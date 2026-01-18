@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+/* Harmonise le bg-image quand on passe en Angular (inline background-image) */
+.card.image-wrapper.bg-image {
+  background-size: cover;
+  background-position: center;
+}
+
+/* Si ton build optimise les images, garde un fallback */
+footer .container-card {
+  overflow: hidden;
+}
+
+/* Petit confort mobile */
+.newsletter-wrapper .input-group {
+  gap: 0.5rem;
+}
+.newsletter-wrapper .btn {
+  white-space: nowrap;
+}

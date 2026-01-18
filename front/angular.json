@@ -11,6 +11,7 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
+          "type": "component",
           "style": "scss"
         }
       },
@@ -31,8 +32,20 @@
               }
             ],
             "styles": [
-              "src/styles.css"
-            ]
+              "public/assets/sandbox/css/style.css",
+              "public/assets/sandbox/css/plugins.css",
+              "src/styles.scss"
+            ],
+            "scripts": [
+              "public/assets/sandbox/js/theme.js"
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src",
+                "src/assets/sandbox/scss",
+                "node_modules"
+              ]
+            }
           },
           "configurations": {
             "production": {
