@@ -34,6 +34,7 @@
             "styles": [
               "public/assets/sandbox/css/style.css",
               "public/assets/sandbox/css/plugins.css",
+              "src/assets/css/sandbox-overrides.css",
               "src/styles.scss"
             ],
             "scripts": [
