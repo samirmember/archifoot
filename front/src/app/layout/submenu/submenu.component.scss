@@ -1,0 +1,14 @@
+.p-menuitem-link.router-link-active {
+  background: #eef2ff;
+  font-weight: 600;
+}
+
+:host ::ng-deep .p-menuitem-link-active {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+:host ::ng-deep .active.p-menubar-item {
+  background-color: var(--p-menubar-item-focus-background);
+  border-radius: 6px;
+}

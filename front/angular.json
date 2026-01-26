@@ -37,15 +37,9 @@
               "src/assets/css/sandbox-overrides.css",
               "src/styles.scss"
             ],
-            "scripts": [
-              "public/assets/sandbox/js/theme.js"
-            ],
+            "scripts": [],
             "stylePreprocessorOptions": {
-              "includePaths": [
-                "src",
-                "src/assets/sandbox/scss",
-                "node_modules"
-              ]
+              "includePaths": ["src", "src/assets/sandbox/scss", "node_modules"]
             }
           },
           "configurations": {
@@ -54,7 +48,7 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumError": "2MB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -66,8 +60,13 @@
             },
             "development": {
               "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": {
+                "scripts": true,
+                "styles": true,
+                "vendor": true
+              },
+              "namedChunks": true,
+              "extractLicenses": false
             }
           },
           "defaultConfiguration": "production"
