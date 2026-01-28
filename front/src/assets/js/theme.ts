@@ -515,6 +515,10 @@ export const theme = {
    * Requires assets/js/vendor/glightbox.js
    */
   lightbox: () => {
+    if (typeof GLightbox !== 'function') {
+      return;
+    }
+
     const lightbox = GLightbox({
       selector: '*[data-glightbox]',
       touchNavigation: true,
