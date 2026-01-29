@@ -1,0 +1,6 @@
+# Composer
+docker compose exec -ti server composer require phpoffice/phpspreadsheet
+
+
+# Rebuild server
+docker compose build --no-cache server
