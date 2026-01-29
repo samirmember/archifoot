@@ -14,13 +14,12 @@ services:
       - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
-      - ./bdd:/docker-entrypoint-initdb.d:ro
+      - ./bdd/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD", "mariadb-admin", "ping", "-proot"]
       interval: 5s
       timeout: 3s
       retries: 20
-
   server:
     build:
       context: ../server

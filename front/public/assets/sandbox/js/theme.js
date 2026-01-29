@@ -21,7 +21,7 @@ var theme = {
     // theme.rellax();
     // theme.scrollCue();
     // theme.swiperSlider();
-    theme.lightbox();
+    // theme.lightbox();
     // theme.plyr();
     // theme.progressBar();
     // theme.loader();

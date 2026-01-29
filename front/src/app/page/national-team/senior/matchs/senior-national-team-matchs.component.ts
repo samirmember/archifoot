@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { NumberService } from '../../../../../shared/number.service';
 
 @Component({
   selector: 'app-senior-national-team-matchs',
@@ -8,19 +9,6 @@ import { Component } from '@angular/core';
 })
 export class SeniorNationalTeamMatchsComponent {
   countries = ['France', 'Germany', 'Italy', 'Spain', 'Portugal'];
-  // years = Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i);
-
-  years = this.populateYears();
-
-  private populateYears(): number[] {
-    const startYear = 1962;
-    const currentYear = new Date().getFullYear();
-    const years: number[] = [];
-
-    for (let year = startYear; year <= currentYear; year++) {
-      years.push(year);
-    }
-
-    return years;
-  }
+  private numberService = inject(NumberService);
+  years = this.numberService.generateAllYears();
 }
