@@ -1,17 +1,18 @@
 FROM php:8.5-fpm
 
-# Paquets nécessaires
-RUN apt-get update && apt-get install -y \
-    git unzip libicu-dev libzip-dev \
- && rm -rf /var/lib/apt/lists/*
+# Paquets nécessaires + compilation extensions PHP
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    $PHPIZE_DEPS \
+    libicu-dev \
+    libpng-dev libjpeg-dev libfreetype6-dev \
+    libzip-dev \
+    unzip git \
+  && docker-php-ext-configure gd --with-freetype --with-jpeg \
+  && docker-php-ext-install -j"$(nproc)" gd intl pdo_mysql zip \
+  && docker-php-ext-enable opcache || true \
+  && rm -rf /var/lib/apt/lists/*
 
-# Extensions Symfony usuelles (sans opcache)
-RUN docker-php-ext-install -j"$(nproc)" intl pdo_mysql zip
-
-# Activer opcache si déjà dispo (ne pas échouer si déjà activé)
-RUN docker-php-ext-enable opcache || true
-
-# Config opcache (dev : tu peux ajuster)
+# Config opcache
 RUN { \
   echo "opcache.enable=1"; \
   echo "opcache.enable_cli=1"; \
