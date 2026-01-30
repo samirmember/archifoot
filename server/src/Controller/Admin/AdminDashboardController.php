@@ -49,7 +49,6 @@ use App\Entity\User;
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 class AdminDashboardController extends AbstractDashboardController
 {
-    #[Route('', name: 'admin')]
     public function index(): Response
     {
         return parent::index();
