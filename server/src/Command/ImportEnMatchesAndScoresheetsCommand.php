@@ -125,7 +125,11 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                 $this->upsertFixtureParticipant($fixtureId, $teamBId, 'B', $scoreB, null);
 
                 // Scoresheet (créé même si vide -> utile pour enrichissement)
-                $coach = $this->toStr($this->get($row, $headers, ['entraineur', 'entraîneur']));
+                $coach = $this->toStr($row['BH'] ?? null);
+                if ($coach === null) {
+                    $coach = $this->toStr($this->get($row, $headers, ['entraineur', 'entraîneur']));
+                }
+                $coachPersonId = $coach ? $this->ensureCoachPerson($coach) : null;
                 $report = $this->toStr($this->get($row, $headers, ['rapport','report']));
                 $scoresheetId = $this->ensureScoresheet($fixtureId, [
                     'attendance' => $this->toInt($this->get($row, $headers, ['nbr_spectateur','spectateur','attendance'])),
@@ -137,9 +141,10 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                     'stoppage_time' => $this->toStr($this->get($row, $headers, ['heure_arret'])),
                     'match_stop_time' => null,
                     'reservations' => $this->toStr($this->get($row, $headers, ['reserve','réserve','reservations'])),
-                    'report' => $this->mergeNotes($report, $coach ? "Entraineur: {$coach}" : null),
+                    'report' => $report,
                     'signed_place' => $this->toStr($this->get($row, $headers, ['fait_a','fait à','fait a'])),
                     'signed_on' => $this->parseDateToYmd($this->get($row, $headers, ['le'])),
+                    'coach_id' => $coachPersonId,
                     'form_state' => '0',
                 ]);
 
@@ -670,5 +675,40 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
         $vals['fixture_id'] = $fixtureId;
         $this->db->insert('scoresheet', $vals);
         return (int)$this->db->lastInsertId();
+    }
+
+    private function ensureCoachPerson(string $fullName): int
+    {
+        $fullName = trim($fullName);
+        $personId = $this->db->fetchOne(
+            "SELECT id FROM person WHERE full_name = :n",
+            ['n'=>$fullName]
+        );
+        if (!$personId) {
+            $this->db->insert('person', [
+                'full_name'=>$fullName,
+                'birth_date'=>null,
+                'birth_city_id'=>null,
+                'birth_region_id'=>null,
+                'birth_country_id'=>null,
+                'nationality_country_id'=>null,
+            ]);
+            $personId = (int)$this->db->lastInsertId();
+        } else {
+            $personId = (int)$personId;
+        }
+
+        $coachId = $this->db->fetchOne(
+            "SELECT id FROM coach WHERE person_id = :p",
+            ['p'=>$personId]
+        );
+        if (!$coachId) {
+            $this->db->insert('coach', [
+                'person_id'=>$personId,
+                'role'=>'Head',
+            ]);
+        }
+
+        return $personId;
     }
 }
