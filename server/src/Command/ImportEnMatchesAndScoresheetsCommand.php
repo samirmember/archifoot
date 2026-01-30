@@ -66,6 +66,12 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                 $matchNo = $this->toInt($this->get($row, $headers, ['n° du match','no match','match no','n du match']));
                 if ($matchNo === null) continue;
 
+                $output->writeln(sprintf(
+                    '<info>Traitement ligne %d: %s</info>',
+                    $i,
+                    json_encode($row, JSON_UNESCAPED_UNICODE)
+                ));
+
                 $dateVal = $this->get($row, $headers, ['date']);
                 $matchDate = $this->parseDateToYmd($dateVal); // YYYY-MM-DD ou null
 
@@ -97,6 +103,7 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                 $stageId = $this->ensureStage($editionId, 'Match', 'round', 0, null);
 
                 $fixtureId = $this->upsertFixture(
+                    $output,
                     $matchNo,
                     $competitionId,
                     $seasonId,
@@ -558,6 +565,7 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
     }
 
     private function upsertFixture(
+        OutputInterface $output,
         int $matchNo,
         int $competitionId,
         int $seasonId,
@@ -592,7 +600,7 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
             return (int)$existing;
         }
 
-        $this->db->insert('fixture', [
+        $fixtureData = [
             'external_match_no'=>$matchNo,
             'competition_id'=>$competitionId,
             'season_id'=>$seasonId,
@@ -608,7 +616,14 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
             'played'=>$played,
             'is_official'=>$isOfficial,
             'notes'=>$notes,
-        ]);
+        ];
+
+        $output->writeln(sprintf(
+            '<info>Insertion fixture (archifoot.fixture): %s</info>',
+            json_encode($fixtureData, JSON_UNESCAPED_UNICODE)
+        ));
+
+        $this->db->insert('fixture', $fixtureData);
         return (int)$this->db->lastInsertId();
     }
 
