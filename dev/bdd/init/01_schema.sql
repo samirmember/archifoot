@@ -323,10 +323,12 @@ CREATE TABLE `scoresheet` (
   `report` TEXT NULL COMMENT 'Report',
   `signed_place` VARCHAR(150) NULL COMMENT 'Signed at',
   `signed_on` DATE NULL COMMENT 'Signed on',
+  `coach_id` INT NULL COMMENT 'FK coach (person)',
   `form_state` VARCHAR(1) NULL COMMENT '0=draft,1=validated,2=archived',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_scoresheet_fixture_id` (`fixture_id`),
-  CONSTRAINT `fk_scoresheet_fixture_id` FOREIGN KEY (`fixture_id`) REFERENCES `fixture`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+  CONSTRAINT `fk_scoresheet_fixture_id` FOREIGN KEY (`fixture_id`) REFERENCES `fixture`(`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT `fk_scoresheet_coach_id` FOREIGN KEY (`coach_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `scoresheet_official`;
