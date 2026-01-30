@@ -2,11 +2,17 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'country')]
 #[ORM\UniqueConstraint(name: 'uq_country_fifa_code', columns: ['fifa_code'])]
+#[ApiResource(
+    operations: [new Get(), new GetCollection()],
+)]
 class Country
 {
     #[ORM\Id]

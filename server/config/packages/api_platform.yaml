@@ -1,0 +1,22 @@
+api_platform:
+    title: 'Archifoot API'
+    version: '1.0.0'
+    formats:
+        jsonld: ['application/ld+json']
+        json: ['application/json']
+    defaults:
+        route_prefix: '/api'
+        pagination_enabled: true
+        pagination_client_enabled: true
+        pagination_items_per_page: '%env(int:API_PAGINATION_ITEMS_PER_PAGE)%'
+    collection:
+        pagination:
+            enabled_parameter_name: 'pagination'
+            items_per_page_parameter_name: 'itemsPerPage'
+    cors:
+        allow_origin: ['%env(resolve:CORS_ALLOW_ORIGIN)%']
+        allow_headers: ['Content-Type', 'Authorization', 'X-API-KEY']
+        expose_headers: ['Link']
+        allow_methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+        max_age: 3600
+        allow_credentials: false
