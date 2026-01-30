@@ -118,6 +118,8 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                 $this->upsertFixtureParticipant($fixtureId, $teamBId, 'B', $scoreB, null);
 
                 // Scoresheet (créé même si vide -> utile pour enrichissement)
+                $coach = $this->toStr($this->get($row, $headers, ['entraineur', 'entraîneur']));
+                $report = $this->toStr($this->get($row, $headers, ['rapport','report']));
                 $scoresheetId = $this->ensureScoresheet($fixtureId, [
                     'attendance' => $this->toInt($this->get($row, $headers, ['nbr_spectateur','spectateur','attendance'])),
                     'fixed_time' => $this->toStr($this->get($row, $headers, ['heure_fixe'])),
@@ -128,20 +130,21 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                     'stoppage_time' => $this->toStr($this->get($row, $headers, ['heure_arret'])),
                     'match_stop_time' => null,
                     'reservations' => $this->toStr($this->get($row, $headers, ['reserve','réserve','reservations'])),
-                    'report' => $this->toStr($this->get($row, $headers, ['rapport','report'])),
+                    'report' => $this->mergeNotes($report, $coach ? "Entraineur: {$coach}" : null),
                     'signed_place' => $this->toStr($this->get($row, $headers, ['fait_a','fait à','fait a'])),
                     'signed_on' => $this->parseDateToYmd($this->get($row, $headers, ['le'])),
                     'form_state' => '0',
                 ]);
 
                 // === Lineups (j1..j18 etc) ===
-                $this->importLineups($scoresheetId, $teamAId, $teamBId, $headers, $row);
+                $algeriaTeamId = $this->resolveAlgeriaTeamId($teamAName, $teamBName, $teamAId, $teamBId);
+                $this->importLineups($scoresheetId, $teamAId, $teamBId, $algeriaTeamId, $headers, $row);
 
                 // === Substitutions (chang1..5 etc) ===
-                $this->importSubstitutions($scoresheetId, $teamAId, $teamBId, $headers, $row);
+                $this->importSubstitutions($scoresheetId, $teamAId, $teamBId, $algeriaTeamId, $headers, $row);
 
                 // === Goals (but1..butN, but_local/but_visiteur) ===
-                $this->importGoals($fixtureId, $teamAId, $teamBId, $headers, $row);
+                $this->importGoals($fixtureId, $teamAId, $teamBId, $algeriaTeamId, $headers, $row);
 
                 $inserted++;
             }
@@ -237,9 +240,29 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
         return null;
     }
 
+    private function resolveAlgeriaTeamId(string $teamAName, string $teamBName, int $teamAId, int $teamBId): ?int
+    {
+        $a = $this->norm($teamAName);
+        $b = $this->norm($teamBName);
+        if ($a !== '' && str_contains($a, 'algerie')) return $teamAId;
+        if ($b !== '' && str_contains($b, 'algerie')) return $teamBId;
+        return null;
+    }
+
+    private function mergeNotes(?string ...$parts): ?string
+    {
+        $out = [];
+        foreach ($parts as $part) {
+            $p = $this->toStr($part);
+            if ($p !== null) $out[] = $p;
+        }
+        if ($out === []) return null;
+        return implode("\n", $out);
+    }
+
     // ----------------- Import blocks: lineups/subs/goals -----------------
 
-    private function importLineups(int $scoresheetId, int $teamAId, int $teamBId, array $headers, array $row): void
+    private function importLineups(int $scoresheetId, int $teamAId, int $teamBId, ?int $algeriaTeamId, array $headers, array $row): void
     {
         // détecte colonnes du style: id_joueur_local_1, id_joueur_visiteur_1, joueur a 1, etc.
         foreach ($headers as $h => $col) {
@@ -261,9 +284,26 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                 ['sid'=>$scoresheetId,'tid'=>$teamId,'name'=>$name,'role'=>$role,'ord'=>$idx]
             );
         }
+
+        if ($algeriaTeamId === null) return;
+
+        foreach ($headers as $h => $col) {
+            if (!preg_match('/^j(\d+)$/', $h, $m)) continue;
+            $name = $this->toStr($row[$col] ?? null);
+            if (!$name) continue;
+
+            $idx = (int)$m[1];
+            $role = ($idx <= 11) ? 'STARTER' : 'SUB';
+
+            $this->db->executeStatement(
+                "INSERT INTO scoresheet_lineup (scoresheet_id, team_id, player_id, player_name_text, shirt_number, lineup_role, is_captain, position_id, sort_order)
+                 VALUES (:sid,:tid,NULL,:name,NULL,:role,0,NULL,:ord)",
+                ['sid'=>$scoresheetId,'tid'=>$algeriaTeamId,'name'=>$name,'role'=>$role,'ord'=>$idx]
+            );
+        }
     }
 
-    private function importSubstitutions(int $scoresheetId, int $teamAId, int $teamBId, array $headers, array $row): void
+    private function importSubstitutions(int $scoresheetId, int $teamAId, int $teamBId, ?int $algeriaTeamId, array $headers, array $row): void
     {
         // Format legacy: chang1_local / chang1_par_local / chang1_minute_local
         for ($n=1; $n<=5; $n++) {
@@ -286,23 +326,48 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                 );
             }
         }
+
+        if ($algeriaTeamId === null) return;
+
+        foreach ($headers as $h => $col) {
+            if (!preg_match('/^chang(\d+)$/', $h, $m)) continue;
+            $val = $this->toStr($row[$col] ?? null);
+            if (!$val) continue;
+
+            [$name, $minute] = $this->extractNameAndMinute($val);
+            if (!$name && !$minute) continue;
+
+            $this->db->executeStatement(
+                "INSERT INTO scoresheet_substitution (scoresheet_id, team_id, player_out_id, player_in_id, player_out_text, player_in_text, minute)
+                 VALUES (:sid,:tid,NULL,NULL,:out,NULL,:min)",
+                ['sid'=>$scoresheetId,'tid'=>$algeriaTeamId,'out'=>$name,'min'=>$minute]
+            );
+        }
     }
 
-    private function importGoals(int $fixtureId, int $teamAId, int $teamBId, array $headers, array $row): void
+    private function importGoals(int $fixtureId, int $teamAId, int $teamBId, ?int $algeriaTeamId, array $headers, array $row): void
     {
         // Colonnes possibles: but_local, but_visiteur (scores) -> déjà géré via participants
         // Ici on veut but1..butN du type: "Gamouh Rabah 48’" ou "X 12’, Y 45+1’"
         foreach ($headers as $h => $col) {
             if (!preg_match('/^but(\d+)?_(local|visiteur)$/', $h, $m) && !preg_match('/^but(\d+)?\s*(local|visiteur)$/', $h, $m)) {
                 // ex: but1_local / but2_visiteur
-                if (!preg_match('/^but(\d+)?_(a|b)$/', $h)) continue;
+                if (!preg_match('/^but(\d+)?_(a|b)$/', $h) && !preg_match('/^but(\d+)$/', $h)) continue;
             }
 
             $val = $this->toStr($row[$col] ?? null);
             if (!$val) continue;
 
-            $side = str_contains($h,'visiteur') || str_ends_with($h,'_b') ? 'B' : 'A';
-            $teamId = ($side==='A') ? $teamAId : $teamBId;
+            $teamId = null;
+            if (str_contains($h,'visiteur') || str_ends_with($h,'_b')) {
+                $teamId = $teamBId;
+            } elseif (str_contains($h,'local') || str_ends_with($h,'_a')) {
+                $teamId = $teamAId;
+            } elseif ($algeriaTeamId !== null) {
+                $teamId = $algeriaTeamId;
+            } else {
+                continue;
+            }
 
             foreach ($this->splitEvents($val) as $evt) {
                 [$name, $minute] = $this->extractNameAndMinute($evt);
