@@ -1,5 +1,6 @@
 # Composer
 docker compose exec -ti server composer require phpoffice/phpspreadsheet
+docker compose exec -ti server php -d memory_limit=-1 bin/console app:import:en:matches-scoresheets var/import/en_matches.xlsx "Matches de l'EN "
 
 
 # Rebuild server
