@@ -5,6 +5,8 @@
     --admin-shell-text: #f8fafc;
     --admin-shell-muted: #cbd5f5;
     --admin-shell-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    --admin-dashboard-surface: #ffffff;
+    --admin-dashboard-muted: #94a3b8;
 }
 
 .admin-shell__header {
@@ -153,6 +155,97 @@
     width: 1px;
 }
 
+.admin-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.admin-dashboard__hero {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(56, 189, 248, 0.15));
+    border-radius: 20px;
+    color: var(--admin-shell-text);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: space-between;
+    padding: 28px 32px;
+}
+
+.admin-dashboard__eyebrow {
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--admin-shell-muted);
+    margin-bottom: 8px;
+}
+
+.admin-dashboard__title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.admin-dashboard__subtitle {
+    font-size: 1rem;
+    color: rgba(248, 250, 252, 0.8);
+    max-width: 520px;
+}
+
+.admin-dashboard__hero-card {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 260px;
+}
+
+.admin-dashboard__hero-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(248, 250, 252, 0.7);
+}
+
+.admin-dashboard__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.admin-dashboard__card {
+    background: var(--admin-dashboard-surface);
+    border-radius: 18px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-dashboard__card h3 {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.admin-dashboard__card p {
+    color: #475569;
+    margin: 0;
+}
+
+.admin-dashboard__chip {
+    align-self: flex-start;
+    background: rgba(56, 189, 248, 0.12);
+    color: #0284c7;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 12px;
+}
+
 @media (max-width: 900px) {
     .admin-shell__header {
         padding: 16px 20px;
@@ -169,5 +262,9 @@
 
     .admin-shell__footer {
         padding: 16px 20px;
+    }
+
+    .admin-dashboard__hero {
+        padding: 24px;
     }
 }
