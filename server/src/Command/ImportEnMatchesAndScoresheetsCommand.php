@@ -74,7 +74,7 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
 
                 $dateVal = $this->get($row, $headers, ['date']);
                 $matchDate = $this->parseDateToYmd($dateVal); // YYYY-MM-DD ou null
-
+                
                 $teamAName = $this->toStr($this->get($row, $headers, ['pays a','equipe a','équipe a']));
                 $teamBName = $this->toStr($this->get($row, $headers, ['pays b','equipe b','équipe b']));
                 if (!$teamAName || !$teamBName) {
@@ -244,6 +244,14 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
         if (preg_match('#^(\d{2})/(\d{2})/(\d{4})#', $s, $m)) {
             return "{$m[3]}-{$m[2]}-{$m[1]}";
         }
+
+        $date = \DateTimeImmutable::createFromFormat('!d/m/Y', $s)
+        ?: \DateTimeImmutable::createFromFormat('!d/m/y', $s);
+
+        if ($date) {
+            return $date->format('Y-m-d');
+        }
+
         return null;
     }
 
