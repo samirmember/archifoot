@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev libjpeg-dev libfreetype6-dev \
     libzip-dev \
     unzip git \
+    ripgrep \
   && docker-php-ext-configure gd --with-freetype --with-jpeg \
   && docker-php-ext-install -j"$(nproc)" gd intl pdo_mysql zip \
   && docker-php-ext-enable opcache || true \
