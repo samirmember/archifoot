@@ -17,12 +17,13 @@
                 <label for="opposing-country" class="form-label">Pays adversaire</label>
                 <select class="form-select" aria-label="" id="opposing-country">
                   <option selected>Tous les pays</option>
-                  <option value="position1">Business</option>
-                  <option value="position2">Design</option>
-                  <option value="position3">Development</option>
-                  <option value="position4">Engineering</option>
-                  <option value="position5">Finance</option>
-                  <option value="position6">Marketing</option>
+                  @if (isLoadingCountries) {
+                    <option disabled>Chargement des pays...</option>
+                  } @else {
+                    @for (country of countries; track country.id) {
+                      <option [value]="country.id">{{ country.name ?? 'Pays inconnu' }}</option>
+                    }
+                  }
                 </select>
               </div>
             </div>
