@@ -10,7 +10,12 @@
 }
 
 .admin-shell__header {
-    background: linear-gradient(120deg, var(--admin-shell-primary), #1f2a4a 55%, #2c3b64);
+    background: linear-gradient(
+        120deg,
+        var(--admin-shell-primary),
+        #1f2a4a 55%,
+        #2c3b64
+    );
     border-bottom: 1px solid rgba(148, 163, 184, 0.2);
     box-shadow: var(--admin-shell-shadow);
     padding: 20px 32px;
@@ -162,7 +167,11 @@
 }
 
 .admin-dashboard__hero {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(56, 189, 248, 0.15));
+    background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.9),
+        rgba(56, 189, 248, 0.15)
+    );
     border-radius: 20px;
     color: var(--admin-shell-text);
     display: flex;
