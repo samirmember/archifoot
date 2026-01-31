@@ -14,8 +14,10 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 final class ApiKeyAuthenticator extends AbstractAuthenticator
 {
-    public function __construct(private readonly string $apiKey)
-    {
+    public function __construct(
+        private readonly string $apiKey,
+        private readonly string $appEnv
+    ) {
     }
 
     public function supports(Request $request): ?bool
@@ -29,6 +31,12 @@ final class ApiKeyAuthenticator extends AbstractAuthenticator
 
     public function authenticate(Request $request): SelfValidatingPassport
     {
+        if ($this->appEnv === 'dev') {
+            return new SelfValidatingPassport(
+                new UserBadge('api-client', static fn () => new ApiKeyUser())
+            );
+        }
+
         $providedKey = $request->headers->get('X-API-KEY');
 
         if ($providedKey === null || $providedKey === '') {
