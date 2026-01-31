@@ -24,3 +24,4 @@ services:
     App\Security\ApiKeyAuthenticator:
         arguments:
             $apiKey: '%env(APP_API_KEY)%'
+            $appEnv: '%kernel.environment%'
