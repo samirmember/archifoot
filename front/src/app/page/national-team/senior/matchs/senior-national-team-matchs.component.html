@@ -15,16 +15,46 @@
             <div class="col-md-4 mb-3">
               <div class="form-select-wrapper">
                 <label for="opposing-country" class="form-label">Pays adversaire</label>
-                <select class="form-select" aria-label="" id="opposing-country">
-                  <option selected>Tous les pays</option>
-                  @if (isLoadingCountries) {
-                    <option disabled>Chargement des pays...</option>
-                  } @else {
-                    @for (country of countries; track country.id) {
-                      <option [value]="country.id">{{ country.name ?? 'Pays inconnu' }}</option>
-                    }
-                  }
-                </select>
+                <p-autoComplete
+                  inputId="opposing-country"
+                  class="country-autocomplete"
+                  [suggestions]="filteredCountries"
+                  (completeMethod)="filterCountries($event)"
+                  [dropdown]="true"
+                  [emptyMessage]="isLoadingCountries ? 'Chargement des pays...' : 'Aucun pays trouvé'"
+                  [optionLabel]="'name'"
+                  [showClear]="true"
+                  [placeholder]="'Tous les pays'"
+                  [ngModelOptions]="{ standalone: true }"
+                  [(ngModel)]="selectedCountry"
+                >
+                  <ng-template pTemplate="item" let-country>
+                    <div class="country-option">
+                      @if (country?.iso2) {
+                        <img
+                          class="country-flag"
+                          [src]="getCountryFlag(country)"
+                          [alt]="country.name ?? 'Drapeau'"
+                          loading="lazy"
+                        />
+                      }
+                      <span>{{ country.name ?? 'Pays inconnu' }}</span>
+                    </div>
+                  </ng-template>
+                  <ng-template pTemplate="selectedItem" let-country>
+                    <div class="country-option">
+                      @if (country?.iso2) {
+                        <img
+                          class="country-flag"
+                          [src]="getCountryFlag(country)"
+                          [alt]="country.name ?? 'Drapeau'"
+                          loading="lazy"
+                        />
+                      }
+                      <span>{{ country.name ?? 'Pays inconnu' }}</span>
+                    </div>
+                  </ng-template>
+                </p-autoComplete>
               </div>
             </div>
             <div class="col-md-4 mb-3">
