@@ -22,9 +22,34 @@ export class SeniorNationalTeamMatchsComponent implements OnInit {
   years = this.numberService.generateAllYears();
 
   ngOnInit(): void {
+    // this.isLoadingCountries = true;
+    // this.countriesService
+    //   .getCountries()
+    //   .pipe(finalize(() => (this.isLoadingCountries = false)))
+    //   .subscribe({
+    //     next: (countries) => {
+    //       this.countries = countries;
+    //       this.filteredCountries = countries;
+    //     },
+    //     error: () => {
+    //       this.countries = [];
+    //       this.filteredCountries = [];
+    //     },
+    //   });
+  }
+
+  filterCountries(event: AutoCompleteCompleteEvent): void {
+    const query = event.query?.toLowerCase().trim();
+    console.log(query);
+
+    if (!query || query.length < 2) {
+      // this.filteredCountries = [...this.countries];
+      return;
+    }
+
     this.isLoadingCountries = true;
     this.countriesService
-      .getCountries()
+      .getCountries(query)
       .pipe(finalize(() => (this.isLoadingCountries = false)))
       .subscribe({
         next: (countries) => {
@@ -36,23 +61,16 @@ export class SeniorNationalTeamMatchsComponent implements OnInit {
           this.filteredCountries = [];
         },
       });
-  }
 
-  filterCountries(event: AutoCompleteCompleteEvent): void {
-    const query = event.query?.toLowerCase().trim();
-
-    if (!query) {
-      this.filteredCountries = [...this.countries];
-      return;
-    }
-
-    this.filteredCountries = this.countries.filter((country) => {
-      const name = country.name?.toLowerCase() ?? '';
-      const iso2 = country.iso2?.toLowerCase() ?? '';
-      const iso3 = country.iso3?.toLowerCase() ?? '';
-      const fifa = country.fifaCode?.toLowerCase() ?? '';
-      return name.includes(query) || iso2.includes(query) || iso3.includes(query) || fifa.includes(query);
-    });
+    // this.filteredCountries = this.countries.filter((country) => {
+    //   const name = country.name?.toLowerCase() ?? '';
+    //   const iso2 = country.iso2?.toLowerCase() ?? '';
+    //   const iso3 = country.iso3?.toLowerCase() ?? '';
+    //   const fifa = country.fifaCode?.toLowerCase() ?? '';
+    //   return (
+    //     name.includes(query) || iso2.includes(query) || iso3.includes(query) || fifa.includes(query)
+    //   );
+    // });
   }
 
   getCountryFlag(country: Country): string | null {

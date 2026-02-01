@@ -21,7 +21,9 @@
                   [suggestions]="filteredCountries"
                   (completeMethod)="filterCountries($event)"
                   [dropdown]="true"
-                  [emptyMessage]="isLoadingCountries ? 'Chargement des pays...' : 'Aucun pays trouvé'"
+                  [emptyMessage]="
+                    isLoadingCountries ? 'Chargement des pays...' : 'Aucun pays trouvé'
+                  "
                   [optionLabel]="'name'"
                   [showClear]="true"
                   [placeholder]="'Tous les pays'"

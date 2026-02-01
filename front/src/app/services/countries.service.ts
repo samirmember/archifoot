@@ -9,12 +9,19 @@ import { Country } from '../models/country.model';
 export class CountriesService {
   constructor(private readonly apiClient: ApiClientService) {}
 
-  public getCountries(): Observable<Country[]> {
+  public getCountries(filterName?: string): Observable<Country[]> {
+    const params: Record<string, string> = {
+      pagination: 'true',
+      'order[name]': 'asc',
+    };
+
+    const q = (filterName ?? '').trim();
+    if (q.length > 0) {
+      params['name'] = q;
+    }
+
     return this.apiClient
-      .getCollection<Country>('countries', {
-        pagination: 'true',
-        'order[name]': 'asc',
-      })
-      .pipe(map((response) => response['hydra:member']));
+      .getCollection<Country>('countries', params)
+      .pipe(map((response) => response['hydra:member'] as Country[]));
   }
 }
