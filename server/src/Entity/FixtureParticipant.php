@@ -3,12 +3,23 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'fixture_participant')]
 #[ORM\UniqueConstraint(name: 'uq_fixture_participant_fixture_id_role', columns: ['fixture_id', 'role'])]
 #[ORM\Index(name: 'ix_fixture_participant_team_id', columns: ['team_id'])]
 #[ORM\Index(name: 'ix_fixture_participant_fixture_id', columns: ['fixture_id'])]
+#[ApiResource(
+    operations: [new Get(), new GetCollection()],
+)]
+#[ApiFilter(SearchFilter::class, properties: [
+    'fixture' => 'exact',
+])]
 class FixtureParticipant
 {
     #[ORM\Id]

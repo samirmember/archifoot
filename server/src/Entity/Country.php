@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -13,6 +15,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ApiResource(
     operations: [new Get(), new GetCollection()],
 )]
+#[ApiFilter(SearchFilter::class, properties: [
+    'name' => 'partial',
+])]
 class Country
 {
     #[ORM\Id]

@@ -3,10 +3,21 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'team')]
 #[ORM\UniqueConstraint(name: 'uq_team_team_type_club_id_national_team_id', columns: ['team_type', 'club_id', 'national_team_id'])]
+#[ApiResource(
+    operations: [new Get(), new GetCollection()],
+)]
+#[ApiFilter(SearchFilter::class, properties: [
+    'displayName' => 'partial',
+])]
 class Team
 {
     #[ORM\Id]
