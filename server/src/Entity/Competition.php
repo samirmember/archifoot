@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'competition')]
@@ -17,15 +19,36 @@ class Competition
     #[ORM\Column(length: 200, nullable: true)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 30, nullable: true)]
-    private ?string $type = null;
-
-    #[ORM\Column(length: 120, nullable: true)]
-    private ?string $organizer = null;
-
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'category_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Category $category = null;
+
+    /**
+     * Inverse side du ManyToMany Fixture<->Competition
+     */
+    #[ORM\ManyToMany(
+        targetEntity: Fixture::class,
+        mappedBy: 'competitions',
+        fetch: 'EXTRA_LAZY'
+    )]
+    private Collection $fixtures;
+
+    /**
+     * 1 Competition -> N Editions (owning side = Edition via ManyToOne)
+     * Ici on est sur le côté "inverse" (OneToMany) mais utile pour navigation.
+     */
+    #[ORM\OneToMany(
+        mappedBy: 'competition',
+        targetEntity: Edition::class,
+        fetch: 'EXTRA_LAZY'
+    )]
+    private Collection $editions;
+
+    public function __construct()
+    {
+        $this->fixtures = new ArrayCollection();
+        $this->editions = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -44,30 +67,6 @@ class Competition
         return $this;
     }
 
-    public function getType(): ?string
-    {
-        return $this->type;
-    }
-
-    public function setType(?string $type): static
-    {
-        $this->type = $type;
-
-        return $this;
-    }
-
-    public function getOrganizer(): ?string
-    {
-        return $this->organizer;
-    }
-
-    public function setOrganizer(?string $organizer): static
-    {
-        $this->organizer = $organizer;
-
-        return $this;
-    }
-
     public function getCategory(): ?Category
     {
         return $this->category;
@@ -77,6 +76,49 @@ class Competition
     {
         $this->category = $category;
 
+        return $this;
+    }
+
+    /** @return Collection<int, Fixture> */
+    public function getFixtures(): Collection
+    {
+        return $this->fixtures;
+    }
+
+    public function addFixture(Fixture $fixture): self
+    {
+        if (!$this->fixtures->contains($fixture)) {
+            $this->fixtures->add($fixture);
+            // IMPORTANT : ne pas appeler $fixture->addCompetition($this) ici,
+            // sinon boucle. La synchro est faite côté Fixture.
+        }
+        return $this;
+    }
+
+    public function removeFixture(Fixture $fixture): self
+    {
+        $this->fixtures->removeElement($fixture);
+        return $this;
+    }
+
+    /** @return Collection<int, Edition> */
+    public function getEditions(): Collection
+    {
+        return $this->editions;
+    }
+
+    public function addEdition(Edition $edition): self
+    {
+        if (!$this->editions->contains($edition)) {
+            $this->editions->add($edition);
+            $edition->setCompetition($this);
+        }
+        return $this;
+    }
+
+    public function removeEdition(Edition $edition): self
+    {
+        $this->editions->removeElement($edition);
         return $this;
     }
 }

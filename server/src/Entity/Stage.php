@@ -20,9 +20,6 @@ class Stage
     #[ORM\Column(length: 120, nullable: true)]
     private ?string $name = null;
 
-    #[ORM\Column(name: 'stage_type', length: 30, nullable: true)]
-    private ?string $stageType = null;
-
     #[ORM\Column(name: 'is_final', nullable: true)]
     private ?bool $isFinal = null;
 
@@ -54,18 +51,6 @@ class Stage
     public function setName(?string $name): static
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getStageType(): ?string
-    {
-        return $this->stageType;
-    }
-
-    public function setStageType(?string $stageType): static
-    {
-        $this->stageType = $stageType;
 
         return $this;
     }

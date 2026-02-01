@@ -3,6 +3,13 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'fixture')]
@@ -11,6 +18,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'ix_fixture_season_id', columns: ['season_id'])]
 #[ORM\Index(name: 'ix_fixture_edition_id', columns: ['edition_id'])]
 #[ORM\Index(name: 'ix_fixture_stage_id', columns: ['stage_id'])]
+#[ApiResource(
+    operations: [new Get(), new GetCollection()],
+)]
 class Fixture
 {
     #[ORM\Id]
@@ -22,16 +32,34 @@ class Fixture
     private ?int $externalMatchNo = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'competition_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private ?Competition $competition = null;
-
-    #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'season_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Season $season = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'edition_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private ?Edition $edition = null;
+    /**
+     * Owning side -> écrit la table fixture_competition
+     */
+    #[ORM\ManyToMany(
+        targetEntity: Competition::class,
+        inversedBy: 'fixtures',
+        fetch: 'EXTRA_LAZY'
+    )]
+    #[ORM\JoinTable(name: 'fixture_competition')]
+    #[ORM\JoinColumn(name: 'fixture_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'competition_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    private Collection $competitions;
+
+    /**
+     * Owning side -> écrit la table fixture_edition
+     */
+    #[ORM\ManyToMany(
+        targetEntity: Edition::class,
+        inversedBy: 'fixtures',
+        fetch: 'EXTRA_LAZY'
+    )]
+    #[ORM\JoinTable(name: 'fixture_edition')]
+    #[ORM\JoinColumn(name: 'fixture_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'edition_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    private Collection $editions;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'stage_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
@@ -73,6 +101,12 @@ class Fixture
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
 
+    public function __construct()
+    {
+        $this->competitions = new ArrayCollection();
+        $this->editions = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -90,18 +124,6 @@ class Fixture
         return $this;
     }
 
-    public function getCompetition(): ?Competition
-    {
-        return $this->competition;
-    }
-
-    public function setCompetition(?Competition $competition): static
-    {
-        $this->competition = $competition;
-
-        return $this;
-    }
-
     public function getSeason(): ?Season
     {
         return $this->season;
@@ -114,15 +136,71 @@ class Fixture
         return $this;
     }
 
-    public function getEdition(): ?Edition
+    /** @return Collection<int, Competition> */
+    public function getCompetitions(): Collection
     {
-        return $this->edition;
+        return $this->competitions;
     }
 
-    public function setEdition(?Edition $edition): static
+    public function addCompetition(Competition $competition): self
     {
-        $this->edition = $edition;
+        if (!$this->competitions->contains($competition)) {
+            $this->competitions->add($competition);
+            // synchro inverse side (objet)
+            $competition->addFixture($this);
+        }
+        return $this;
+    }
 
+    public function removeCompetition(Competition $competition): self
+    {
+        if ($this->competitions->removeElement($competition)) {
+            $competition->removeFixture($this);
+        }
+        return $this;
+    }
+
+    /** @return Collection<int, Edition> */
+    public function getEditions(): Collection
+    {
+        return $this->editions;
+    }
+
+    /**
+     * Case where we should add to fixture both: addEdition() and addCompetition()
+     */
+    // public function addEdition(Edition $edition): self
+    // {
+    //     if (!$this->editions->contains($edition)) {
+    //         $this->editions->add($edition);
+    //         $edition->addFixture($this);
+    //     }
+    //     return $this;
+    // }
+
+    /**
+     * Case where we should use only : addEdition() so the edition and the competition will be added
+     */
+    public function addEdition(Edition $edition): self
+    {
+        if (!$this->editions->contains($edition)) {
+            $this->editions->add($edition);
+            $edition->addFixture($this);
+
+            // cohérence métier : Edition => Competition
+            $competition = $edition->getCompetition();
+            if ($competition !== null) {
+                $this->addCompetition($competition);
+            }
+        }
+        return $this;
+    }
+
+    public function removeEdition(Edition $edition): self
+    {
+        if ($this->editions->removeElement($edition)) {
+            $edition->removeFixture($this);
+        }
         return $this;
     }
 

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'edition')]
@@ -14,8 +16,11 @@ class Edition
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'competition_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    /**
+     * Owning side (la FK est dans edition.competition_id)
+     */
+    #[ORM\ManyToOne(targetEntity: Competition::class, inversedBy: 'editions', fetch: 'LAZY')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
     private ?Competition $competition = null;
 
     #[ORM\ManyToOne]
@@ -29,6 +34,21 @@ class Edition
     #[ORM\JoinColumn(name: 'division_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Division $division = null;
 
+    /**
+     * Inverse side du ManyToMany Fixture<->Edition
+     */
+    #[ORM\ManyToMany(
+        targetEntity: Fixture::class,
+        mappedBy: 'editions',
+        fetch: 'EXTRA_LAZY'
+    )]
+    private Collection $fixtures;
+
+    public function __construct()
+    {
+        $this->fixtures = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -39,7 +59,7 @@ class Edition
         return $this->competition;
     }
 
-    public function setCompetition(?Competition $competition): static
+    public function setCompetition(?Competition $competition): self
     {
         $this->competition = $competition;
 
@@ -79,6 +99,26 @@ class Edition
     {
         $this->division = $division;
 
+        return $this;
+    }
+
+    /** @return Collection<int, Fixture> */
+    public function getFixtures(): Collection
+    {
+        return $this->fixtures;
+    }
+
+    public function addFixture(Fixture $fixture): self
+    {
+        if (!$this->fixtures->contains($fixture)) {
+            $this->fixtures->add($fixture);
+        }
+        return $this;
+    }
+
+    public function removeFixture(Fixture $fixture): self
+    {
+        $this->fixtures->removeElement($fixture);
         return $this;
     }
 }
