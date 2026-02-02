@@ -26,6 +26,18 @@ class Stage
     #[ORM\Column(name: 'sort_order', nullable: true)]
     private ?int $sortOrder = null;
 
+    #[ORM\ManyToMany(
+        targetEntity: Fixture::class,
+        mappedBy: 'stages',
+        fetch: 'EXTRA_LAZY'
+    )]
+    private Collection $fixtures;
+
+    public function __construct()
+    {
+        $this->fixtures = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -76,6 +88,26 @@ class Stage
     {
         $this->sortOrder = $sortOrder;
 
+        return $this;
+    }
+
+    /** @return Collection<int, Fixture> */
+    public function getFixtures(): Collection
+    {
+        return $this->fixtures;
+    }
+
+    public function addFixture(Fixture $fixture): self
+    {
+        if (!$this->fixtures->contains($fixture)) {
+            $this->fixtures->add($fixture);
+        }
+        return $this;
+    }
+
+    public function removeFixture(Fixture $fixture): self
+    {
+        $this->fixtures->removeElement($fixture);
         return $this;
     }
 }

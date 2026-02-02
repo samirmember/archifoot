@@ -17,7 +17,6 @@ use ApiPlatform\Metadata\GetCollection;
 #[ORM\Index(name: 'ix_fixture_competition_id', columns: ['competition_id'])]
 #[ORM\Index(name: 'ix_fixture_season_id', columns: ['season_id'])]
 #[ORM\Index(name: 'ix_fixture_edition_id', columns: ['edition_id'])]
-#[ORM\Index(name: 'ix_fixture_stage_id', columns: ['stage_id'])]
 #[ApiResource(
     operations: [new Get(), new GetCollection()],
 )]
@@ -61,9 +60,15 @@ class Fixture
     #[ORM\InverseJoinColumn(name: 'edition_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
     private Collection $editions;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'stage_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private ?Stage $stage = null;
+    #[ORM\ManyToMany(
+        targetEntity: Stage::class,
+        inversedBy: 'fixtures',
+        fetch: 'EXTRA_LAZY'
+    )]
+    #[ORM\JoinTable(name: 'fixture_stage')]
+    #[ORM\JoinColumn(name: 'fixture_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'stage_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    private Collection $stages;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'matchday_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
@@ -105,6 +110,7 @@ class Fixture
     {
         $this->competitions = new ArrayCollection();
         $this->editions = new ArrayCollection();
+        $this->stages = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -204,14 +210,46 @@ class Fixture
         return $this;
     }
 
-    public function getStage(): ?Stage
+    /** @return Collection<int, Stage> */
+    public function getStages(): Collection
     {
-        return $this->stage;
+        return $this->stages;
     }
 
-    public function setStage(?Stage $stage): static
+    public function addStage(Stage $stage): self
     {
-        $this->stage = $stage;
+        if (!$this->stages->contains($stage)) {
+            $this->stages->add($stage);
+            $stage->addFixture($this); // synchro inverse
+        }
+        return $this;
+    }
+
+    public function removeStage(Stage $stage): self
+    {
+        if ($this->stages->removeElement($stage)) {
+            $stage->removeFixture($this);
+        }
+        return $this;
+    }
+
+    /**
+     * Utiliser ceci pour ajouter le stage, édition et compétition en une seule opération
+     * (puisque Stage -> Edition -> Competition).
+     */
+    public function addStageWithConsistency(Stage $stage): self
+    {
+        $this->addStage($stage);
+
+        $edition = $stage->getEdition();
+        if ($edition !== null) {
+            $this->addEdition($edition);
+
+            $competition = $edition->getCompetition();
+            if ($competition !== null) {
+                $this->addCompetition($competition);
+            }
+        }
 
         return $this;
     }

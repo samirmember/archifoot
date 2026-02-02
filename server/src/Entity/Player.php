@@ -21,9 +21,6 @@ class Player
     #[ORM\JoinColumn(name: 'primary_position_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Position $primaryPosition = null;
 
-    #[ORM\Column(name: 'preferred_foot', length: 10, nullable: true)]
-    private ?string $preferredFoot = null;
-
     public function getId(): ?int
     {
         return $this->id;

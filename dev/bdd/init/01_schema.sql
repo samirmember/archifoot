@@ -339,7 +339,6 @@ CREATE TABLE `stage` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
   `edition_id` INT NULL COMMENT 'FK edition',
   `name` VARCHAR(120) NULL COMMENT 'Stage/Round/Phase (Group, Final, J1...)',
-  `is_final` TINYINT(1) NULL COMMENT '1 if final' CHECK (`is_final` IN (0,1)),
   `sort_order` INT NULL COMMENT 'Ordering',
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_stage_edition_id` FOREIGN KEY (`edition_id`) REFERENCES `edition`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
@@ -427,7 +426,6 @@ CREATE TABLE `player` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
   `person_id` INT NULL COMMENT 'FK person',
   `primary_position_id` INT NULL COMMENT 'FK position',
-  `preferred_foot` VARCHAR(10) NULL COMMENT 'L/R/Both',
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_player_person_id` FOREIGN KEY (`person_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT `fk_player_primary_position_id` FOREIGN KEY (`primary_position_id`) REFERENCES `position`(`id`) ON UPDATE CASCADE ON DELETE SET NULL
@@ -487,7 +485,6 @@ CREATE TABLE `fixture` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
   `external_match_no` INT NULL COMMENT 'N° du match (source)',
   `season_id` INT NULL COMMENT 'FK season',
-  `stage_id` INT NULL COMMENT 'FK stage',
   `matchday_id` INT NULL COMMENT 'FK matchday',
   `division_id` INT NULL COMMENT 'FK division',
   `category_id` INT NULL COMMENT 'FK category',
@@ -501,9 +498,7 @@ CREATE TABLE `fixture` (
   PRIMARY KEY (`id`),
   KEY `ix_fixture_match_date` (`match_date`),
   KEY `ix_fixture_season_id` (`season_id`),
-  KEY `ix_fixture_stage_id` (`stage_id`),
   CONSTRAINT `fk_fixture_season_id` FOREIGN KEY (`season_id`) REFERENCES `season`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
-  CONSTRAINT `fk_fixture_stage_id` FOREIGN KEY (`stage_id`) REFERENCES `stage`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT `fk_fixture_matchday_id` FOREIGN KEY (`matchday_id`) REFERENCES `matchday`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT `fk_fixture_division_id` FOREIGN KEY (`division_id`) REFERENCES `division`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT `fk_fixture_category_id` FOREIGN KEY (`category_id`) REFERENCES `category`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
@@ -537,6 +532,20 @@ CREATE TABLE `fixture_edition` (
     ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT `fk_fixture_edition_edition_id`
     FOREIGN KEY (`edition_id`) REFERENCES `edition`(`id`)
+    ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `fixture_stage`;
+CREATE TABLE `fixture_stage` (
+  `fixture_id` INT NOT NULL COMMENT 'FK fixture',
+  `stage_id` INT NOT NULL COMMENT 'FK stage',
+  PRIMARY KEY (`fixture_id`, `stage_id`),
+  KEY `ix_fs_stage_id` (`stage_id`),
+  CONSTRAINT `fk_fs_fixture_id`
+    FOREIGN KEY (`fixture_id`) REFERENCES `fixture`(`id`)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT `fk_fs_stage_id`
+    FOREIGN KEY (`stage_id`) REFERENCES `stage`(`id`)
     ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -771,5 +780,145 @@ CREATE TABLE `import_batch` (
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_import_batch_source_file_id` FOREIGN KEY (`source_file_id`) REFERENCES `source_file`(`id`) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+SET FOREIGN_KEY_CHECKS=1;
+
+
+
+# Liaison joueur - clubs ou équipe nationale
+-- =========================================================
+-- Ajout d'une table robuste pour :
+-- - club actuel d'un joueur
+-- - club à la date d'un match (fixture.match_date)
+-- - historique complet des clubs
+-- Compatible avec le schéma (team/team_type, player, fixture, source_file)
+-- =========================================================
+
+SET FOREIGN_KEY_CHECKS=0;
+
+-- 1) Garantir que chaque club a une ligne team (team_type='CLUB')
+-- (idempotent grâce à l'UNIQUE uq_team_team_type_club_id_national_team_id)
+INSERT IGNORE INTO `team` (`team_type`, `club_id`, `national_team_id`, `display_name`)
+SELECT 'CLUB', c.id, NULL, COALESCE(c.short_name, c.name)
+FROM `club` c;
+
+-- 2) Table d'appartenance joueur -> club (via team_id)
+DROP TABLE IF EXISTS `player_club_membership`;
+CREATE TABLE `player_club_membership` (
+  `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
+  `player_id` INT NOT NULL COMMENT 'FK player',
+  `team_id` INT NOT NULL COMMENT 'FK team (must be CLUB)',
+  `from_date` DATE NULL COMMENT 'Début (NULL si inconnu)',
+  `to_date` DATE NULL COMMENT 'Fin (NULL = en cours / inconnu)',
+  `is_current` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 = club actuel (règle forte)' CHECK (`is_current` IN (0,1)),
+  `source_note` VARCHAR(200) NULL COMMENT 'Source / note',
+
+  PRIMARY KEY (`id`),
+
+  -- Pour tes 3 use-cases
+  KEY `ix_pcm_player_current` (`player_id`, `is_current`),
+  KEY `ix_pcm_player_period` (`player_id`, `from_date`, `to_date`),
+  KEY `ix_pcm_team_period` (`team_id`, `from_date`, `to_date`),
+
+  -- Eviter les doublons exacts
+  UNIQUE KEY `uq_pcm_exact` (`player_id`, `team_id`, `from_date`, `to_date`),
+
+  CONSTRAINT `fk_pcm_player_id`
+    FOREIGN KEY (`player_id`) REFERENCES `player`(`id`)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+
+  CONSTRAINT `fk_pcm_team_id`
+    FOREIGN KEY (`team_id`) REFERENCES `team`(`id`)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+
+  CONSTRAINT `ck_pcm_dates`
+    CHECK (`from_date` IS NULL OR `to_date` IS NULL OR `from_date` <= `to_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 3) Règles de robustesse via triggers :
+-- - team_id DOIT référencer une team CLUB
+-- - un joueur ne doit avoir qu'un seul is_current=1
+-- - optionnel : empêcher chevauchement de périodes (fortement recommandé)
+DROP TRIGGER IF EXISTS trg_pcm_validate_ins;
+DROP TRIGGER IF EXISTS trg_pcm_validate_upd;
+
+DELIMITER $$
+
+CREATE TRIGGER trg_pcm_validate_ins
+BEFORE INSERT ON player_club_membership
+FOR EACH ROW
+BEGIN
+  DECLARE v_type VARCHAR(10);
+
+  -- team doit être un CLUB
+  SELECT team_type INTO v_type FROM team WHERE id = NEW.team_id;
+  IF v_type IS NULL OR v_type <> 'CLUB' THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'player_club_membership.team_id must reference a CLUB team';
+  END IF;
+
+  -- Un seul club actuel
+  IF NEW.is_current = 1 THEN
+    UPDATE player_club_membership
+       SET is_current = 0
+     WHERE player_id = NEW.player_id;
+    -- Option : si tu veux forcer to_date NULL sur le current
+    SET NEW.to_date = NULL;
+  END IF;
+
+  -- Empêcher chevauchement (même joueur)
+  IF EXISTS (
+    SELECT 1
+    FROM player_club_membership m
+    WHERE m.player_id = NEW.player_id
+      AND (m.to_date IS NULL OR NEW.from_date IS NULL OR m.to_date >= NEW.from_date)
+      AND (NEW.to_date IS NULL OR m.from_date IS NULL OR NEW.to_date >= m.from_date)
+  ) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Chevauchement de périodes club pour ce joueur';
+  END IF;
+END$$
+
+CREATE TRIGGER trg_pcm_validate_upd
+BEFORE UPDATE ON player_club_membership
+FOR EACH ROW
+BEGIN
+  DECLARE v_type VARCHAR(10);
+
+  SELECT team_type INTO v_type FROM team WHERE id = NEW.team_id;
+  IF v_type IS NULL OR v_type <> 'CLUB' THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'player_club_membership.team_id must reference a CLUB team';
+  END IF;
+
+  IF NEW.is_current = 1 THEN
+    UPDATE player_club_membership
+       SET is_current = 0
+     WHERE player_id = NEW.player_id AND id <> NEW.id;
+    SET NEW.to_date = NULL;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM player_club_membership m
+    WHERE m.player_id = NEW.player_id
+      AND m.id <> NEW.id
+      AND (m.to_date IS NULL OR NEW.from_date IS NULL OR m.to_date >= NEW.from_date)
+      AND (NEW.to_date IS NULL OR m.from_date IS NULL OR NEW.to_date >= m.from_date)
+  ) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Chevauchement de périodes club pour ce joueur';
+  END IF;
+END$$
+
+DELIMITER ;
+
+-- 4) Vue pratique : club actuel (si is_current=1)
+DROP VIEW IF EXISTS v_player_current_club;
+CREATE VIEW v_player_current_club AS
+SELECT
+  m.player_id,
+  m.team_id,
+  t.display_name AS club_name,
+  m.from_date
+FROM player_club_membership m
+JOIN team t ON t.id = m.team_id
+WHERE m.is_current = 1;
 
 SET FOREIGN_KEY_CHECKS=1;
