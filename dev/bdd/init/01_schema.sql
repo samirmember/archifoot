@@ -384,6 +384,8 @@ CREATE TABLE `national_team` (
   CONSTRAINT `fk_national_team_category_id` FOREIGN KEY (`category_id`) REFERENCES `category`(`id`) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+INSERT INTO `national_team` (id, country_id, category_id, name) VALUES (1, 1, 1, 'Algérie');
+
 DROP TABLE IF EXISTS `team`;
 CREATE TABLE `team` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
@@ -396,6 +398,8 @@ CREATE TABLE `team` (
   CONSTRAINT `fk_team_club_id` FOREIGN KEY (`club_id`) REFERENCES `club`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT `fk_team_national_team_id` FOREIGN KEY (`national_team_id`) REFERENCES `national_team`(`id`) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `team` (id, team_type, club_id, national_team_id, display_name) VALUES (1, 'NATIONAL', NULL, 1, 'Algérie');
 
 DROP TABLE IF EXISTS `person`;
 CREATE TABLE `person` (
@@ -803,11 +807,11 @@ SELECT 'CLUB', c.id, NULL, COALESCE(c.short_name, c.name)
 FROM `club` c;
 
 -- 2) Table d'appartenance joueur -> club (via team_id)
-DROP TABLE IF EXISTS `player_club_membership`;
-CREATE TABLE `player_club_membership` (
+DROP TABLE IF EXISTS `player_team_membership`;
+CREATE TABLE `player_team_membership` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
   `player_id` INT NOT NULL COMMENT 'FK player',
-  `team_id` INT NOT NULL COMMENT 'FK team (must be CLUB)',
+  `team_id` INT NOT NULL COMMENT 'FK team',
   `from_date` DATE NULL COMMENT 'Début (NULL si inconnu)',
   `to_date` DATE NULL COMMENT 'Fin (NULL = en cours / inconnu)',
   `is_current` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 = club actuel (règle forte)' CHECK (`is_current` IN (0,1)),
@@ -835,81 +839,110 @@ CREATE TABLE `player_club_membership` (
     CHECK (`from_date` IS NULL OR `to_date` IS NULL OR `from_date` <= `to_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 3) Règles de robustesse via triggers :
--- - team_id DOIT référencer une team CLUB
--- - un joueur ne doit avoir qu'un seul is_current=1
--- - optionnel : empêcher chevauchement de périodes (fortement recommandé)
-DROP TRIGGER IF EXISTS trg_pcm_validate_ins;
-DROP TRIGGER IF EXISTS trg_pcm_validate_upd;
+-- =========================================================
+-- Triggers robustesse - player_team_membership
+-- Règles :
+-- 1) team_id doit exister (et team_type = 'CLUB' ou 'NATIONAL')
+-- 2) un seul is_current=1 par (player_id, team_type)
+-- 3) anti-chevauchement par (player_id, team_type)
+-- =========================================================
+
+DROP TRIGGER IF EXISTS trg_ptm_validate_ins;
+DROP TRIGGER IF EXISTS trg_ptm_validate_upd;
 
 DELIMITER $$
 
-CREATE TRIGGER trg_pcm_validate_ins
-BEFORE INSERT ON player_club_membership
+CREATE TRIGGER trg_ptm_validate_ins
+BEFORE INSERT ON player_team_membership
 FOR EACH ROW
 BEGIN
-  DECLARE v_type VARCHAR(10);
+  DECLARE v_type ENUM('CLUB','NATIONAL');
 
-  -- team doit être un CLUB
-  SELECT team_type INTO v_type FROM team WHERE id = NEW.team_id;
-  IF v_type IS NULL OR v_type <> 'CLUB' THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'player_club_membership.team_id must reference a CLUB team';
+  -- team_id doit exister + récupérer team_type
+  SELECT team_type INTO v_type
+  FROM team
+  WHERE id = NEW.team_id;
+
+  IF v_type IS NULL THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'player_team_membership.team_id references an unknown team';
   END IF;
 
-  -- Un seul club actuel
+  -- Si current => un seul current par type (CLUB ou NATIONAL)
   IF NEW.is_current = 1 THEN
-    UPDATE player_club_membership
-       SET is_current = 0
-     WHERE player_id = NEW.player_id;
-    -- Option : si tu veux forcer to_date NULL sur le current
+    UPDATE player_team_membership m
+    JOIN team t ON t.id = m.team_id
+    SET m.is_current = 0
+    WHERE m.player_id = NEW.player_id
+      AND t.team_type = v_type;
+
+    -- Forcer fin NULL si current (recommandé)
     SET NEW.to_date = NULL;
   END IF;
 
-  -- Empêcher chevauchement (même joueur)
+  -- Anti-chevauchement par team_type (même player, même type)
   IF EXISTS (
     SELECT 1
-    FROM player_club_membership m
+    FROM player_team_membership m
+    JOIN team t ON t.id = m.team_id
     WHERE m.player_id = NEW.player_id
+      AND t.team_type = v_type
       AND (m.to_date IS NULL OR NEW.from_date IS NULL OR m.to_date >= NEW.from_date)
       AND (NEW.to_date IS NULL OR m.from_date IS NULL OR NEW.to_date >= m.from_date)
   ) THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Chevauchement de périodes club pour ce joueur';
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'Overlapping memberships for same player and team_type';
   END IF;
 END$$
 
-CREATE TRIGGER trg_pcm_validate_upd
-BEFORE UPDATE ON player_club_membership
+
+CREATE TRIGGER trg_ptm_validate_upd
+BEFORE UPDATE ON player_team_membership
 FOR EACH ROW
 BEGIN
-  DECLARE v_type VARCHAR(10);
+  DECLARE v_type ENUM('CLUB','NATIONAL');
 
-  SELECT team_type INTO v_type FROM team WHERE id = NEW.team_id;
-  IF v_type IS NULL OR v_type <> 'CLUB' THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'player_club_membership.team_id must reference a CLUB team';
+  -- team_id doit exister + récupérer team_type
+  SELECT team_type INTO v_type
+  FROM team
+  WHERE id = NEW.team_id;
+
+  IF v_type IS NULL THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'player_team_membership.team_id references an unknown team';
   END IF;
 
+  -- Si current => un seul current par type (CLUB ou NATIONAL)
   IF NEW.is_current = 1 THEN
-    UPDATE player_club_membership
-       SET is_current = 0
-     WHERE player_id = NEW.player_id AND id <> NEW.id;
+    UPDATE player_team_membership m
+    JOIN team t ON t.id = m.team_id
+    SET m.is_current = 0
+    WHERE m.player_id = NEW.player_id
+      AND m.id <> NEW.id
+      AND t.team_type = v_type;
+
     SET NEW.to_date = NULL;
   END IF;
 
+  -- Anti-chevauchement par team_type (même player, même type)
   IF EXISTS (
     SELECT 1
-    FROM player_club_membership m
+    FROM player_team_membership m
+    JOIN team t ON t.id = m.team_id
     WHERE m.player_id = NEW.player_id
       AND m.id <> NEW.id
+      AND t.team_type = v_type
       AND (m.to_date IS NULL OR NEW.from_date IS NULL OR m.to_date >= NEW.from_date)
       AND (NEW.to_date IS NULL OR m.from_date IS NULL OR NEW.to_date >= m.from_date)
   ) THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Chevauchement de périodes club pour ce joueur';
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'Overlapping memberships for same player and team_type';
   END IF;
 END$$
 
 DELIMITER ;
 
--- 4) Vue pratique : club actuel (si is_current=1)
+
 DROP VIEW IF EXISTS v_player_current_club;
 CREATE VIEW v_player_current_club AS
 SELECT
@@ -917,8 +950,51 @@ SELECT
   m.team_id,
   t.display_name AS club_name,
   m.from_date
-FROM player_club_membership m
+FROM player_team_membership m
+JOIN team t ON t.id = m.team_id
+WHERE m.is_current = 1
+  AND t.team_type = 'CLUB';
+
+
+DROP VIEW IF EXISTS v_player_current_national;
+CREATE VIEW v_player_current_national AS
+SELECT
+  m.player_id,
+  m.team_id,
+  t.display_name AS national_team_name,
+  m.from_date
+FROM player_team_membership m
+JOIN team t ON t.id = m.team_id
+WHERE m.is_current = 1
+  AND t.team_type = 'NATIONAL';
+
+DROP VIEW IF EXISTS v_player_current_team;
+CREATE VIEW v_player_current_team AS
+SELECT
+  m.player_id,
+  t.team_type,
+  m.team_id,
+  t.display_name AS team_name,
+  m.from_date
+FROM player_team_membership m
 JOIN team t ON t.id = m.team_id
 WHERE m.is_current = 1;
 
-SET FOREIGN_KEY_CHECKS=1;
+-- Lookup current (par player)
+CREATE INDEX ix_ptm_player_current
+  ON player_team_membership(player_id, is_current);
+
+-- Requêtes à date (player + période)
+CREATE INDEX ix_ptm_player_from_to
+  ON player_team_membership(player_id, from_date, to_date);
+
+-- Variante utile si tu as beaucoup de to_date NULL
+CREATE INDEX ix_ptm_player_to_from
+  ON player_team_membership(player_id, to_date, from_date);
+
+-- Requêtes par team (effectif à date / historique)
+CREATE INDEX ix_ptm_team_from_to
+  ON player_team_membership(team_id, from_date, to_date);
+
+CREATE INDEX ix_team_type
+  ON team(team_type);

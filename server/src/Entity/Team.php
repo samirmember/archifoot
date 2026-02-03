@@ -39,6 +39,14 @@ class Team
     #[ORM\Column(name: 'display_name', length: 200, nullable: true)]
     private ?string $displayName = null;
 
+    #[ORM\OneToMany(mappedBy: 'team', targetEntity: PlayerTeamMembership::class, orphanRemoval: true)]
+    private Collection $playerClubMemberships;
+
+    public function __construct()
+    {
+        $this->playerClubMemberships = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -90,5 +98,10 @@ class Team
         $this->displayName = $displayName;
 
         return $this;
+    }
+
+    public function getPlayerTeamMemberships(): Collection
+    {
+        return $this->playerClubMemberships;
     }
 }
