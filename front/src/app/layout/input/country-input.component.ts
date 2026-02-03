@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AutoCompleteModule } from 'primeng/autocomplete';
+import { AutoComplete, AutoCompleteModule } from 'primeng/autocomplete';
+import { finalize } from 'rxjs';
 import { CountriesService } from '../../services/countries.service';
 import { Country } from '../../models/country.model';
 
@@ -13,6 +14,7 @@ import { Country } from '../../models/country.model';
   styleUrls: ['./country-input.component.scss'],
 })
 export class CountryInputComponent {
+  @ViewChild(AutoComplete) autoComplete?: AutoComplete;
   selectedCountry: Country | null = null;
   suggestions: Country[] = [];
   loading = false;
@@ -25,20 +27,27 @@ export class CountryInputComponent {
     // minLength côté PrimeNG + garde-fou
     if (q.length < 3) {
       this.suggestions = [];
+      this.loading = false;
       return;
     }
 
     this.loading = true;
-    this.countriesService.getCountries(q).subscribe({
-      next: (items) => {
-        this.suggestions = items;
-        this.loading = false;
-      },
-      error: () => {
-        this.suggestions = [];
-        this.loading = false;
-      },
-    });
+    this.countriesService
+      .getCountries(q)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        }),
+      )
+      .subscribe({
+        next: (items) => {
+          this.suggestions = items;
+          queueMicrotask(() => this.autoComplete?.show());
+        },
+        error: () => {
+          this.suggestions = [];
+        },
+      });
   }
 
   flagUrl(iso2?: string): string | null {
