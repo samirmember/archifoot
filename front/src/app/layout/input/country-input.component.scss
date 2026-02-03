@@ -1,3 +1,6 @@
+.p-autocomplete {
+  width: 100%;
+}
 .country-item {
   display: flex;
   align-items: center;
@@ -19,7 +22,7 @@
   border-radius: 2px;
   object-fit: cover;
 }
-.p-autocomplete-input {
+:host ::ng-deep .p-autocomplete-input {
   display: block;
   width: 100%;
   padding: 0.6rem 2rem 0.6rem 1rem;
@@ -30,7 +33,6 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  background-color: red;
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 20px 20px;
