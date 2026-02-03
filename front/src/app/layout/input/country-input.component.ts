@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AutoComplete, AutoCompleteModule } from 'primeng/autocomplete';
@@ -11,10 +11,10 @@ import { Country } from '../../models/country.model';
   standalone: true,
   imports: [CommonModule, FormsModule, AutoCompleteModule],
   templateUrl: './country-input.component.html',
-  styleUrls: ['./country-input.component.scss'],
+  styleUrl: './country-input.component.scss',
 })
 export class CountryInputComponent {
-  @ViewChild(AutoComplete) autoComplete?: AutoComplete;
+  autoComplete = viewChild<AutoComplete>(AutoComplete);
   selectedCountry: Country | null = null;
   suggestions: Country[] = [];
   loading = false;
@@ -42,7 +42,7 @@ export class CountryInputComponent {
       .subscribe({
         next: (items) => {
           this.suggestions = items;
-          queueMicrotask(() => this.autoComplete?.show());
+          queueMicrotask(() => this.autoComplete()?.show());
         },
         error: () => {
           this.suggestions = [];
@@ -52,7 +52,6 @@ export class CountryInputComponent {
 
   flagUrl(iso2?: string): string | null {
     if (!iso2) return null;
-    // Option A: via CDN (rapide). Tu peux remplacer par tes assets locaux.
     return `https://flagcdn.com/24x18/${iso2.toLowerCase()}.png`;
   }
 }
