@@ -1,0 +1,21 @@
+.country-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.country-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.country-flag {
+  width: 24px;
+  height: 18px;
+  flex: 0 0 auto;
+  border-radius: 2px;
+  object-fit: cover;
+}

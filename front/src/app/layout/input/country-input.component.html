@@ -1,0 +1,37 @@
+<p-autoComplete
+  [(ngModel)]="selectedCountry"
+  [suggestions]="suggestions"
+  (completeMethod)="search($event)"
+  [minLength]="3"
+  [delay]="250"
+  [dropdown]="false"
+  optionLabel="name"
+  [appendTo]="'body'"
+  placeholder="Pays (3 lettres min)…"
+>
+  <ng-template pTemplate="item" let-c>
+    <div class="country-item">
+      <span class="country-name">{{ c.name }}</span>
+      <img
+        *ngIf="flagUrl(c.iso2) as url"
+        class="country-flag"
+        [src]="url"
+        [alt]="'Drapeau ' + c.name"
+        loading="lazy"
+      />
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="selectedItem" let-c>
+    <div class="country-item">
+      <span class="country-name">{{ c?.name }}</span>
+      <img
+        *ngIf="flagUrl(c?.iso2) as url"
+        class="country-flag"
+        [src]="url"
+        [alt]="'Drapeau ' + c?.name"
+        loading="lazy"
+      />
+    </div>
+  </ng-template>
+</p-autoComplete>
