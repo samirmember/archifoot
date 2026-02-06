@@ -11,6 +11,7 @@ use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'fixture')]
@@ -114,11 +115,15 @@ class Fixture
     #[Groups(['fixture:read'])]
     private ?string $notes = null;
 
+    #[ORM\OneToMany(mappedBy: 'fixture', targetEntity: FixtureParticipant::class)]
+    private Collection $participants;
+
     public function __construct()
     {
         $this->competitions = new ArrayCollection();
         $this->editions = new ArrayCollection();
         $this->stages = new ArrayCollection();
+        $this->participants = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -132,38 +137,57 @@ class Fixture
         return $this->season?->getName();
     }
 
-    /** @return string[] */
     #[Groups(['fixture:read'])]
-    public function getCompetitionNames(): array
-    {
-        return $this->competitions
-            ->map(static fn(Competition $competition): ?string => $competition->getName())
-            ->filter(static fn(?string $name): bool => $name !== null && $name !== '')
-            ->getValues();
-    }
-
-    /** @return string[] */
-    #[Groups(['fixture:read'])]
-    public function getEditionNames(): array
-    {
-        return $this->editions
-            ->map(static fn(Edition $edition): ?string => $edition->getName())
-            ->filter(static fn(?string $name): bool => $name !== null && $name !== '')
-            ->getValues();
-    }
-
-    /** @return string[] */
-    #[Groups(['fixture:read'])]
-    public function getStageNames(): array
+    #[SerializedName('stages')]
+    public function getStagesData(): array
     {
         return $this->stages
-            ->map(static fn(Stage $stage): ?string => $stage->getName())
-            ->filter(static fn(?string $name): bool => $name !== null && $name !== '')
+            ->map(static function (Stage $stage): array {
+                $edition = $stage->getEdition();
+                $competition = $edition?->getCompetition();
+
+                return [
+                    'id' => $stage->getId(),
+                    'name' => $stage->getName(),
+                    'edition' => [
+                        'id' => $edition?->getId(),
+                        'name' => $edition?->getName(),
+                        'competition' => [
+                            'id' => $competition?->getId(),
+                            'name' => $competition?->getName(),
+                        ],
+                    ],
+                ];
+            })
             ->getValues();
     }
 
     #[Groups(['fixture:read'])]
-    public function getCountryName(): ?string
+    public function getTeamA(): ?array
+    {
+        return $this->buildTeamDataByRole('A');
+    }
+
+    #[Groups(['fixture:read'])]
+    public function getTeamB(): ?array
+    {
+        return $this->buildTeamDataByRole('B');
+    }
+
+    #[Groups(['fixture:read'])]
+    public function getScoreA(): ?int
+    {
+        return $this->getScoreByRole('A');
+    }
+
+    #[Groups(['fixture:read'])]
+    public function getScoreB(): ?int
+    {
+        return $this->getScoreByRole('B');
+    }
+
+    #[Groups(['fixture:read'])]
+    public function getCountryStadiumName(): ?string
     {
         return $this->country?->getName();
     }
@@ -434,5 +458,48 @@ class Fixture
         $this->notes = $notes;
 
         return $this;
+    }
+
+    /** @return Collection<int, FixtureParticipant> */
+    public function getParticipants(): Collection
+    {
+        return $this->participants;
+    }
+
+    private function buildTeamDataByRole(string $role): ?array
+    {
+        $participant = $this->findParticipantByRole($role);
+        $team = $participant?->getTeam();
+
+        if ($team === null) {
+            return null;
+        }
+
+        $country = $team->getNationalTeam()?->getCountry() ?? $team->getClub()?->getCountry();
+        $name = $team->getDisplayName()
+            ?? $team->getNationalTeam()?->getName()
+            ?? $team->getClub()?->getName();
+
+        return [
+            'id' => $team->getId(),
+            'name' => $name,
+            'iso2' => $country?->getIso3(),
+        ];
+    }
+
+    private function getScoreByRole(string $role): ?int
+    {
+        return $this->findParticipantByRole($role)?->getScore();
+    }
+
+    private function findParticipantByRole(string $role): ?FixtureParticipant
+    {
+        foreach ($this->participants as $participant) {
+            if ($participant->getRole() === $role) {
+                return $participant;
+            }
+        }
+
+        return null;
     }
 }
