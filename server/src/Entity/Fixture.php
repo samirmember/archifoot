@@ -139,7 +139,7 @@ class Fixture
         return $this->competitions
             ->map(static fn(Competition $competition): ?string => $competition->getName())
             ->filter(static fn(?string $name): bool => $name !== null && $name !== '')
-            ->values()
+            ->getValues()
             ->toArray();
     }
 
@@ -150,7 +150,7 @@ class Fixture
         return $this->editions
             ->map(static fn(Edition $edition): ?string => $edition->getName())
             ->filter(static fn(?string $name): bool => $name !== null && $name !== '')
-            ->values()
+            ->getValues()
             ->toArray();
     }
 
@@ -161,7 +161,7 @@ class Fixture
         return $this->stages
             ->map(static fn(Stage $stage): ?string => $stage->getName())
             ->filter(static fn(?string $name): bool => $name !== null && $name !== '')
-            ->values()
+            ->getValues()
             ->toArray();
     }
 
