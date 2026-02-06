@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { ApiClientService } from '../../shared/api/api-client.service';
 
 export interface Competition {
@@ -16,14 +16,20 @@ export class CompetitionService {
   constructor(private readonly apiClient: ApiClientService) {}
 
   public getCompetitions(): Observable<Competition[]> {
-    return this.apiClient.getCollection<Competition>('competitions', { pagination: 'false' }).pipe(
-      map((response) => {
-        if (Array.isArray(response)) {
-          return response as Competition[];
-        }
+    return this.apiClient
+      .getCollection<Competition>('competitions', {
+        pagination: 'false',
+        'order[name]': 'asc',
+      })
+      .pipe(
+        map((response) => {
+          if (Array.isArray(response)) {
+            return response as Competition[];
+          }
 
-        return Array.isArray(response['hydra:member']) ? response['hydra:member'] : [];
-      }),
-    );
+          return Array.isArray(response['hydra:member']) ? response['hydra:member'] : [];
+        }),
+        catchError(() => of([])),
+      );
   }
 }

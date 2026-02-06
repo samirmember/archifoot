@@ -5,9 +5,8 @@
         <h2 class="fs-15 text-uppercase text-muted mb-3">Matchs des séniors</h2>
         <h3 class="display-4 mb-10 px-xxl-15">Tous les matchs joués par l'équipe nationale</h3>
       </div>
-      <!-- /column -->
     </div>
-    <!-- /.row -->
+
     <div class="row">
       <div class="col-xl-10 mx-auto">
         <form class="filter-form mb-10">
@@ -18,167 +17,59 @@
                 <app-country-input id="country" name="country" />
               </div>
             </div>
+
             <div class="col-md-4 mb-3">
               <div class="form-select-wrapper">
                 <label for="year" class="form-label">Année</label>
-                <select class="form-select" aria-label="" id="year">
-                  <option selected>Toutes les années</option>
+                <select class="form-select" id="year" [(ngModel)]="selectedYear" name="year">
+                  <option [ngValue]="null">Toutes les années</option>
                   @for (year of years; track $index) {
-                    <option value="{{ year }}">{{ year }}</option>
+                    <option [ngValue]="year">{{ year }}</option>
                   }
                 </select>
               </div>
             </div>
+
             <div class="col-md-4 mb-3">
               <div class="form-select-wrapper">
                 <label for="match-type" class="form-label">Type du match</label>
-                <select class="form-select" aria-label="" id="match-type">
-                  <option selected>Toutes les compétitions</option>
+                <select class="form-select" id="match-type" [(ngModel)]="selectedCompetitionId" name="competition">
+                  <option [ngValue]="null">Toutes les compétitions</option>
                   @for (competition of competitions(); track competition.id) {
-                    <option [value]="competition.id">{{ competition.name }}</option>
+                    <option [ngValue]="competition.id">{{ competition.name }}</option>
                   }
                 </select>
               </div>
             </div>
           </div>
         </form>
+
         <div class="job-list mb-10">
-          <h3 class="mb-4">Design</h3>
-          <a href="#" class="card mb-4 lift">
-            <div class="card-body p-5">
-              <span class="row justify-content-between align-items-center">
-                <span class="col-md-5 mb-2 mb-md-0 d-flex align-items-center text-body">
-                  <span class="avatar bg-red text-white w-9 h-9 fs-17 me-3">GD</span> Senior Graphic
-                  Designer
-                </span>
-                <span class="col-5 col-md-3 text-body d-flex align-items-center">
-                  <i class="uil uil-clock me-1"></i> Full time
-                </span>
-                <span class="col-7 col-md-4 col-lg-3 text-body d-flex align-items-center">
-                  <i class="uil uil-location-arrow me-1"></i> San Francisco, US
-                </span>
-                <span class="d-none d-lg-block col-1 text-center text-body">
-                  <i class="uil uil-angle-right-b"></i>
-                </span>
-              </span>
-            </div>
-            <!-- /.card-body -->
-          </a>
-          <!-- /.card -->
-          <a href="#" class="card mb-4 lift">
-            <div class="card-body p-5">
-              <span class="row justify-content-between align-items-center">
-                <span class="col-md-5 mb-2 mb-md-0 d-flex align-items-center text-body">
-                  <span class="avatar bg-green text-white w-9 h-9 fs-17 me-3">UX</span> UI/UX
-                  Designer
-                </span>
-                <span class="col-5 col-md-3 text-body d-flex align-items-center">
-                  <i class="uil uil-clock me-1"></i> Remote
-                </span>
-                <span class="col-7 col-md-4 col-lg-3 text-body d-flex align-items-center">
-                  <i class="uil uil-location-arrow me-1"></i> Anywhere
-                </span>
-                <span class="d-none d-lg-block col-1 text-center text-body">
-                  <i class="uil uil-angle-right-b"></i>
-                </span>
-              </span>
-            </div>
-            <!-- /.card-body -->
-          </a>
-          <!-- /.card -->
-          <a href="#" class="card mb-4 lift">
-            <div class="card-body p-5">
-              <span class="row justify-content-between align-items-center">
-                <span class="col-md-5 mb-2 mb-md-0 d-flex align-items-center text-body">
-                  <span class="avatar bg-yellow text-white w-9 h-9 fs-17 me-3">AN</span> Multimedia
-                  Artist &amp; Animator
-                </span>
-                <span class="col-5 col-md-3 text-body d-flex align-items-center">
-                  <i class="uil uil-clock me-1"></i> Full time
-                </span>
-                <span class="col-7 col-md-4 col-lg-3 text-body d-flex align-items-center">
-                  <i class="uil uil-location-arrow me-1"></i> Birmingham, UK
-                </span>
-                <span class="d-none d-lg-block col-1 text-center text-body">
-                  <i class="uil uil-angle-right-b"></i>
-                </span>
-              </span>
-            </div>
-            <!-- /.card-body -->
-          </a>
-          <!-- /.card -->
-        </div>
-        <div class="job-list">
-          <h3 class="mb-4">Development</h3>
-          <a href="#" class="card mb-4 lift">
-            <div class="card-body p-5">
-              <span class="row justify-content-between align-items-center">
-                <span class="col-md-5 mb-2 mb-md-0 d-flex align-items-center text-body">
-                  <span class="avatar bg-purple text-white w-9 h-9 fs-17 me-3">FE</span> Front End
-                  Developer
-                </span>
-                <span class="col-5 col-md-3 text-body d-flex align-items-center">
-                  <i class="uil uil-clock me-1"></i> Part time
-                </span>
-                <span class="col-7 col-md-4 col-lg-3 text-body d-flex align-items-center">
-                  <i class="uil uil-location-arrow me-1"></i> Sydney, AU
-                </span>
-                <span class="d-none d-lg-block col-1 text-center text-body">
-                  <i class="uil uil-angle-right-b"></i>
-                </span>
-              </span>
-            </div>
-            <!-- /.card-body -->
-          </a>
-          <!-- /.card -->
-          <a href="#" class="card mb-4 lift">
-            <div class="card-body p-5">
-              <span class="row justify-content-between align-items-center">
-                <span class="col-md-5 mb-2 mb-md-0 d-flex align-items-center text-body">
-                  <span class="avatar bg-orange text-white w-9 h-9 fs-17 me-3">MD</span> Mobile
-                  Developer
-                </span>
-                <span class="col-5 col-md-3 text-body d-flex align-items-center">
-                  <i class="uil uil-clock me-1"></i> Full-time
-                </span>
-                <span class="col-7 col-md-4 col-lg-3 text-body d-flex align-items-center">
-                  <i class="uil uil-location-arrow me-1"></i> San Francisco, US
-                </span>
-                <span class="d-none d-lg-block col-1 text-center text-body">
-                  <i class="uil uil-angle-right-b"></i>
-                </span>
-              </span>
-            </div>
-            <!-- /.card-body -->
-          </a>
-          <!-- /.card -->
-          <a href="#" class="card mb-4 lift">
-            <div class="card-body p-5">
-              <span class="row justify-content-between align-items-center">
-                <span class="col-md-5 mb-2 mb-md-0 d-flex align-items-center text-body">
-                  <span class="avatar bg-pink text-white w-9 h-9 fs-17 me-3">NT</span> .NET
-                  Developer
-                </span>
-                <span class="col-5 col-md-3 text-body d-flex align-items-center">
-                  <i class="uil uil-clock me-1"></i> Full time
-                </span>
-                <span class="col-7 col-md-4 col-lg-3 text-body d-flex align-items-center">
-                  <i class="uil uil-location-arrow me-1"></i> Manchester, UK
-                </span>
-                <span class="d-none d-lg-block col-1 text-center text-body">
-                  <i class="uil uil-angle-right-b"></i>
-                </span>
-              </span>
-            </div>
-            <!-- /.card-body -->
-          </a>
-          <!-- /.card -->
+          <h3 class="mb-4">Résultats</h3>
+
+          @if (filteredResults().length === 0) {
+            <p class="text-muted">Aucun résultat trouvé avec les filtres sélectionnés.</p>
+          }
+
+          @for (result of filteredResults(); track result.fixtureId ?? $index) {
+            <article class="card mb-4">
+              <div class="card-body p-4">
+                <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+                  <strong>
+                    #{{ result.externalMatchNo ?? 'N/A' }} - {{ result.countryA }} {{ result.scoreA ?? '-' }} -
+                    {{ result.scoreB ?? '-' }} {{ result.countryB }}
+                  </strong>
+                  <span>{{ result.date ?? 'Date inconnue' }}</span>
+                </div>
+                <div class="small text-muted">
+                  {{ result.competition ?? 'Compétition inconnue' }} · {{ result.edition ?? 'Édition inconnue' }} ·
+                  {{ result.stage ?? 'Étape inconnue' }} · Saison: {{ result.season ?? 'N/A' }}
+                </div>
+              </div>
+            </article>
+          }
         </div>
       </div>
-      <!-- /column -->
     </div>
-    <!-- /.row -->
   </div>
-  <!-- /.container -->
 </section>
-<!-- /section -->
