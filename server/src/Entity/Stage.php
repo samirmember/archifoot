@@ -28,11 +28,11 @@ class Stage
         mappedBy: 'stages',
         fetch: 'EXTRA_LAZY'
     )]
-    private Collection $fixtures;
+    private \Doctrine\Common\Collections\Collection $fixtures;
 
     public function __construct()
     {
-        $this->fixtures = new ArrayCollection();
+        $this->fixtures = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     public function getId(): ?int
@@ -81,8 +81,8 @@ class Stage
         return $this;
     }
 
-    /** @return Collection<int, Fixture> */
-    public function getFixtures(): Collection
+    /** @return \Doctrine\Common\Collections\Collection<int, Fixture> */
+    public function getFixtures(): \Doctrine\Common\Collections\Collection
     {
         return $this->fixtures;
     }
