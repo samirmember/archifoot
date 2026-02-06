@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { ApiClientService } from '../../shared/api/api-client.service';
+import { ApiClientService } from '../core/http/api-client.service';
 import { Country } from '../models/country.model';
 
 type HydraCollection<T> = { 'hydra:member': T[] };

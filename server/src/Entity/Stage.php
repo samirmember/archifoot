@@ -20,9 +20,6 @@ class Stage
     #[ORM\Column(length: 120, nullable: true)]
     private ?string $name = null;
 
-    #[ORM\Column(name: 'is_final', nullable: true)]
-    private ?bool $isFinal = null;
-
     #[ORM\Column(name: 'sort_order', nullable: true)]
     private ?int $sortOrder = null;
 
@@ -69,14 +66,7 @@ class Stage
 
     public function isFinal(): ?bool
     {
-        return $this->isFinal;
-    }
-
-    public function setIsFinal(?bool $isFinal): static
-    {
-        $this->isFinal = $isFinal;
-
-        return $this;
+        return $this->getName() === 'Finale';
     }
 
     public function getSortOrder(): ?int

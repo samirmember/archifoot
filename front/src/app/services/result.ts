@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { catchError, forkJoin, map, Observable, of, switchMap } from 'rxjs';
-import { ApiClientService } from '../../shared/api/api-client.service';
+import { ApiClientService } from '../core/http/api-client.service';
 
 interface ApiFixture {
   id?: number;
@@ -100,14 +100,18 @@ export class ResultService {
             fixture: fixtureIri,
           })
           .pipe(
-            map((response) => (Array.isArray(response) ? response : (response['hydra:member'] ?? []))),
+            map((response) =>
+              Array.isArray(response) ? response : (response['hydra:member'] ?? []),
+            ),
             catchError(() => of([])),
           )
       : of([]);
 
     return participants$.pipe(
       switchMap((participants) => {
-        const sortedParticipants = [...participants].sort((a, b) => (a.role === 'A' ? -1 : 1) - (b.role === 'A' ? -1 : 1));
+        const sortedParticipants = [...participants].sort(
+          (a, b) => (a.role === 'A' ? -1 : 1) - (b.role === 'A' ? -1 : 1),
+        );
         const participantA = sortedParticipants[0];
         const participantB = sortedParticipants[1];
 

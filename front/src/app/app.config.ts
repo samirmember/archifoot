@@ -4,12 +4,12 @@ import { provideRouter } from '@angular/router';
 import { providePrimeNG } from 'primeng/config';
 import { routes } from './app.routes';
 import Aura from '@primeuix/themes/aura';
-import { apiKeyInterceptor } from '../shared/api/api-key.interceptor';
+import { apiHeadersInterceptor } from './core/http/api-headers.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient(withInterceptors([apiKeyInterceptor])),
+    provideHttpClient(withInterceptors([apiHeadersInterceptor])),
     provideRouter(routes),
     providePrimeNG({
       ripple: true,
