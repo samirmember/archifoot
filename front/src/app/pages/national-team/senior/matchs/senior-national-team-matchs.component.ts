@@ -7,7 +7,7 @@ import { Country } from '../../../../models/country.model';
 import { NumberService } from '../../../../../shared/number.service';
 import { CountryInputComponent } from 'src/app/layouts/input/country-input.component';
 import { CompetitionService } from 'src/app/services/competition.service';
-import { MatchResult, ResultService } from 'src/app/services/result';
+import { MatchResult, ResultService } from 'src/app/services/result.service';
 
 @Component({
   selector: 'app-senior-national-team-matchs',
@@ -25,10 +25,15 @@ export class SeniorNationalTeamMatchsComponent {
   selectedCompetitionId: number | null = null;
 
   years = this.numberService.generateAllYears();
-  competitions = toSignal(this.competitionService.getCompetitions().pipe(catchError(() => of([]))), {
+  competitions = toSignal(
+    this.competitionService.getCompetitions().pipe(catchError(() => of([]))),
+    {
+      initialValue: [],
+    },
+  );
+  results = toSignal(this.resultService.getResults().pipe(catchError(() => of([]))), {
     initialValue: [],
   });
-  results = toSignal(this.resultService.getResults().pipe(catchError(() => of([]))), { initialValue: [] });
 
   filteredResults = computed(() => {
     const currentResults = this.results();
@@ -55,7 +60,10 @@ export class SeniorNationalTeamMatchsComponent {
     return Number.isNaN(parsedDate.getTime()) ? null : parsedDate.getFullYear();
   }
 
-  private extractCompetitionIdFromResult(result: MatchResult, selectedCompetitionId: number): boolean {
+  private extractCompetitionIdFromResult(
+    result: MatchResult,
+    selectedCompetitionId: number,
+  ): boolean {
     const competition = this.competitions().find((item) => item.name === result.competition);
     return competition?.id === selectedCompetitionId;
   }
