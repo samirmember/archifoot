@@ -2,6 +2,11 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -9,6 +14,12 @@ use Doctrine\Common\Collections\Collection;
 #[ORM\Entity]
 #[ORM\Table(name: 'competition')]
 #[ORM\UniqueConstraint(name: 'uq_competition_name_category_id', columns: ['name', 'category_id'])]
+#[ApiResource(
+    operations: [new Get(), new GetCollection()],
+)]
+#[ApiFilter(SearchFilter::class, properties: [
+    'name' => 'partial',
+])]
 class Competition
 {
     #[ORM\Id]

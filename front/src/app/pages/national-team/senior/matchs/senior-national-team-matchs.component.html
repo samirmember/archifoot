@@ -33,16 +33,10 @@
               <div class="form-select-wrapper">
                 <label for="match-type" class="form-label">Type du match</label>
                 <select class="form-select" aria-label="" id="match-type">
-                  <option selected>Location</option>
-                  <option value="location1">Chicago, US</option>
-                  <option value="location3">Michigan, US</option>
-                  <option value="location2">New York, US</option>
-                  <option value="location4">Los Angles, US</option>
-                  <option value="location5">Moscow, Russia</option>
-                  <option value="location6">Sydney, Australia</option>
-                  <option value="location7">Birmingham, UK</option>
-                  <option value="location8">Manchester, UK</option>
-                  <option value="location9">Beijing, China</option>
+                  <option selected>Toutes les compétitions</option>
+                  @for (competition of competitions(); track competition.id) {
+                    <option [value]="competition.id">{{ competition.name }}</option>
+                  }
                 </select>
               </div>
             </div>

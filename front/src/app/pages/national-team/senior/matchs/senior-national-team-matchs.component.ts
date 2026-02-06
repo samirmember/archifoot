@@ -1,11 +1,11 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
-import { finalize } from 'rxjs';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 import { Country } from '../../../../models/country.model';
-import { CountryService } from '../../../../services/country.service';
 import { NumberService } from '../../../../../shared/number.service';
 import { CountryInputComponent } from 'src/app/layouts/input/country-input.component';
+import { CompetitionService } from 'src/app/services/competition.service';
 
 @Component({
   selector: 'app-senior-national-team-matchs',
@@ -15,6 +15,9 @@ import { CountryInputComponent } from 'src/app/layouts/input/country-input.compo
 })
 export class SeniorNationalTeamMatchsComponent {
   private numberService = inject(NumberService);
+  private competitionService = inject(CompetitionService);
+
   selectedCountry: Country | null = null;
   years = this.numberService.generateAllYears();
+  competitions = toSignal(this.competitionService.getCompetitions(), { initialValue: [] });
 }

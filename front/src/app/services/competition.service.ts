@@ -15,7 +15,7 @@ export interface Competition {
 export class CompetitionService {
   constructor(private readonly apiClient: ApiClientService) {}
 
-  public getCompetitios(): Observable<Competition[]> {
+  public getCompetitions(): Observable<Competition[]> {
     return this.apiClient.getCollection<Competition>('competitions', { pagination: 'false' }).pipe(
       map((response) => {
         if (Array.isArray(response)) {
