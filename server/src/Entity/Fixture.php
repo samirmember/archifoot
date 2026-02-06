@@ -24,6 +24,15 @@ use Symfony\Component\Serializer\Annotation\SerializedName;
     normalizationContext: ['groups' => ['fixture:read']],
     operations: [new Get(), new GetCollection()],
 )]
+#[ApiFilter(SearchFilter::class, properties: [
+    'season.name' => 'exact',
+    'competitions.name' => 'partial',
+    'participants.team.displayName' => 'partial',
+    'participants.team.nationalTeam.name' => 'partial',
+    'participants.team.nationalTeam.country.iso3' => 'exact',
+    'participants.team.club.name' => 'partial',
+    'participants.team.club.country.iso3' => 'exact',
+])]
 class Fixture
 {
     #[ORM\Id]
