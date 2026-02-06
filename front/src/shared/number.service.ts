@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class NumberService {
   public generateAllYears(): number[] {
-    const startYear = 1962;
+    const startYear = 1963;
     const currentYear = new Date().getFullYear();
     const years: number[] = [];
 

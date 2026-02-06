@@ -7,7 +7,9 @@
   [dropdown]="false"
   optionLabel="name"
   [appendTo]="'body'"
-  placeholder="Pays (3 lettres min)…"
+  [name]="name()"
+  [id]="id()"
+  [placeholder]="placeholder()"
 >
   <ng-template pTemplate="item" let-c>
     <div class="country-item">

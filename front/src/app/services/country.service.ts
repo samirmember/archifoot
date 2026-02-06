@@ -6,7 +6,7 @@ import { Country } from '../models/country.model';
 type HydraCollection<T> = { 'hydra:member': T[] };
 
 @Injectable({ providedIn: 'root' })
-export class CountriesService {
+export class CountryService {
   constructor(private readonly apiClient: ApiClientService) {}
 
   public getCountries(filterName?: string): Observable<Country[]> {

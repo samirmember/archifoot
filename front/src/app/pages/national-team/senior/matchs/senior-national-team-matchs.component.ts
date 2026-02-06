@@ -3,9 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
 import { finalize } from 'rxjs';
 import { Country } from '../../../../models/country.model';
-import { CountriesService } from '../../../../services/countries.service';
+import { CountryService } from '../../../../services/country.service';
 import { NumberService } from '../../../../../shared/number.service';
-import { CountryInputComponent } from 'src/app/layout/input/country-input.component';
+import { CountryInputComponent } from 'src/app/layouts/input/country-input.component';
 
 @Component({
   selector: 'app-senior-national-team-matchs',

@@ -1,9 +1,9 @@
-import { Component, viewChild } from '@angular/core';
+import { Component, inject, input, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AutoComplete, AutoCompleteModule } from 'primeng/autocomplete';
 import { finalize } from 'rxjs';
-import { CountriesService } from '../../services/countries.service';
+import { CountryService } from '../../services/country.service';
 import { Country } from '../../models/country.model';
 
 @Component({
@@ -14,12 +14,14 @@ import { Country } from '../../models/country.model';
   styleUrl: './country-input.component.scss',
 })
 export class CountryInputComponent {
+  id = input.required<string>();
+  name = input.required<string>();
+  placeholder = input<string>('Tous les pays');
+  countryService = inject(CountryService);
   autoComplete = viewChild<AutoComplete>(AutoComplete);
   selectedCountry: Country | null = null;
   suggestions: Country[] = [];
   loading = false;
-
-  constructor(private readonly countriesService: CountriesService) {}
 
   search(event: { query: string }): void {
     const q = (event.query ?? '').trim();
@@ -32,7 +34,7 @@ export class CountryInputComponent {
     }
 
     this.loading = true;
-    this.countriesService
+    this.countryService
       .getCountries(q)
       .pipe(
         finalize(() => {
