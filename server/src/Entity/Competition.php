@@ -10,11 +10,13 @@ use ApiPlatform\Metadata\GetCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'competition')]
 #[ORM\UniqueConstraint(name: 'uq_competition_name_category_id', columns: ['name', 'category_id'])]
 #[ApiResource(
+    normalizationContext: ['groups' => ['competition:read']],
     operations: [new Get(), new GetCollection()],
 )]
 #[ApiFilter(SearchFilter::class, properties: [
@@ -25,13 +27,16 @@ class Competition
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['competition:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 200, nullable: true)]
+    #[Groups(['competition:read'])]
     private ?string $name = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'category_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    #[Groups(['competition:read'])]
     private ?Category $category = null;
 
     /**
