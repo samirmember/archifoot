@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'fixture')]
@@ -18,6 +19,8 @@ use ApiPlatform\Metadata\GetCollection;
 #[ORM\Index(name: 'ix_fixture_season_id', columns: ['season_id'])]
 #[ORM\Index(name: 'ix_fixture_edition_id', columns: ['edition_id'])]
 #[ApiResource(
+    formats: ['json' => ['application/json']],
+    normalizationContext: ['groups' => ['fixture:read']],
     operations: [new Get(), new GetCollection()],
 )]
 class Fixture
@@ -28,6 +31,7 @@ class Fixture
     private ?int $id = null;
 
     #[ORM\Column(name: 'external_match_no', nullable: true)]
+    #[Groups(['fixture:read'])]
     private ?int $externalMatchNo = null;
 
     #[ORM\ManyToOne]
@@ -83,6 +87,7 @@ class Fixture
     private ?Category $category = null;
 
     #[ORM\Column(name: 'match_date', type: 'date', nullable: true)]
+    #[Groups(['fixture:read'])]
     private ?\DateTimeInterface $matchDate = null;
 
     #[ORM\ManyToOne]
@@ -98,12 +103,15 @@ class Fixture
     private ?Country $country = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['fixture:read'])]
     private ?bool $played = null;
 
     #[ORM\Column(name: 'is_official', nullable: true)]
+    #[Groups(['fixture:read'])]
     private ?bool $isOfficial = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Groups(['fixture:read'])]
     private ?string $notes = null;
 
     public function __construct()
@@ -116,6 +124,63 @@ class Fixture
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    #[Groups(['fixture:read'])]
+    public function getSeasonName(): ?string
+    {
+        return $this->season?->getName();
+    }
+
+    /** @return string[] */
+    #[Groups(['fixture:read'])]
+    public function getCompetitionNames(): array
+    {
+        return $this->competitions
+            ->map(static fn(Competition $competition): ?string => $competition->getName())
+            ->filter(static fn(?string $name): bool => $name !== null && $name !== '')
+            ->values()
+            ->toArray();
+    }
+
+    /** @return string[] */
+    #[Groups(['fixture:read'])]
+    public function getEditionNames(): array
+    {
+        return $this->editions
+            ->map(static fn(Edition $edition): ?string => $edition->getName())
+            ->filter(static fn(?string $name): bool => $name !== null && $name !== '')
+            ->values()
+            ->toArray();
+    }
+
+    /** @return string[] */
+    #[Groups(['fixture:read'])]
+    public function getStageNames(): array
+    {
+        return $this->stages
+            ->map(static fn(Stage $stage): ?string => $stage->getName())
+            ->filter(static fn(?string $name): bool => $name !== null && $name !== '')
+            ->values()
+            ->toArray();
+    }
+
+    #[Groups(['fixture:read'])]
+    public function getCountryName(): ?string
+    {
+        return $this->country?->getName();
+    }
+
+    #[Groups(['fixture:read'])]
+    public function getCityName(): ?string
+    {
+        return $this->city?->getName();
+    }
+
+    #[Groups(['fixture:read'])]
+    public function getStadiumName(): ?string
+    {
+        return $this->stadium?->getName();
     }
 
     public function getExternalMatchNo(): ?int
