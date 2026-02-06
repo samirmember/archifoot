@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'fixture_participant')]
@@ -15,16 +16,20 @@ use ApiPlatform\Metadata\GetCollection;
 #[ORM\Index(name: 'ix_fixture_participant_team_id', columns: ['team_id'])]
 #[ORM\Index(name: 'ix_fixture_participant_fixture_id', columns: ['fixture_id'])]
 #[ApiResource(
+    formats: ['json' => ['application/json']],
+    normalizationContext: ['groups' => ['fixture_participant:read']],
     operations: [new Get(), new GetCollection()],
 )]
 #[ApiFilter(SearchFilter::class, properties: [
     'fixture' => 'exact',
+    'fixture.id' => 'exact',
 ])]
 class FixtureParticipant
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['fixture_participant:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne]
@@ -36,21 +41,27 @@ class FixtureParticipant
     private ?Team $team = null;
 
     #[ORM\Column(length: 1, nullable: true)]
+    #[Groups(['fixture_participant:read'])]
     private ?string $role = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['fixture_participant:read'])]
     private ?int $score = null;
 
     #[ORM\Column(name: 'score_extra', nullable: true)]
+    #[Groups(['fixture_participant:read'])]
     private ?int $scoreExtra = null;
 
     #[ORM\Column(name: 'score_penalty', nullable: true)]
+    #[Groups(['fixture_participant:read'])]
     private ?int $scorePenalty = null;
 
     #[ORM\Column(name: 'is_winner', nullable: true)]
+    #[Groups(['fixture_participant:read'])]
     private ?bool $isWinner = null;
 
     #[ORM\Column(name: 'venue_role', length: 10, nullable: true)]
+    #[Groups(['fixture_participant:read'])]
     private ?string $venueRole = null;
 
     public function getId(): ?int
@@ -80,6 +91,19 @@ class FixtureParticipant
         $this->team = $team;
 
         return $this;
+    }
+
+
+    #[Groups(['fixture_participant:read'])]
+    public function getFixtureId(): ?int
+    {
+        return $this->fixture?->getId();
+    }
+
+    #[Groups(['fixture_participant:read'])]
+    public function getTeamName(): ?string
+    {
+        return $this->team?->getName();
     }
 
     public function getRole(): ?string
