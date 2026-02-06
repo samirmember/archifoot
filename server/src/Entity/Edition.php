@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Attribute\Ignore;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'edition')]
@@ -42,6 +43,7 @@ class Edition
         mappedBy: 'editions',
         fetch: 'EXTRA_LAZY'
     )]
+    #[Ignore]
     private Collection $fixtures;
 
     public function __construct()
