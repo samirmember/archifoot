@@ -66,6 +66,7 @@ class Fixture
     #[ORM\JoinTable(name: 'fixture_competition')]
     #[ORM\JoinColumn(name: 'fixture_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'competition_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[Groups(['fixture:read'])]
     private Collection $competitions;
 
     /**
@@ -266,6 +267,20 @@ class Fixture
             $competition->removeFixture($this);
         }
         return $this;
+    }
+
+    #[Groups(['fixture:read'])]
+    #[SerializedName('competitions')]
+    public function getCompetitionsData()
+    {
+        return $this->competitions
+            ->map(static function (Competition $competition): array {
+                return [
+                    'id' => $competition->getId(),
+                    'name' => $competition->getName()
+                ];
+            })
+            ->getValues();
     }
 
     /** @return Collection<int, Edition> */

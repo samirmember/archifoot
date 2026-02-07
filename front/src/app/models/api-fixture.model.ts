@@ -37,4 +37,5 @@ export interface ApiFixture {
   countryStadiumName?: string | null;
   cityName?: string | null;
   stadiumName?: string | null;
+  competitions?: ApiFixtureStageCompetition[];
 }

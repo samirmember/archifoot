@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { ApiClientService } from '../core/http/api-client.service';
-import { ApiFixture } from '../models/api-fixture.model';
+import { ApiFixture, ApiFixtureStageCompetition } from '../models/api-fixture.model';
 
 export interface ResultFilters {
   seasonName?: string;
@@ -20,9 +20,9 @@ export interface MatchResult {
   countryB: string;
   countryCodeA: string | null | undefined;
   countryCodeB: string | null | undefined;
-  edition: string | null;
-  stage: string | null;
-  competition: string | null;
+  editions: string[] | null;
+  stages: string[] | null;
+  competitions?: ApiFixtureStageCompetition[];
   scoreA: number | null;
   scoreB: number | null;
   date: string | null;
@@ -32,6 +32,7 @@ export interface MatchResult {
   city: string | null;
   stadium: string | null;
   notes: string | null;
+  competitionLabel?: string;
 }
 
 @Injectable({
@@ -50,7 +51,9 @@ export class ResultService {
   }
 
   private mapFixtureToResult(fixture: ApiFixture): MatchResult {
-    const firstStage = fixture.stages?.[0];
+    const isString = (v: unknown): v is string => typeof v === 'string';
+    const stages = fixture.stages?.map((stage) => stage.name).filter(isString);
+    const editions = fixture.stages?.map((stage) => stage.edition?.name).filter(isString);
 
     return {
       fixtureId: fixture.id ?? null,
@@ -59,9 +62,9 @@ export class ResultService {
       countryCodeA: fixture.teamA?.iso2,
       countryCodeB: fixture.teamB?.iso2,
       countryB: fixture.teamB?.name ?? 'Équipe B',
-      edition: firstStage?.edition?.name ?? null,
-      stage: firstStage?.name ?? null,
-      competition: firstStage?.edition?.competition?.name ?? null,
+      stages: stages ?? null,
+      editions: editions ?? null,
+      competitions: fixture.competitions,
       scoreA: fixture.scoreA ?? null,
       scoreB: fixture.scoreB ?? null,
       date: fixture.matchDate ?? null,
@@ -71,7 +74,50 @@ export class ResultService {
       city: fixture.cityName ?? null,
       stadium: fixture.stadiumName ?? null,
       notes: fixture.notes ?? null,
+      competitionLabel: this.getCompetitionLabels(fixture).join(' | '),
     };
+  }
+
+  /**
+   * Construit les libellés "Stage Compétition Édition" par compétition.
+   * - Si stages/editions absents -> ["Nom compétition", ...]
+   * - Sinon -> ["Stage Nom compétition Édition", ...]
+   */
+  private getCompetitionLabels(fixture: ApiFixture): string[] {
+    const competitions = fixture.competitions ?? [];
+    const stages = fixture.stages ?? [];
+
+    // Si pas de compétition => rien à construire
+    if (competitions.length === 0) return [];
+
+    // Contrôle de cohérence (si stages fournis)
+    if (stages.length > 0 && stages.length !== competitions.length) {
+      console.warn(
+        `[getCompetitionContextLabels] Incohérence: competitions=${competitions.length}, stages=${stages.length} (externalMatchNo=${fixture.externalMatchNo ?? 'n/a'})`,
+      );
+    }
+
+    return competitions
+      .map((comp, i) => {
+        const compName = (comp?.name ?? '').trim();
+        const stage = stages[i];
+
+        const stageName = (stage?.name ?? '').trim();
+        const editionName = (stage?.edition?.name ?? '').trim();
+
+        // Si on veut être strict sur "édition doit correspondre à la compétition",
+        // on peut vérifier stage.edition?.competition?.id === comp.id (si ids présents).
+        // Ici, on reste best-effort.
+
+        // Cas "match amical" : pas de stage + pas d'édition => juste le nom compétition
+        if (!stageName && !editionName) return compName;
+
+        // Concat propre (sans doubles espaces)
+        return [stageName.charAt(0).toUpperCase() + stageName.slice(1), compName, editionName]
+          .filter(Boolean)
+          .join(' ');
+      })
+      .filter(Boolean); // au cas où compName est vide/null
   }
 
   private buildFixtureFilters(filters?: ResultFilters): Record<string, string> {
