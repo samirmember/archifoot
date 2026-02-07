@@ -244,7 +244,10 @@ INSERT INTO `country` (`name`, `iso2`, `iso3`, `fifa_code`) VALUES
 ('Îles Marshall','MH','MHL','MHL'),
 ('Niue','NU','NIU','NIU'),
 ('Tokelau','TK','TKL','TKL'),
-('Yougoslavie','YU','YUG','YUG');
+('Yougoslavie','YU','YUG','YUG'),
+('Tchécoslovaquie','CZ','CSK','TCH'),
+('URSS','SU','SUN','URS')
+;
 
 DROP TABLE IF EXISTS `region`;
 CREATE TABLE `region` (
