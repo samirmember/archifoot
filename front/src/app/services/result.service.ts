@@ -9,6 +9,8 @@ export interface ResultFilters {
   teamIso3?: string;
   competitionName?: string;
   competitionId?: number;
+  page?: number;
+  itemsPerPage?: number;
 }
 
 export interface MatchResult {
@@ -74,8 +76,8 @@ export class ResultService {
 
   private buildFixtureFilters(filters?: ResultFilters): Record<string, string> {
     const params: Record<string, string> = {
-      page: '1',
-      itemsPerPage: '20',
+      page: String(filters?.page ?? 1),
+      itemsPerPage: String(filters?.itemsPerPage ?? 20),
       'order[matchDate]': 'desc',
     };
 
