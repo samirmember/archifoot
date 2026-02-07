@@ -1,10 +1,11 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
+import { FlagComponent } from 'src/app/layouts/flag/flag.component';
 import { MatchResult } from 'src/app/services/result.service';
 
 @Component({
   selector: 'app-result',
-  imports: [DatePipe],
+  imports: [FlagComponent, DatePipe],
   templateUrl: './result.component.html',
   styleUrl: './result.component.scss',
 })
