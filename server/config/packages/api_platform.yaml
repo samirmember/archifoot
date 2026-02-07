@@ -12,6 +12,7 @@ api_platform:
         route_prefix: "/api"
         pagination_enabled: true
         pagination_client_enabled: true
+        pagination_client_items_per_page: true
         pagination_items_per_page: "%env(int:API_PAGINATION_ITEMS_PER_PAGE)%"
     collection:
         pagination:
