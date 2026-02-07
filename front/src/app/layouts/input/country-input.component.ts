@@ -1,4 +1,4 @@
-import { Component, inject, input, viewChild } from '@angular/core';
+import { Component, inject, input, output, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AutoComplete, AutoCompleteModule } from 'primeng/autocomplete';
@@ -20,8 +20,15 @@ export class CountryInputComponent {
   countryService = inject(CountryService);
   autoComplete = viewChild<AutoComplete>(AutoComplete);
   selectedCountry: Country | null = null;
+  selectedCountryChange = output<Country | null>();
   suggestions: Country[] = [];
   loading = false;
+
+
+  onSelectedCountryChange(country: Country | null): void {
+    this.selectedCountry = country;
+    this.selectedCountryChange.emit(country);
+  }
 
   search(event: { query: string }): void {
     const q = (event.query ?? '').trim();

@@ -8,6 +8,7 @@ export interface ResultFilters {
   teamName?: string;
   teamIso3?: string;
   competitionName?: string;
+  competitionId?: number;
 }
 
 export interface MatchResult {
@@ -69,7 +70,8 @@ export class ResultService {
 
   private buildFixtureFilters(filters?: ResultFilters): Record<string, string> {
     const params: Record<string, string> = {
-      pagination: 'false',
+      page: '1',
+      itemsPerPage: '20',
       'order[matchDate]': 'desc',
     };
 
@@ -83,6 +85,10 @@ export class ResultService {
 
     if (filters.competitionName) {
       params['competitions.name'] = filters.competitionName;
+    }
+
+    if (filters.competitionId) {
+      params['competitions.id'] = String(filters.competitionId);
     }
 
     if (filters.teamName) {

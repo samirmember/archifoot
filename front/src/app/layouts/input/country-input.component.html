@@ -1,5 +1,6 @@
 <p-autoComplete
   [(ngModel)]="selectedCountry"
+  (ngModelChange)="onSelectedCountryChange($event)"
   [suggestions]="suggestions"
   (completeMethod)="search($event)"
   [minLength]="3"

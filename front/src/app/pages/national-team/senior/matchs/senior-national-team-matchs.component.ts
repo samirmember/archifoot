@@ -1,13 +1,13 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { AutoCompleteModule } from 'primeng/autocomplete';
-import { catchError, of } from 'rxjs';
+import { BehaviorSubject, catchError, of, switchMap } from 'rxjs';
 import { Country } from '../../../../models/country.model';
 import { NumberService } from '../../../../../shared/number.service';
 import { CountryInputComponent } from 'src/app/layouts/input/country-input.component';
 import { CompetitionService } from 'src/app/services/competition.service';
-import { MatchResult, ResultService } from 'src/app/services/result.service';
+import { ResultFilters, ResultService } from 'src/app/services/result.service';
 
 @Component({
   selector: 'app-senior-national-team-matchs',
@@ -24,6 +24,8 @@ export class SeniorNationalTeamMatchsComponent {
   selectedYear: number | null = null;
   selectedCompetitionId: number | null = null;
 
+  private readonly filters$ = new BehaviorSubject<ResultFilters>({});
+
   years = this.numberService.generateAllYears();
   competitions = toSignal(
     this.competitionService.getCompetitions().pipe(catchError(() => of([]))),
@@ -31,40 +33,45 @@ export class SeniorNationalTeamMatchsComponent {
       initialValue: [],
     },
   );
-  results = toSignal(this.resultService.getResults().pipe(catchError(() => of([]))), {
-    initialValue: [],
-  });
+  results = toSignal(
+    this.filters$.pipe(
+      switchMap((filters) => this.resultService.getResults(filters).pipe(catchError(() => of([])))),
+    ),
+    {
+      initialValue: [],
+    },
+  );
 
-  filteredResults = computed(() => {
-    const currentResults = this.results();
-
-    return currentResults.filter((result: MatchResult) => {
-      const yearIsMatching = this.selectedYear
-        ? this.getYearFromDate(result.date) === this.selectedYear
-        : true;
-
-      const competitionIsMatching = this.selectedCompetitionId
-        ? this.extractCompetitionIdFromResult(result, this.selectedCompetitionId)
-        : true;
-
-      return yearIsMatching && competitionIsMatching;
-    });
-  });
-
-  private getYearFromDate(date: string | null): number | null {
-    if (!date) {
-      return null;
-    }
-
-    const parsedDate = new Date(date);
-    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate.getFullYear();
+  onCountryChange(country: Country | null): void {
+    this.selectedCountry = country;
+    this.refreshResults();
   }
 
-  private extractCompetitionIdFromResult(
-    result: MatchResult,
-    selectedCompetitionId: number,
-  ): boolean {
-    const competition = this.competitions().find((item) => item.name === result.competition);
-    return competition?.id === selectedCompetitionId;
+  onYearChange(year: number | null): void {
+    this.selectedYear = year;
+    this.refreshResults();
+  }
+
+  onCompetitionChange(competitionId: number | null): void {
+    this.selectedCompetitionId = competitionId;
+    this.refreshResults();
+  }
+
+  private refreshResults(): void {
+    const filters: ResultFilters = {};
+
+    if (this.selectedCountry?.iso3) {
+      filters.teamIso3 = this.selectedCountry.iso3;
+    }
+
+    if (this.selectedYear) {
+      filters.seasonName = String(this.selectedYear);
+    }
+
+    if (this.selectedCompetitionId) {
+      filters.competitionId = this.selectedCompetitionId;
+    }
+
+    this.filters$.next(filters);
   }
 }
