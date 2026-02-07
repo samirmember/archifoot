@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use App\Filter\FixtureParticipantCountryIso3OrFilter;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -31,9 +32,12 @@ use Symfony\Component\Serializer\Annotation\SerializedName;
     'competitions.id' => 'exact',
     'participants.team.displayName' => 'partial',
     'participants.team.nationalTeam.name' => 'partial',
-    'participants.team.nationalTeam.country.iso3' => 'exact',
     'participants.team.club.name' => 'partial',
-    'participants.team.club.country.iso3' => 'exact',
+])]
+#[ApiFilter(FixtureParticipantCountryIso3OrFilter::class, properties: [
+    'participants.team.country.iso3',
+    'participants.team.nationalTeam.country.iso3',
+    'participants.team.club.country.iso3',
 ])]
 #[ApiFilter(OrderFilter::class, properties: ['matchDate' => 'DESC'])]
 class Fixture
