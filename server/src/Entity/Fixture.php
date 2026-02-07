@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -27,12 +28,14 @@ use Symfony\Component\Serializer\Annotation\SerializedName;
 #[ApiFilter(SearchFilter::class, properties: [
     'season.name' => 'exact',
     'competitions.name' => 'partial',
+    'competitions.id' => 'exact',
     'participants.team.displayName' => 'partial',
     'participants.team.nationalTeam.name' => 'partial',
     'participants.team.nationalTeam.country.iso3' => 'exact',
     'participants.team.club.name' => 'partial',
     'participants.team.club.country.iso3' => 'exact',
 ])]
+#[ApiFilter(OrderFilter::class, properties: ['matchDate' => 'DESC'])]
 class Fixture
 {
     #[ORM\Id]
