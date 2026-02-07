@@ -9,25 +9,21 @@
           <source
             type="image/webp"
             [srcset]="
-              'https://flagcdn.com/w80/' +
-              iso2A +
-              '.webp, https://flagcdn.com/w160/' +
-              iso2A +
+              'https://flagcdn.com/w80/' + iso2A() +
+              '.webp, https://flagcdn.com/w160/' + iso2A() +
               '.webp 2x'
             "
           />
           <source
             type="image/png"
             [srcset]="
-              'https://flagcdn.com/w80/' +
-              iso2A +
-              '.png, https://flagcdn.com/w160/' +
-              iso2A +
+              'https://flagcdn.com/w80/' + iso2A() +
+              '.png, https://flagcdn.com/w160/' + iso2A() +
               '.png 2x'
             "
           />
           <img
-            [src]="'https://flagcdn.com/w80/' + iso2A + '.png'"
+            [src]="'https://flagcdn.com/w80/' + iso2A() + '.png'"
             width="60"
             [alt]="result().countryA"
           />
@@ -44,25 +40,21 @@
           <source
             type="image/webp"
             [srcset]="
-              'https://flagcdn.com/w80/' +
-              iso2B +
-              '.webp, https://flagcdn.com/w160/' +
-              iso2B +
+              'https://flagcdn.com/w80/' + iso2B() +
+              '.webp, https://flagcdn.com/w160/' + iso2B() +
               '.webp 2x'
             "
           />
           <source
             type="image/png"
             [srcset]="
-              'https://flagcdn.com/w80/' +
-              iso2B +
-              '.png, https://flagcdn.com/w160/' +
-              iso2B +
+              'https://flagcdn.com/w80/' + iso2B() +
+              '.png, https://flagcdn.com/w160/' + iso2B() +
               '.png 2x'
             "
           />
           <img
-            [src]="'https://flagcdn.com/w80/' + iso2B + '.png'"
+            [src]="'https://flagcdn.com/w80/' + iso2B() + '.png'"
             width="60"
             height="40"
             [alt]="result().countryB"

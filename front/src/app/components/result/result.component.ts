@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, input, OnInit } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { MatchResult } from 'src/app/services/result.service';
 
 @Component({
@@ -8,13 +8,8 @@ import { MatchResult } from 'src/app/services/result.service';
   templateUrl: './result.component.html',
   styleUrl: './result.component.scss',
 })
-export class ResultComponent implements OnInit {
+export class ResultComponent {
   result = input.required<MatchResult>();
-  iso2A: string | null | undefined;
-  iso2B: string | null | undefined;
-
-  ngOnInit(): void {
-    this.iso2A = this.result().countryCodeA?.toLowerCase();
-    this.iso2B = this.result().countryCodeB?.toLowerCase();
-  }
+  readonly iso2A = computed(() => this.result().countryCodeA?.toLowerCase() ?? '');
+  readonly iso2B = computed(() => this.result().countryCodeB?.toLowerCase() ?? '');
 }
