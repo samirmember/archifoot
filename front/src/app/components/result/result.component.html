@@ -1,0 +1,81 @@
+<a href="#" class="card mb-4 lift result-container">
+  <div class="card-body p-5">
+    <span class="row justify-content-between">
+      <div class="w-100 text-center date">
+        {{ result().date | date: 'd MMM y' }}
+      </div>
+      <div class="col d-flex flex-row-reverse bd-highlight">
+        <picture class="country-flag">
+          <source
+            type="image/webp"
+            [srcset]="
+              'https://flagcdn.com/w80/' +
+              iso2A +
+              '.webp, https://flagcdn.com/w160/' +
+              iso2A +
+              '.webp 2x'
+            "
+          />
+          <source
+            type="image/png"
+            [srcset]="
+              'https://flagcdn.com/w80/' +
+              iso2A +
+              '.png, https://flagcdn.com/w160/' +
+              iso2A +
+              '.png 2x'
+            "
+          />
+          <img
+            [src]="'https://flagcdn.com/w80/' + iso2A + '.png'"
+            width="60"
+            [alt]="result().countryA"
+          />
+        </picture>
+        <span class="country-name">{{ result().countryA }}</span>
+      </div>
+      <div class="col align-items-center text-center">
+        <span class="badge badge-lg bg-primary rounded-pill result-score"
+          >{{ result().scoreA }} - {{ result().scoreB }}</span
+        >
+      </div>
+      <div class="col d-flex bd-highlight">
+        <picture class="country-flag">
+          <source
+            type="image/webp"
+            [srcset]="
+              'https://flagcdn.com/w80/' +
+              iso2B +
+              '.webp, https://flagcdn.com/w160/' +
+              iso2B +
+              '.webp 2x'
+            "
+          />
+          <source
+            type="image/png"
+            [srcset]="
+              'https://flagcdn.com/w80/' +
+              iso2B +
+              '.png, https://flagcdn.com/w160/' +
+              iso2B +
+              '.png 2x'
+            "
+          />
+          <img
+            [src]="'https://flagcdn.com/w80/' + iso2B + '.png'"
+            width="60"
+            height="40"
+            [alt]="result().countryB"
+          />
+        </picture>
+        <span class="country-name">{{ result().countryB }}</span>
+      </div>
+      <div class="w-100 mt-2 text-center small text-muted">
+        {{ result().competition ?? 'Compétition inconnue' }} ·
+        {{ result().edition ? 'Édition du ' + result().edition : null }} ·
+        {{ result().stage ?? 'Étape inconnue' }}
+      </div>
+    </span>
+  </div>
+  <!-- /.card-body -->
+</a>

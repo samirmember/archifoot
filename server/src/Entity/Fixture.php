@@ -499,7 +499,7 @@ class Fixture
         return [
             'id' => $team->getId(),
             'name' => $name,
-            'iso2' => $country?->getIso3(),
+            'iso2' => $country?->getIso2(),
         ];
     }
 

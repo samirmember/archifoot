@@ -25,7 +25,13 @@
             <div class="col-md-4 mb-3">
               <div class="form-select-wrapper">
                 <label for="year" class="form-label">Année</label>
-                <select class="form-select" id="year" [(ngModel)]="selectedYear" (ngModelChange)="onYearChange($event)" name="year">
+                <select
+                  class="form-select"
+                  id="year"
+                  [(ngModel)]="selectedYear"
+                  (ngModelChange)="onYearChange($event)"
+                  name="year"
+                >
                   <option [ngValue]="null">Toutes les années</option>
                   @for (year of years; track $index) {
                     <option [ngValue]="year">{{ year }}</option>
@@ -37,7 +43,13 @@
             <div class="col-md-4 mb-3">
               <div class="form-select-wrapper">
                 <label for="match-type" class="form-label">Type du match</label>
-                <select class="form-select" id="match-type" [(ngModel)]="selectedCompetitionId" (ngModelChange)="onCompetitionChange($event)" name="competition">
+                <select
+                  class="form-select"
+                  id="match-type"
+                  [(ngModel)]="selectedCompetitionId"
+                  (ngModelChange)="onCompetitionChange($event)"
+                  name="competition"
+                >
                   <option [ngValue]="null">Toutes les compétitions</option>
                   @for (competition of competitions(); track competition.id) {
                     <option [ngValue]="competition.id">{{ competition.name }}</option>
@@ -47,32 +59,7 @@
             </div>
           </div>
         </form>
-
-        <div class="job-list mb-10">
-          <h3 class="mb-4">Résultats</h3>
-
-          @if (results().length === 0) {
-            <p class="text-muted">Aucun résultat trouvé avec les filtres sélectionnés.</p>
-          }
-
-          @for (result of results(); track result.fixtureId ?? $index) {
-            <article class="card mb-4">
-              <div class="card-body p-4">
-                <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
-                  <strong>
-                    #{{ result.externalMatchNo ?? 'N/A' }} - {{ result.countryA }} {{ result.scoreA ?? '-' }} -
-                    {{ result.scoreB ?? '-' }} {{ result.countryB }}
-                  </strong>
-                  <span>{{ result.date ?? 'Date inconnue' }}</span>
-                </div>
-                <div class="small text-muted">
-                  {{ result.competition ?? 'Compétition inconnue' }} · {{ result.edition ?? 'Édition inconnue' }} ·
-                  {{ result.stage ?? 'Étape inconnue' }} · Saison: {{ result.season ?? 'N/A' }}
-                </div>
-              </div>
-            </article>
-          }
-        </div>
+        <app-results-list [list]="results()" />
       </div>
     </div>
   </div>

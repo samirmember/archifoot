@@ -16,6 +16,8 @@ export interface MatchResult {
   externalMatchNo: number | null;
   countryA: string;
   countryB: string;
+  countryCodeA: string | null | undefined;
+  countryCodeB: string | null | undefined;
   edition: string | null;
   stage: string | null;
   competition: string | null;
@@ -52,6 +54,8 @@ export class ResultService {
       fixtureId: fixture.id ?? null,
       externalMatchNo: fixture.externalMatchNo ?? null,
       countryA: fixture.teamA?.name ?? 'Équipe A',
+      countryCodeA: fixture.teamA?.iso2,
+      countryCodeB: fixture.teamB?.iso2,
       countryB: fixture.teamB?.name ?? 'Équipe B',
       edition: firstStage?.edition?.name ?? null,
       stage: firstStage?.name ?? null,

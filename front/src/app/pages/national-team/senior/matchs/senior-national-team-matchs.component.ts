@@ -8,10 +8,11 @@ import { NumberService } from '../../../../../shared/number.service';
 import { CountryInputComponent } from 'src/app/layouts/input/country-input.component';
 import { CompetitionService } from 'src/app/services/competition.service';
 import { ResultFilters, ResultService } from 'src/app/services/result.service';
+import { ResultsListComponent } from 'src/app/components/results-list/results-list.component';
 
 @Component({
   selector: 'app-senior-national-team-matchs',
-  imports: [AutoCompleteModule, FormsModule, CountryInputComponent],
+  imports: [AutoCompleteModule, FormsModule, CountryInputComponent, ResultsListComponent],
   templateUrl: './senior-national-team-matchs.component.html',
   styleUrl: './senior-national-team-matchs.component.scss',
 })
