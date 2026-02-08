@@ -12,7 +12,6 @@ export class FlagComponent {
   position = input.required<'A' | 'B'>();
   readonly flagUrls = computed<string[]>(() => {
     const iso2 = this.iso2().toLowerCase() ?? '';
-    console.log(iso2);
     if (iso2 === 'su') {
       return ['assets/img/urss-flag.png', 'assets/img/urss-flag.png'];
     }

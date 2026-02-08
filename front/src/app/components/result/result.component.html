@@ -22,6 +22,12 @@
         [iso2]="iso2B()"
         [classList]="`col d-flex bd-highlight`"
       />
+      @if (result().notes) {
+        <a href="#" data-bs-toggle="tooltip" data-bs-placement="top" [title]="result().notes"
+          ><i class="uil uil-comment-alt-exclamation"></i
+        ></a>
+      }
+
       <div class="mt-2 text-center small text-muted">
         <div class="w-100">{{ result().competitionLabel }}</div>
         <div class="w-100">
