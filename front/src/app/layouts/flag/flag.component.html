@@ -1,6 +1,6 @@
 <picture class="country-flag">
-  <source type="image/webp" [srcset]="flagUrls()[0] + '.webp, ' + flagUrls()[1] + '.webp 2x'" />
-  <source type="image/png" [srcset]="flagUrls()[0] + '.png, ' + flagUrls()[1] + '.png 2x'" />
+  <source type="image/webp" [srcset]="flagUrls()[0] + ', ' + flagUrls()[1] + ' 2x'" />
+  <!-- <source type="image/png" [srcset]="flagUrls()[0] + '.png, ' + flagUrls()[1] + '.png 2x'" /> -->
   <img [src]="flagUrls()[0] + '.png'" width="60" height="40" [alt]="countryName()" />
 </picture>
 <span class="country-name">{{ countryName() }}</span>

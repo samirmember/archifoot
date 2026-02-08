@@ -61,7 +61,9 @@ export class SeniorNationalTeamMatchsComponent {
           this.results.update((currentResults) =>
             page === 1 ? nextResults : [...currentResults, ...nextResults],
           );
-          this.hasMoreResults.set(nextResults.length === SeniorNationalTeamMatchsComponent.PAGE_SIZE);
+          this.hasMoreResults.set(
+            nextResults.length === SeniorNationalTeamMatchsComponent.PAGE_SIZE,
+          );
           this.isLoading.set(false);
         });
 
@@ -71,6 +73,7 @@ export class SeniorNationalTeamMatchsComponent {
 
   onCountryChange(country: Country | null): void {
     this.selectedCountry = country;
+    console.log(country);
     this.refreshResults();
   }
 

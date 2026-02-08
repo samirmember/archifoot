@@ -24,7 +24,6 @@ export class CountryInputComponent {
   suggestions: Country[] = [];
   loading = false;
 
-
   onSelectedCountryChange(country: Country | null): void {
     this.selectedCountry = country;
     this.selectedCountryChange.emit(country);
@@ -61,6 +60,10 @@ export class CountryInputComponent {
 
   flagUrl(iso2?: string): string | null {
     if (!iso2) return null;
-    return `https://flagcdn.com/24x18/${iso2.toLowerCase()}.png`;
+    iso2 = iso2.toLowerCase();
+    if (iso2 === 'su') {
+      return `assets/img/urss-flag.png`;
+    }
+    return `https://flagcdn.com/24x18/${iso2}.png`;
   }
 }
