@@ -2,6 +2,8 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\City;
+use App\Entity\Country;
 use App\Entity\Stadium;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
@@ -21,8 +23,10 @@ class StadiumCrudController extends AbstractCrudController
         return [
             IdField::new('id')->hideOnForm(),
             TextField::new('name'),
-            AssociationField::new('city', 'city_id'),
-            AssociationField::new('country', 'country_id'),
+            AssociationField::new('city', 'city_id')
+                ->setFormTypeOption('choice_label', static fn (City $city): string => $city->getName() ?: sprintf('City #%d', $city->getId() ?? 0)),
+            AssociationField::new('country', 'country_id')
+                ->setFormTypeOption('choice_label', static fn (Country $country): string => $country->getName() ?: sprintf('Country #%d', $country->getId() ?? 0)),
             IntegerField::new('capacity'),
         ];
     }

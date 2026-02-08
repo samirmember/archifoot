@@ -5,10 +5,10 @@ docker compose exec -ti server php -d memory_limit=-1 bin/console app:import:en:
 
 docker compose exec -ti server bin/console cache:clear
 
+docker compose exec -ti server php bin/console make:user
 docker compose exec -ti server bin/console make:migration
 docker compose exec -ti server bin/console doctrine:migrations:migrate
 docker compose exec -ti server php bin/console app:create-admin samirmember@gmail.com "samir"
-docker compose exec -ti server php bin/console make:user
 
 
 # Rebuild server
