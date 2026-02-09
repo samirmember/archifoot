@@ -1,9 +1,25 @@
 .result-container {
+  position: relative;
   .date {
     font-size: 13px;
     margin-bottom: 10px;
   }
+  .result-score {
+    font-size: 20px;
+  }
+  .note-tooltip {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    .p-tooltip-arrow {
+      border-left-color: #111827 !important; /* si position left */
+    }
+  }
 }
-.result-score {
-  font-size: 20px;
+.tooltip-container,
+.tooltip-container h3 {
+  color: white;
 }

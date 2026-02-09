@@ -3,4 +3,9 @@
   <!-- <source type="image/png" [srcset]="flagUrls()[0] + '.png, ' + flagUrls()[1] + '.png 2x'" /> -->
   <img [src]="flagUrls()[0] + '.png'" width="60" height="40" [alt]="countryName()" />
 </picture>
-<span class="country-name">{{ countryName() }}</span>
+<div class="country-name" [class.mt--5]="category() !== 'Sénior'">
+  <span>{{ countryName() }}</span>
+  @if (category() !== 'Sénior') {
+    <div class="small text-muted text-center">{{ category() }}</div>
+  }
+</div>

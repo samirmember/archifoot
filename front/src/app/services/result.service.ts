@@ -25,12 +25,15 @@ export interface MatchResult {
   competitions?: ApiFixtureStageCompetition[];
   scoreA: number | null;
   scoreB: number | null;
+  categoryA: string;
+  categoryB: string;
   date: string | null;
   season: string | null;
   isOfficial: boolean | null;
   played: boolean | null;
   city: string | null;
   stadium: string | null;
+  countryStadiumName: string | null;
   notes: string | null;
   competitionLabel?: string;
 }
@@ -73,8 +76,11 @@ export class ResultService {
       played: fixture.played ?? null,
       city: fixture.cityName ?? null,
       stadium: fixture.stadiumName ?? null,
+      countryStadiumName: fixture.countryStadiumName,
       notes: fixture.notes ?? null,
       competitionLabel: this.getCompetitionLabels(fixture).join(' | '),
+      categoryA: fixture.categories[0].name ?? '',
+      categoryB: fixture.categories[1].name ?? '',
     };
   }
 

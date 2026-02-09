@@ -533,4 +533,18 @@ class Fixture
 
         return null;
     }
+    
+    #[Groups(['fixture:read'])]
+    #[SerializedName('categories')]
+    public function getParticipantsCategories()
+    {
+        return $this->participants
+            ->map(static function (FixtureParticipant $participant): array {
+                return [
+                    'id' => $participant->getTeam()->getNationalTeam()->getCategory()->getId(),
+                    'name' => $participant->getTeam()->getNationalTeam()->getCategory()->getName()
+                ];
+            })
+            ->getValues();
+    }
 }

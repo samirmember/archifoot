@@ -10,6 +10,7 @@ export class FlagComponent {
   countryName = input.required<string>();
   iso2 = input.required<string>();
   position = input.required<'A' | 'B'>();
+  category = input.required<string>();
   readonly flagUrls = computed<string[]>(() => {
     const iso2 = this.iso2().toLowerCase() ?? '';
     if (iso2 === 'su') {

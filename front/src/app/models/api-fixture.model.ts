@@ -9,6 +9,11 @@ export interface ApiFixtureStageCompetition {
   name: string | null;
 }
 
+export interface ApiCategory {
+  id: number | null;
+  name: string | null;
+}
+
 export interface ApiFixtureStageEdition {
   id: number | null;
   name: string | null;
@@ -34,8 +39,9 @@ export interface ApiFixture {
   teamB?: ApiFixtureTeam | null;
   scoreA?: number | null;
   scoreB?: number | null;
-  countryStadiumName?: string | null;
+  countryStadiumName: string | null;
   cityName?: string | null;
   stadiumName?: string | null;
   competitions?: ApiFixtureStageCompetition[];
+  categories: ApiCategory[];
 }

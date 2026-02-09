@@ -9,6 +9,7 @@
         [position]="'A'"
         [countryName]="result().countryA"
         [iso2]="iso2A()"
+        [category]="result().categoryA"
         [classList]="`col d-flex bd-highlight flex-row-reverse`"
       />
       <div class="col align-items-center text-center">
@@ -20,19 +21,36 @@
         [position]="'B'"
         [countryName]="result().countryB"
         [iso2]="iso2B()"
+        [category]="result().categoryB"
         [classList]="`col d-flex bd-highlight`"
       />
-      @if (result().notes) {
-        <a href="#" data-bs-toggle="tooltip" data-bs-placement="top" [title]="result().notes"
-          ><i class="uil uil-comment-alt-exclamation"></i
-        ></a>
-      }
-
       <div class="mt-2 text-center small text-muted">
         <div class="w-100">{{ result().competitionLabel }}</div>
         <div class="w-100">
-          <i class="uil uil-location-pin-alt"></i> {{ result().stadium }}, {{ result().city }}
+          <i class="uil uil-location-pin-alt"></i> {{ result().stadium }}. {{ result().city }},
+          {{ result().countryStadiumName }}.
         </div>
+        @if (result().notes) {
+          <a
+            href="#"
+            class="note-tooltip"
+            [aria-label]="result().notes"
+            [pTooltip]="tooltipContent"
+            tooltipEvent="both"
+            tooltipPosition="bottom"
+            tooltipPosition="top"
+            [appendTo]="'body'"
+            [showDelay]="150"
+            (click)="$event.preventDefault()"
+            ><i class="uil uil-comment-alt-exclamation"></i
+          ></a>
+          <ng-template #tooltipContent>
+            <div class="flex items-center tooltip-container">
+              <h3><i class="uil uil-exclamation-triangle"></i> Notes</h3>
+              <p>{{ result().notes }}</p>
+            </div>
+          </ng-template>
+        }
       </div>
     </span>
   </div>
