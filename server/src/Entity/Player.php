@@ -2,11 +2,12 @@
 
 namespace App\Entity;
 
+use App\Repository\PlayerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: PlayerRepository::class)]
 #[ORM\Table(name: 'player')]
 class Player
 {
@@ -26,6 +27,9 @@ class Player
     #[ORM\OneToMany(mappedBy: 'player', targetEntity: PlayerTeamMembership::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
     #[ORM\OrderBy(['fromDate' => 'DESC'])]
     private Collection $clubMemberships;
+
+    #[ORM\Column(name: 'photo_url', length: 500, nullable: true)]
+    private ?string $photoUrl = null;
 
     public function __construct()
     {
@@ -64,6 +68,18 @@ class Player
     public function getClubMemberships(): Collection
     {
         return $this->clubMemberships;
+    }
+
+    public function getPhotoUrl(): ?string
+    {
+        return $this->photoUrl;
+    }
+
+    public function setPhotoUrl(?string $photoUrl): static
+    {
+        $this->photoUrl = $photoUrl;
+
+        return $this;
     }
 
     public function addClubMembership(PlayerTeamMembership $membership): self
