@@ -111,12 +111,12 @@ class PlayerRepository extends ServiceEntityRepository
                 'p.id AS id',
                 'person.fullName AS fullName',
                 'p.photoUrl AS photoUrl',
-                'position.label AS position',
-                'nationality.name AS nationality',
-                'person.birthDate AS birthDate',
-                'birthCity.name AS birthCity',
-                'birthRegion.name AS birthRegion',
-                'birthCountry.name AS birthCountry'
+                'position.label AS positionName',
+                'nationality.name AS nationalityName',
+                'person.birthDate AS birthDateName',
+                'birthCity.name AS birthCityName',
+                'birthRegion.name AS birthRegionName',
+                'birthCountry.name AS birthCountrNamey'
             )
             ->leftJoin('p.person', 'person')
             ->leftJoin('p.primaryPosition', 'position')
@@ -228,9 +228,9 @@ class PlayerRepository extends ServiceEntityRepository
             ->getSingleResult();
 
         $birthChunks = array_filter([
-            $detail['birthCity'] ?? null,
-            $detail['birthRegion'] ?? null,
-            $detail['birthCountry'] ?? null,
+            $detail['birthCityName'] ?? null,
+            $detail['birthRegionName'] ?? null,
+            $detail['birthCountryName'] ?? null,
         ]);
 
         return [
@@ -238,9 +238,9 @@ class PlayerRepository extends ServiceEntityRepository
             'slug' => $slug,
             'fullName' => $detail['fullName'],
             'photoUrl' => $detail['photoUrl'],
-            'position' => $detail['position'],
-            'nationality' => $detail['nationality'],
-            'birthDateLabel' => $this->formatDate($detail['birthDate'] ?? null),
+            'position' => $detail['positionName'],
+            'nationality' => $detail['nationalityName'],
+            'birthDateLabel' => $this->formatDate($detail['birthDateName'] ?? null),
             'birthPlace' => count($birthChunks) ? implode(', ', $birthChunks) : null,
             'currentClub' => $currentClub,
             'shirtNumber' => isset($lineupStats['shirtNumber']) && $lineupStats['shirtNumber'] !== null
