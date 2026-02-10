@@ -1,5 +1,6 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import {
   PlayerService,
@@ -9,7 +10,7 @@ import {
 
 @Component({
   selector: 'app-senior-national-team-players',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './senior-national-team-players.component.html',
   styleUrl: './senior-national-team-players.component.scss',
 })
@@ -81,6 +82,18 @@ export class SeniorNationalTeamPlayersComponent {
       .slice(0, 2)
       .map((part) => part.charAt(0).toUpperCase())
       .join('');
+  }
+
+  getPlayerPath(fullName: string): string[] {
+    const slug = fullName
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-');
+
+    return ['/equipe-nationale/senior/joueurs', slug];
   }
 
   private randomizePlayers(players: SeniorPlayer[]): SeniorPlayer[] {
