@@ -24,11 +24,26 @@ class PlayerRepository extends ServiceEntityRepository
         $baseQb = $this->createQueryBuilder('p')
             ->select('DISTINCT p.id AS id, person.fullName AS fullName, p.photoUrl AS photoUrl')
             ->innerJoin('p.person', 'person')
-            ->innerJoin('App\\Entity\\PlayerNationalStats', 'stats', 'WITH', 'stats.player = p')
-            ->innerJoin('stats.team', 'team')
+            ->innerJoin('App\\Entity\\PlayerTeamMembership', 'membership', 'WITH', 'membership.player = p')
+            ->innerJoin('membership.team', 'team')
             ->innerJoin('team.nationalTeam', 'nationalTeam')
             ->innerJoin('nationalTeam.country', 'country')
             ->where('LOWER(country.name) IN (:algeriaNames) OR UPPER(country.iso3) = :algeriaIso3')
+            ->andWhere(
+                'NOT EXISTS (
+                    SELECT 1 FROM App\\Entity\\PlayerTeamMembership newerMembership
+                    WHERE newerMembership.player = p
+                    AND (
+                        COALESCE(newerMembership.fromDate, newerMembership.toDate) > COALESCE(membership.fromDate, membership.toDate)
+                        OR (
+                            COALESCE(newerMembership.fromDate, newerMembership.toDate) = COALESCE(membership.fromDate, membership.toDate)
+                            AND newerMembership.id > membership.id
+                        )
+                    )
+                )'
+            )
+            ->andWhere('UPPER(team.teamType) = :teamTypeNational')
+            ->setParameter('teamTypeNational', 'NATIONAL')
             ->setParameter('algeriaNames', ['algérie', 'algerie'])
             ->setParameter('algeriaIso3', 'DZA');
 
