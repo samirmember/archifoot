@@ -18,9 +18,7 @@ use Symfony\Component\Serializer\Annotation\SerializedName;
 #[ORM\Entity]
 #[ORM\Table(name: 'fixture')]
 #[ORM\Index(name: 'ix_fixture_match_date', columns: ['match_date'])]
-#[ORM\Index(name: 'ix_fixture_competition_id', columns: ['competition_id'])]
 #[ORM\Index(name: 'ix_fixture_season_id', columns: ['season_id'])]
-#[ORM\Index(name: 'ix_fixture_edition_id', columns: ['edition_id'])]
 #[ApiResource(
     formats: ['json' => ['application/json']],
     normalizationContext: ['groups' => ['fixture:read']],

@@ -32,7 +32,7 @@ class FixtureParticipant
     #[Groups(['fixture_participant:read'])]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'participants')]
     #[ORM\JoinColumn(name: 'fixture_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
     private ?Fixture $fixture = null;
 
