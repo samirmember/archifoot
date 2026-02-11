@@ -75,6 +75,24 @@ class Player
         return $this->photoUrl;
     }
 
+    public function getPersonFullName(): ?string
+    {
+        return $this->person?->getFullName();
+    }
+
+    public function setPersonFullName(?string $fullName): static
+    {
+        if ($this->person === null && $fullName !== null && $fullName !== '') {
+            $this->person = new Person();
+        }
+
+        if ($this->person !== null) {
+            $this->person->setFullName($fullName);
+        }
+
+        return $this;
+    }
+
     public function setPhotoUrl(?string $photoUrl): static
     {
         $this->photoUrl = $photoUrl;

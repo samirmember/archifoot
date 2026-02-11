@@ -47,4 +47,13 @@ class Position
 
         return $this;
     }
+
+    public function __toString(): string
+    {
+        if ($this->code && $this->label) {
+            return sprintf('%s - %s', $this->code, $this->label);
+        }
+
+        return $this->label ?? $this->code ?? '';
+    }
 }
