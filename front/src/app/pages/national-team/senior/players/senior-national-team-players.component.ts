@@ -1,4 +1,5 @@
 import { Component, effect, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 import {
@@ -9,7 +10,7 @@ import {
 
 @Component({
   selector: 'app-senior-national-team-players',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './senior-national-team-players.component.html',
   styleUrl: './senior-national-team-players.component.scss',
 })
@@ -83,6 +84,10 @@ export class SeniorNationalTeamPlayersComponent {
       .join('');
   }
 
+
+  getPlayerSlug(fullName: string): string {
+    return this.playerService.toSlug(fullName);
+  }
   private randomizePlayers(players: SeniorPlayer[]): SeniorPlayer[] {
     const shuffled = [...players];
     for (let i = shuffled.length - 1; i > 0; i--) {

@@ -1,0 +1,198 @@
+.player-profile-page {
+  .card-like {
+    background: #fff;
+    border: 1px solid #e8edf3;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(35, 45, 66, 0.06);
+  }
+
+  .back-link {
+    display: inline-flex;
+    margin-bottom: 1rem;
+    color: #3559a8;
+    font-weight: 600;
+  }
+
+  .hero {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(200px, 280px) 1fr;
+    padding: 1rem;
+    margin-bottom: 1rem;
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .hero-photo {
+    min-height: 260px;
+    background: linear-gradient(135deg, #0f2a62, #2e5eb7);
+    border-radius: 14px;
+    overflow: hidden;
+
+    img,
+    .photo-placeholder {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+  }
+
+  .hero-content {
+    h1 {
+      margin-bottom: 1rem;
+      color: #162645;
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: #5e7398;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+  }
+
+  .identity-grid {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+
+    span {
+      padding: 0.65rem 0.75rem;
+      border-radius: 10px;
+      background: #f4f7fb;
+      color: #23314f;
+      font-weight: 500;
+      font-size: 0.92rem;
+    }
+  }
+
+  .stats-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    margin-bottom: 1rem;
+  }
+
+  .stat-card,
+  .section-block {
+    padding: 1rem;
+  }
+
+  h2 {
+    font-size: 1.05rem;
+    margin-bottom: 0.9rem;
+    color: #172b4d;
+  }
+
+  .big-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: 0.75rem;
+
+    div {
+      background: #f4f7fb;
+      border-radius: 12px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    strong {
+      font-size: 1.3rem;
+      color: #12274a;
+    }
+
+    span {
+      color: #64748f;
+      font-size: 0.88rem;
+    }
+  }
+
+  .timeline-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.65rem;
+
+    li {
+      display: grid;
+      gap: 0.15rem;
+      background: #f9fbff;
+      border: 1px solid #e8edf3;
+      border-radius: 12px;
+      padding: 0.75rem;
+    }
+
+    span {
+      color: #60708d;
+      font-size: 0.9rem;
+    }
+
+    em {
+      color: #246e4a;
+      font-style: normal;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+  }
+
+  .future-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .future-card {
+    border-radius: 12px;
+    padding: 0.85rem;
+    border: 1px solid #e8edf3;
+
+    h3 {
+      font-size: 0.95rem;
+      margin-bottom: 0.4rem;
+      color: #1d3158;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.86rem;
+      color: #5f6d88;
+    }
+
+    &.missing {
+      background: #fff9f0;
+      border-color: #f3dfb9;
+    }
+
+    &.ready {
+      background: #f2fbf6;
+      border-color: #cdebd7;
+    }
+  }
+
+  .state-box {
+    background: #fff;
+    border: 1px dashed #cad4e0;
+    border-radius: 12px;
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #5f6b85;
+  }
+
+  .muted {
+    color: #6a7894;
+    margin: 0;
+  }
+}
