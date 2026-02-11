@@ -1,0 +1,20 @@
+<div class="players-grid">
+  @for (player of players(); track player.id) {
+    <a
+      class="player-card"
+      [routerLink]="['/equipe-nationale/senior/joueurs', getPlayerSlug(player.fullName)]"
+    >
+      <div class="player-photo">
+        @if (player.photoUrl) {
+          <img [src]="player.photoUrl" [alt]="player.fullName" loading="lazy" />
+        } @else {
+          <div class="photo-placeholder">{{ getPlayerInitials(player.fullName) }}</div>
+        }
+      </div>
+      <div class="player-meta">
+        <h4>{{ player.fullName }}</h4>
+        <span>Équipe nationale d'Algérie</span>
+      </div>
+    </a>
+  }
+</div>

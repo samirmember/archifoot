@@ -127,7 +127,7 @@ export class PlayerService {
 
   public getSeniorNationalTeamPlayers(
     page: number,
-    perPage: 10 | 20,
+    perPage: 12 | 24,
     query = '',
   ): Observable<SeniorPlayersResponse> {
     return this.apiClient.get<SeniorPlayersResponse>('senior-national-team/players', {
@@ -138,7 +138,9 @@ export class PlayerService {
   }
 
   public getSeniorNationalTeamPlayerProfile(slug: string): Observable<PlayerProfile> {
-    return this.apiClient.get<PlayerProfile>(`senior-national-team/players/${encodeURIComponent(slug)}`);
+    return this.apiClient.get<PlayerProfile>(
+      `senior-national-team/players/${encodeURIComponent(slug)}`,
+    );
   }
 
   public toSlug(value: string): string {

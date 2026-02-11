@@ -1,5 +1,4 @@
 import { Component, effect, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 import {
@@ -7,10 +6,11 @@ import {
   SeniorPlayer,
   SeniorPlayersResponse,
 } from '../../../../services/player.service';
+import { PlayersListComponent } from '../../../../components/players-list/players-list.component';
 
 @Component({
   selector: 'app-senior-national-team-players',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, PlayersListComponent],
   templateUrl: './senior-national-team-players.component.html',
   styleUrl: './senior-national-team-players.component.scss',
 })
@@ -23,7 +23,7 @@ export class SeniorNationalTeamPlayersComponent {
   readonly totalPages = signal(1);
 
   readonly page = signal(1);
-  readonly perPage = signal<10 | 20>(10);
+  readonly perPage = signal<12 | 24>(12);
   readonly searchTerm = signal('');
 
   searchModel = '';
@@ -42,9 +42,7 @@ export class SeniorNationalTeamPlayersComponent {
 
       const subscription = this.playerService
         .getSeniorNationalTeamPlayers(currentPage, pageSize, query)
-        .pipe(
-          catchError(() => of(emptyResponse)),
-        )
+        .pipe(catchError(() => of(emptyResponse)))
         .subscribe((response: SeniorPlayersResponse) => {
           this.players.set(this.randomizePlayers(response.items));
           this.total.set(response.meta.total);
@@ -62,7 +60,7 @@ export class SeniorNationalTeamPlayersComponent {
   }
 
   onPerPageChange(value: string): void {
-    const nextPerPage: 10 | 20 = value === '20' ? 20 : 10;
+    const nextPerPage: 12 | 24 = value === '24' ? 24 : 12;
     this.perPage.set(nextPerPage);
     this.page.set(1);
   }
@@ -75,19 +73,6 @@ export class SeniorNationalTeamPlayersComponent {
     this.page.set(page);
   }
 
-  getPlayerInitials(fullName: string): string {
-    return fullName
-      .split(' ')
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part.charAt(0).toUpperCase())
-      .join('');
-  }
-
-
-  getPlayerSlug(fullName: string): string {
-    return this.playerService.toSlug(fullName);
-  }
   private randomizePlayers(players: SeniorPlayer[]): SeniorPlayer[] {
     const shuffled = [...players];
     for (let i = shuffled.length - 1; i > 0; i--) {

@@ -25,7 +25,12 @@
 
       <div class="per-page-box">
         <label for="per-page">Afficher</label>
-        <select id="per-page" class="form-select" [ngModel]="perPage()" (ngModelChange)="onPerPageChange($event)">
+        <select
+          id="per-page"
+          class="form-select"
+          [ngModel]="perPage()"
+          (ngModelChange)="onPerPageChange($event)"
+        >
           <option value="10">10 joueurs</option>
           <option value="20">20 joueurs</option>
         </select>
@@ -39,27 +44,16 @@
     } @else if (players().length === 0) {
       <div class="empty-state">Aucun joueur trouvé pour ce filtre.</div>
     } @else {
-      <div class="players-grid">
-        @for (player of players(); track player.id) {
-          <a class="player-card" [routerLink]="['/equipe-nationale/senior/joueurs', getPlayerSlug(player.fullName)]">
-            <div class="player-photo">
-              @if (player.photoUrl) {
-                <img [src]="player.photoUrl" [alt]="player.fullName" loading="lazy" />
-              } @else {
-                <div class="photo-placeholder">{{ getPlayerInitials(player.fullName) }}</div>
-              }
-            </div>
-            <div class="player-meta">
-              <h4>{{ player.fullName }}</h4>
-              <span>Équipe nationale d'Algérie</span>
-            </div>
-          </a>
-        }
-      </div>
+      <app-players-list [players]="players()" />
     }
 
     <div class="pagination" aria-label="Pagination des joueurs">
-      <button type="button" class="btn btn-soft-primary" [disabled]="page() === 1" (click)="goToPage(page() - 1)">
+      <button
+        type="button"
+        class="btn btn-soft-primary"
+        [disabled]="page() === 1"
+        (click)="goToPage(page() - 1)"
+      >
         Précédent
       </button>
       <span>Page {{ page() }} / {{ totalPages() }}</span>

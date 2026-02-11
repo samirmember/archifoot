@@ -1,0 +1,56 @@
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.player-card {
+  display: block;
+  text-decoration: none;
+  background: #fff;
+  border: 1px solid #e8edf3;
+  border-radius: 14px;
+  overflow: hidden;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(15, 36, 84, 0.1);
+  }
+}
+
+.player-photo {
+  height: 220px;
+  background: linear-gradient(135deg, #0f2a62, #2e5eb7);
+
+  img,
+  .photo-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+}
+
+.player-meta {
+  padding: 1rem;
+
+  h4 {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    color: #172b4d;
+  }
+
+  span {
+    color: #6c7a92;
+    font-size: 0.9rem;
+  }
+}
