@@ -1,0 +1,53 @@
+.result-skeleton-card {
+  .skeleton-line,
+  .skeleton-team,
+  .skeleton-score {
+    position: relative;
+    overflow: hidden;
+    background-color: #e8edf3;
+    border-radius: 999px;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+      animation: skeleton-shimmer 1.4s infinite;
+    }
+  }
+
+  .skeleton-date {
+    height: 14px;
+    width: 120px;
+  }
+
+  .skeleton-team {
+    height: 48px;
+    width: 180px;
+    border-radius: 12px;
+  }
+
+  .skeleton-score {
+    width: 120px;
+    height: 38px;
+    border-radius: 999px;
+  }
+
+  .skeleton-competition {
+    height: 12px;
+    width: min(320px, 70%);
+  }
+
+  .skeleton-location {
+    height: 12px;
+    width: min(520px, 90%);
+  }
+}
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+

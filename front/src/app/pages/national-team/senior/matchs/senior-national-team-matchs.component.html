@@ -59,7 +59,11 @@
             </div>
           </div>
         </form>
-        <app-results-list [list]="results()" />
+        @if (isLoading() && results().length === 0) {
+          <app-results-skeleton [count]="3" />
+        } @else {
+          <app-results-list [list]="results()" />
+        }
 
         @if (results().length > 0) {
           <div class="text-center">
