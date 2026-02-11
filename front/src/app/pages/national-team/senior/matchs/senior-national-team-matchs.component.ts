@@ -9,10 +9,17 @@ import { CountryInputComponent } from 'src/app/layouts/input/country-input.compo
 import { CompetitionService } from 'src/app/services/competition.service';
 import { MatchResult, ResultFilters, ResultService } from 'src/app/services/result.service';
 import { ResultsListComponent } from 'src/app/components/results-list/results-list.component';
+import { ResultsSkeletonComponent } from 'src/app/components/results-skeleton/results-skeleton.component';
 
 @Component({
   selector: 'app-senior-national-team-matchs',
-  imports: [AutoCompleteModule, FormsModule, CountryInputComponent, ResultsListComponent],
+  imports: [
+    AutoCompleteModule,
+    FormsModule,
+    CountryInputComponent,
+    ResultsListComponent,
+    ResultsSkeletonComponent,
+  ],
   templateUrl: './senior-national-team-matchs.component.html',
   styleUrl: './senior-national-team-matchs.component.scss',
 })
