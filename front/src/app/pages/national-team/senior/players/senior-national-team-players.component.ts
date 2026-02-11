@@ -1,4 +1,5 @@
 import { Component, effect, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
@@ -84,18 +85,10 @@ export class SeniorNationalTeamPlayersComponent {
       .join('');
   }
 
-  getPlayerPath(fullName: string): string[] {
-    const slug = fullName
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .trim()
-      .replace(/\s+/g, '-');
 
-    return ['/equipe-nationale/senior/joueurs', slug];
+  getPlayerSlug(fullName: string): string {
+    return this.playerService.toSlug(fullName);
   }
-
   private randomizePlayers(players: SeniorPlayer[]): SeniorPlayer[] {
     const shuffled = [...players];
     for (let i = shuffled.length - 1; i > 0; i--) {

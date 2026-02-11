@@ -41,7 +41,7 @@
     } @else {
       <div class="players-grid">
         @for (player of players(); track player.id) {
-          <a class="player-card" [routerLink]="getPlayerPath(player.fullName)">
+          <a class="player-card" [routerLink]="['/equipe-nationale/senior/joueurs', getPlayerSlug(player.fullName)]">
             <div class="player-photo">
               @if (player.photoUrl) {
                 <img [src]="player.photoUrl" [alt]="player.fullName" loading="lazy" />
