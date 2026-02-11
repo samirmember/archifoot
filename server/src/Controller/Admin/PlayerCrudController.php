@@ -35,7 +35,7 @@ class PlayerCrudController extends AbstractCrudController
         $photoField = ImageField::new('photoUrl', 'Photo')
             ->setBasePath('/uploads/players')
             ->setUploadDir('public/uploads/players')
-            ->setUploadedFileNamePattern('[year]/[month]/[day]/[uuid].[extension]')
+            ->setUploadedFileNamePattern('[uuid].[extension]')
             ->setRequired(false);
 
         return [
