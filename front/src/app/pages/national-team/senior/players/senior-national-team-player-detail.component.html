@@ -1,0 +1,113 @@
+<section class="wrapper bg-light player-detail-page">
+  <div class="container py-12 py-md-14">
+    <a class="back-link" routerLink="/equipe-nationale/senior/joueurs">← Retour à la liste des joueurs</a>
+
+    @if (isLoading()) {
+      <div class="state-card">Chargement de la fiche joueur...</div>
+    } @else if (!player()) {
+      <div class="state-card">Ce joueur est introuvable.</div>
+    } @else {
+      <div class="hero-card">
+        <div class="hero-avatar">
+          @if (player()!.photoUrl) {
+            <img [src]="player()!.photoUrl" [alt]="player()!.fullName" loading="lazy" />
+          } @else {
+            <div class="avatar-placeholder">{{ getPlayerInitials(player()!.fullName) }}</div>
+          }
+        </div>
+
+        <div class="hero-meta">
+          <p class="eyebrow">Équipe nationale senior</p>
+          <h1>{{ player()!.fullName }}</h1>
+          <p class="position">{{ player()!.profile.primaryPositionLabel || 'Poste non renseigné' }}</p>
+
+          <div class="chips">
+            <span>Nationalité: {{ player()!.profile.nationalityCountry || 'N/A' }}</span>
+            <span>Date de naissance: {{ player()!.profile.birthDate ? (player()!.profile.birthDate | date: 'dd/MM/yyyy') : 'N/A' }}</span>
+            <span>Lieu de naissance: {{ getBirthLocation(player()!) || 'N/A' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        @for (stat of keyStats(); track stat.label) {
+          <article class="stat-card">
+            <span>{{ stat.label }}</span>
+            <strong>{{ stat.value }}</strong>
+          </article>
+        }
+      </div>
+
+      <div class="content-grid">
+        <article class="panel">
+          <h2>Parcours en clubs & sélections</h2>
+          @if (player()!.timeline.memberships.length === 0) {
+            <p class="empty-line">Aucune donnée de parcours disponible.</p>
+          } @else {
+            <ul class="timeline-list">
+              @for (membership of player()!.timeline.memberships; track membership.id) {
+                <li>
+                  <div class="timeline-dot"></div>
+                  <div>
+                    <h3>{{ getMembershipLabel(membership) }}</h3>
+                    <p>
+                      {{ membership.fromDate ? (membership.fromDate | date: 'MM/yyyy') : 'Début inconnu' }}
+                      —
+                      {{ membership.toDate ? (membership.toDate | date: 'MM/yyyy') : (membership.isCurrent ? "Aujourd'hui" : 'Fin inconnue') }}
+                    </p>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </article>
+
+        <article class="panel">
+          <h2>Stats nationales détaillées</h2>
+          @if (player()!.nationalStats.records.length === 0) {
+            <p class="empty-line">Aucune ligne de stats nationales enregistrée.</p>
+          } @else {
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Équipe</th>
+                    <th>Sélections</th>
+                    <th>Buts</th>
+                    <th>Période</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (record of player()!.nationalStats.records; track record.id) {
+                    <tr>
+                      <td>{{ record.teamDisplayName || 'Algérie' }}</td>
+                      <td>{{ record.caps ?? 0 }}</td>
+                      <td>{{ record.goals ?? 0 }}</td>
+                      <td>
+                        {{ record.fromDate ? (record.fromDate | date: 'yyyy') : '?' }}
+                        -
+                        {{ record.toDate ? (record.toDate | date: 'yyyy') : '...' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </article>
+      </div>
+
+      <article class="panel placeholder-panel">
+        <h2>Bloc stats avancées (à dynamiser)</h2>
+        <div class="placeholder-grid">
+          @for (item of player()!.futureDataPlaceholders; track item.label) {
+            <div class="placeholder-item">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value ?? 'Donnée à connecter' }}</strong>
+            </div>
+          }
+        </div>
+      </article>
+    }
+  </div>
+</section>
