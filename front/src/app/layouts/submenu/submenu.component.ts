@@ -59,14 +59,16 @@ export class SubmenuComponent implements OnInit {
 
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        const lastSegment = event.url.split('/').pop();
+        const activeUrl = event.urlAfterRedirects;
         this.items.forEach((item) => {
           item.styleClass = item.styleClass?.replace(' active', '') || '';
         });
 
-        const activeItem = this.items.find((item) =>
-          item.routerLink?.toString().includes(lastSegment),
-        );
+        const activeItem = this.items.find((item) => {
+          const itemUrl = item.routerLink?.toString() ?? '';
+          return activeUrl.startsWith(itemUrl);
+        });
+
         if (activeItem) {
           activeItem.styleClass += ' active';
         }

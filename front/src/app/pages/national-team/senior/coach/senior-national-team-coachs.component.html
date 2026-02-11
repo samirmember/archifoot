@@ -1,1 +1,51 @@
-<p>senior-national-team-coachs works!</p>
+<section class="wrapper bg-light coachs-page">
+  <div class="container py-14 py-md-16">
+    <div class="row text-center mb-8">
+      <div class="col-xl-10 mx-auto">
+        <h2 class="fs-15 text-uppercase text-muted mb-3">Staff Algérie</h2>
+        <h3 class="display-4 mb-0 px-xxl-15">Les entraîneurs de l'équipe nationale senior</h3>
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="state-card">Chargement des entraîneurs...</div>
+    } @else if (coaches().length === 0) {
+      <div class="state-card">Aucun entraîneur à afficher.</div>
+    } @else {
+      <div class="coachs-grid">
+        @for (coach of coaches(); track coach.id) {
+          <a class="coach-card" [routerLink]="getCoachPath(coach.slug)">
+            <div class="coach-avatar">
+              @if (coach.portraitUrl) {
+                <img [src]="coach.portraitUrl" [alt]="coach.fullName" loading="lazy" />
+              } @else {
+                <div class="avatar-placeholder">{{ getCoachInitials(coach.fullName) }}</div>
+              }
+            </div>
+
+            <div class="coach-meta">
+              <h4>{{ coach.fullName }}</h4>
+              <p class="role">{{ coach.role }}</p>
+              <p class="subline">{{ coach.nationality }}</p>
+
+              <div class="mini-stats">
+                <div>
+                  <span>Matchs</span>
+                  <strong>{{ coach.highlights.matchCount }}</strong>
+                </div>
+                <div>
+                  <span>Victoires</span>
+                  <strong>{{ coach.highlights.wins }}</strong>
+                </div>
+                <div>
+                  <span>Win rate</span>
+                  <strong>{{ getWinRate(coach) }}%</strong>
+                </div>
+              </div>
+            </div>
+          </a>
+        }
+      </div>
+    }
+  </div>
+</section>
