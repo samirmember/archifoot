@@ -157,7 +157,9 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                 $this->importLineups($scoresheetId, $matchDate, $row);
 
                 // === Substitutions (chang1..5 etc) ===
-                $this->importSubstitutions($scoresheetId, $matchDate, $row);
+                // if (!in_array($row['A'], ['5', '11', '33', '50', '71', '84', '87', '91'])) {
+                    $this->importSubstitutions($scoresheetId, $matchDate, $row);
+                // }
 
                 // === Goals (but1..butN, but_local/but_visiteur) ===
                 $this->importGoals($fixtureId, $algeriaTeamId, $otherTeamId, $matchDate, $row);
@@ -363,27 +365,43 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
     {
         $substitutionCols = [
             'AK', 'AL', 'AM', 'AN', 'AO',
-            'AP', 'AQ', 'AR', 'AS', 'AT',
+            'AP', 'AQ', 'AR', 'AS',
         ];
         foreach ($substitutionCols as $colKey) {
             $val = $this->toStr($row[$colKey] ?? null);
-            if (!$val) continue;
-            $playerId = $this->ensurePlayerPerson($val);
-            $this->ensurePlayerTeamMembershipRecord($playerId, $matchDate);
-            $scoresheetSubstitutionId = $this->ensureScoresheetSubstitutionRecord($scoresheetId, 1, $playerId, $val);
+            $colIn = $this->shiftLetters($colKey, -9);
+            $valIn = $this->toStr($row[$colIn] ?? null);
+            // if (($val && !$valIn) || (!$val && $valIn)) {
+            //     dd('Problème de substitution', $row['A'], $val, $valIn, $colKey, $colIn);
+            // }
+            // if (!$val || $val === null) continue;
+            $playerId = null;
+            $playerIdIn = null;
+            if ($val) {
+                $playerId = $this->ensurePlayerPerson($val);
+                $this->ensurePlayerTeamMembershipRecord($playerId, $matchDate);
+            }
+            if ($valIn) {
+                $playerIdIn = $this->ensurePlayerPerson($valIn);
+            }
+            if ($playerId || $playerIdIn) {
+                $scoresheetSubstitutionId = $this->ensureScoresheetSubstitutionRecord($scoresheetId, 1, $playerId, $playerIdIn, $val, $valIn);
+            }
         }
     }
 
-    private function ensureScoresheetSubstitutionRecord($scoresheetId, $algeriaTeamId, $playerId, $val): int
+    private function ensureScoresheetSubstitutionRecord($scoresheetId, $algeriaTeamId, $playerId, $playerIdIn, $val, $valIn): int
     {
         $id = $this->db->fetchOne("SELECT id FROM scoresheet_substitution 
             WHERE scoresheet_id = :sid 
             AND team_id = :tid 
             AND player_out_id = :pid 
+            AND player_in_id = :pidin
             AND player_out_text = :name", [
                 'sid' => $scoresheetId,
                 'tid' => $algeriaTeamId,
                 'pid' => $playerId,
+                'pidin' => $playerIdIn,
                 'name' => $val,
             ]
         );
@@ -393,7 +411,9 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
             'scoresheet_id' => $scoresheetId,
             'team_id' => $algeriaTeamId,
             'player_out_id' => $playerId,
+            'player_in_id' => $playerIdIn,
             'player_out_text' => $val,
+            'player_in_text' => $valIn,
         ]);
         return (int)$this->db->lastInsertId();
     }
@@ -962,5 +982,47 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
         }
 
         return $personId;
+    }
+
+    /**
+     * Décale une chaîne A..Z (type colonnes Excel) de $shift positions.
+     * Ex: shiftLetters('AK', -9) => 'AB'
+     *     shiftLetters('A', -1)  => null (hors borne)
+     *
+     * Règle : A=1 ... Z=26, AA=27, etc.
+     */
+    function shiftLetters(string $s, int $shift): ?string
+    {
+        $s = strtoupper(trim($s));
+        if ($s === '' || !preg_match('/^[A-Z]+$/', $s)) {
+            throw new InvalidArgumentException("Entrée invalide: '$s' (A..Z uniquement).");
+        }
+
+        // 1) Convertir en nombre (base-26 Excel: A=1..Z=26)
+        $n = 0;
+        $len = strlen($s);
+        for ($i = 0; $i < $len; $i++) {
+            $digit = ord($s[$i]) - ord('A') + 1; // 1..26
+            $n = $n * 26 + $digit;
+        }
+
+        // 2) Appliquer le shift
+        $n += $shift;
+
+        // 3) Hors borne (pas de 0 ou négatif)
+        if ($n <= 0) {
+            return null;
+        }
+
+        // 4) Reconvertir en lettres (inverse Excel)
+        $out = '';
+        while ($n > 0) {
+            $n--; // clé: passer en 0..25
+            $rem = $n % 26;
+            $out = chr(ord('A') + $rem) . $out;
+            $n = intdiv($n, 26);
+        }
+
+        return $out;
     }
 }
