@@ -1,5 +1,23 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { ApiClientService } from '../core/http/api-client.service';
+
+export interface SeniorCoachListItem {
+  id: number;
+  fullName: string;
+  role: string | null;
+  nationality: string | null;
+}
+
+export interface SeniorCoachesResponse {
+  items: SeniorCoachListItem[];
+  meta: {
+    page: number;
+    perPage: number;
+    total: number;
+    totalPages: number;
+  };
+}
 
 export interface SeniorCoachHighlights {
   trophies: number;
@@ -69,8 +87,18 @@ export interface SeniorCoach {
 
 @Injectable({ providedIn: 'root' })
 export class CoachService {
-  getSeniorNationalTeamCoaches(): Observable<SeniorCoach[]> {
-    return of(SENIOR_COACHES);
+  constructor(private readonly apiClient: ApiClientService) {}
+
+  getSeniorNationalTeamCoaches(
+    page: number,
+    perPage: 12 | 24,
+    query = '',
+  ): Observable<SeniorCoachesResponse> {
+    return this.apiClient.get<SeniorCoachesResponse>('senior-national-team/coaches', {
+      page,
+      perPage,
+      q: query,
+    });
   }
 
   getSeniorNationalTeamCoachBySlug(slug: string): Observable<SeniorCoach | null> {
