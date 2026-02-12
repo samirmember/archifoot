@@ -9,11 +9,10 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class SeniorNationalTeamMatchScoresheetController extends AbstractController
 {
-    #[Route('/api/senior-national-team/matchs/{fixtureId}/scoresheet', name: 'api_senior_match_scoresheet_show', methods: ['GET'])]
-    public function __invoke(int $fixtureId, Connection $connection): JsonResponse
+    #[Route('/api/senior-national-team/matchs/{externalMatchNo}/scoresheet', name: 'api_senior_match_scoresheet_show', methods: ['GET'])]
+    public function __invoke(int $externalMatchNo, Connection $connection): JsonResponse
     {
-        $fixture = $connection->fetchAssociative(
-            <<<'SQL'
+        $sql = <<<'SQL'
                 SELECT
                     f.id,
                     f.external_match_no AS "externalMatchNo",
@@ -30,14 +29,21 @@ class SeniorNationalTeamMatchScoresheetController extends AbstractController
                 LEFT JOIN city city ON city.id = f.city_id
                 LEFT JOIN stadium st ON st.id = f.stadium_id
                 LEFT JOIN country c ON c.id = f.country_id
-                WHERE f.id = :fixtureId
-            SQL,
-            ['fixtureId' => $fixtureId]
+                WHERE f.id = :external_match_no
+            SQL;
+            // dd($sql);
+        $fixture = $connection->fetchAssociative(
+            $sql,
+            ['external_match_no' => $externalMatchNo]
         );
+
+        // dd($fixture);
 
         if ($fixture === false) {
             return $this->json(['message' => 'Match introuvable.'], 404);
         }
+
+        $fixtureId = $fixture['id'];
 
         $participants = $connection->fetchAllAssociative(
             <<<'SQL'
@@ -52,7 +58,7 @@ class SeniorNationalTeamMatchScoresheetController extends AbstractController
                 LEFT JOIN team t ON t.id = fp.team_id
                 LEFT JOIN national_team nt ON nt.id = t.national_team_id
                 LEFT JOIN country co ON co.id = nt.country_id
-                LEFT JOIN category cat ON cat.id = fp.category_id
+                LEFT JOIN category cat ON cat.id = nt.category_id
                 WHERE fp.fixture_id = :fixtureId
             SQL,
             ['fixtureId' => $fixtureId]
@@ -112,7 +118,7 @@ class SeniorNationalTeamMatchScoresheetController extends AbstractController
                         sl.is_captain AS "isCaptain",
                         sl.player_name_text AS "playerNameText",
                         t.display_name AS "teamName",
-                        pos.name AS "positionName",
+                        pos.label AS "positionName",
                         person.full_name AS "playerName"
                     FROM scoresheet_lineup sl
                     LEFT JOIN team t ON t.id = sl.team_id

@@ -23,7 +23,7 @@ export const routes: Routes = [
           { path: 'home', pathMatch: 'full', redirectTo: 'home' },
           { path: 'home', component: SeniorNationalTeamHistoryComponent },
           { path: 'matchs', component: SeniorNationalTeamMatchsComponent },
-          { path: 'matchs/:fixtureId', component: SeniorNationalTeamMatchDetailComponent },
+          { path: 'matchs/:externalMatchNo', component: SeniorNationalTeamMatchDetailComponent },
           { path: 'joueurs', component: SeniorNationalTeamPlayersComponent },
           { path: 'joueurs/:slug', component: SeniorNationalTeamPlayerProfileComponent },
           { path: 'entraineurs', component: SeniorNationalTeamCoachsComponent },

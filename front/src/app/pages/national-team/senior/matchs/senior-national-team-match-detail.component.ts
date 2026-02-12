@@ -26,16 +26,16 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    const fixtureIdParam = this.route.snapshot.paramMap.get('fixtureId');
-    const fixtureId = fixtureIdParam ? Number(fixtureIdParam) : NaN;
+    const externalMatchNoParam = this.route.snapshot.paramMap.get('externalMatchNo');
+    const externalMatchNo: number = externalMatchNoParam ? Number(externalMatchNoParam) : NaN;
 
-    if (Number.isNaN(fixtureId) || fixtureId <= 0) {
+    if (Number.isNaN(externalMatchNo) || externalMatchNo <= 0) {
       this.error.set('Identifiant de match invalide.');
       this.isLoading.set(false);
       return;
     }
 
-    this.service.getMatchScoresheetDetails(fixtureId).subscribe({
+    this.service.getMatchScoresheetDetails(externalMatchNo).subscribe({
       next: (response) => {
         this.details.set(response);
         this.isLoading.set(false);

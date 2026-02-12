@@ -9,9 +9,11 @@ import { MatchScoresheetDetailsResponse } from '../models/match-scoresheet.model
 export class MatchScoresheetService {
   constructor(private readonly apiClient: ApiClientService) {}
 
-  public getMatchScoresheetDetails(fixtureId: number): Observable<MatchScoresheetDetailsResponse> {
+  public getMatchScoresheetDetails(
+    externalMatchNo: number,
+  ): Observable<MatchScoresheetDetailsResponse> {
     return this.apiClient.get<MatchScoresheetDetailsResponse>(
-      `senior-national-team/matchs/${fixtureId}/scoresheet`,
+      `senior-national-team/matchs/${externalMatchNo}/scoresheet`,
     );
   }
 }

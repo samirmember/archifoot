@@ -1,7 +1,9 @@
 <div
   class="card mb-4 lift result-container"
   [attr.data-match-id]="result().externalMatchNo"
-  [routerLink]="result().fixtureId ? ['/equipe-nationale/senior/matchs', result().fixtureId] : null"
+  [routerLink]="
+    result().externalMatchNo ? ['/equipe-nationale/senior/matchs', result().externalMatchNo] : null
+  "
   tabindex="0"
   role="link"
 >
