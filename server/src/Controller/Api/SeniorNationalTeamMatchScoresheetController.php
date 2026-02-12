@@ -29,15 +29,12 @@ class SeniorNationalTeamMatchScoresheetController extends AbstractController
                 LEFT JOIN city city ON city.id = f.city_id
                 LEFT JOIN stadium st ON st.id = f.stadium_id
                 LEFT JOIN country c ON c.id = f.country_id
-                WHERE f.id = :external_match_no
+                WHERE f.external_match_no = :external_match_no
             SQL;
-            // dd($sql);
         $fixture = $connection->fetchAssociative(
             $sql,
             ['external_match_no' => $externalMatchNo]
         );
-
-        // dd($fixture);
 
         if ($fixture === false) {
             return $this->json(['message' => 'Match introuvable.'], 404);
