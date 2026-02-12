@@ -17,7 +17,7 @@ class SeniorNationalTeamPlayersController extends AbstractController
         $page = max(1, (int) $request->query->get('page', 1));
 
         $requestedPerPage = (int) $request->query->get('perPage', 10);
-        $perPage = in_array($requestedPerPage, [10, 20], true) ? $requestedPerPage : 10;
+        $perPage = max(1, min($requestedPerPage, 100));
 
         $result = $playerRepository->findAlgeriaSeniorPlayers($query, $page, $perPage);
 
