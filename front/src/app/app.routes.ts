@@ -8,6 +8,7 @@ import { SeniorNationalTeamCoachsComponent } from './pages/national-team/senior/
 import { SeniorNationalTeamCoachDetailComponent } from './pages/national-team/senior/coach/senior-national-team-coach-detail.component';
 import { SeniorNationalTeamPlayersComponent } from './pages/national-team/senior/players/senior-national-team-players.component';
 import { SeniorNationalTeamPlayerProfileComponent } from './pages/national-team/senior/players/senior-national-team-player-profile.component';
+import { SeniorNationalTeamMatchDetailComponent } from './pages/national-team/senior/matchs/senior-national-team-match-detail.component';
 
 export const routes: Routes = [
   {
@@ -22,6 +23,7 @@ export const routes: Routes = [
           { path: 'home', pathMatch: 'full', redirectTo: 'home' },
           { path: 'home', component: SeniorNationalTeamHistoryComponent },
           { path: 'matchs', component: SeniorNationalTeamMatchsComponent },
+          { path: 'matchs/:fixtureId', component: SeniorNationalTeamMatchDetailComponent },
           { path: 'joueurs', component: SeniorNationalTeamPlayersComponent },
           { path: 'joueurs/:slug', component: SeniorNationalTeamPlayerProfileComponent },
           { path: 'entraineurs', component: SeniorNationalTeamCoachsComponent },
