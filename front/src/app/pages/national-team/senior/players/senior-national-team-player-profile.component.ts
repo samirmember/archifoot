@@ -25,6 +25,50 @@ export class SeniorNationalTeamPlayerProfileComponent {
 
   readonly pageTitle = computed(() => this.profile()?.fullName ?? 'Fiche joueur');
 
+  readonly highlightStats = computed(() => {
+    const playerProfile = this.profile();
+    if (!playerProfile) {
+      return [];
+    }
+
+    return [
+      { label: 'Sélections', value: playerProfile.stats.caps, accent: 'primary' },
+      { label: 'Buts', value: playerProfile.stats.goals, accent: 'goal' },
+      { label: 'Titularisations', value: playerProfile.stats.starts, accent: 'neutral' },
+      { label: 'Entrées en jeu', value: playerProfile.stats.subIn, accent: 'neutral' },
+      { label: 'Capitanat', value: playerProfile.stats.captainMatches, accent: 'neutral' },
+      { label: 'Dernière sélection', value: playerProfile.stats.lastCapDate ?? '—', accent: 'neutral' },
+    ];
+  });
+
+  readonly disciplineStats = computed(() => {
+    const playerProfile = this.profile();
+    if (!playerProfile) {
+      return [];
+    }
+
+    return [
+      { label: 'Cartons jaunes', value: playerProfile.stats.yellowCards, accent: 'yellow' },
+      { label: 'Cartons rouges', value: playerProfile.stats.redCards, accent: 'red' },
+    ];
+  });
+
+  readonly identityFacts = computed(() => {
+    const playerProfile = this.profile();
+    if (!playerProfile) {
+      return [];
+    }
+
+    return [
+      { label: 'Poste', value: this.asBadgeLabel(playerProfile.position) },
+      { label: 'Nationalité', value: this.asBadgeLabel(playerProfile.nationality) },
+      { label: 'Date de naissance', value: this.asBadgeLabel(playerProfile.birthDateLabel, 'Date inconnue') },
+      { label: 'Lieu de naissance', value: this.asBadgeLabel(playerProfile.birthPlace, 'Lieu inconnu') },
+      { label: 'Club actuel', value: this.asBadgeLabel(playerProfile.currentClub, 'Club inconnu') },
+      { label: 'Numéro', value: this.asBadgeLabel(playerProfile.shirtNumber, 'N/A') },
+    ];
+  });
+
   constructor() {
     effect((onCleanup) => {
       const slug = this.slugParam().get('slug')?.trim() ?? '';
