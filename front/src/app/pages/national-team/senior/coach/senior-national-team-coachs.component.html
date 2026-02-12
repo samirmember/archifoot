@@ -46,17 +46,22 @@
     } @else {
       <div class="coachs-grid">
         @for (coach of coaches(); track coach.id) {
-          <article class="coach-card">
-            <div class="coach-avatar">
-              <div class="avatar-placeholder">{{ getCoachInitials(coach.fullName) }}</div>
-            </div>
+          <a
+            class="coach-card-link"
+            [routerLink]="['/equipe-nationale/senior/entraineurs', getCoachSlug(coach.fullName)]"
+          >
+            <article class="coach-card">
+              <div class="coach-avatar">
+                <div class="avatar-placeholder">{{ getCoachInitials(coach.fullName) }}</div>
+              </div>
 
-            <div class="coach-meta">
-              <h4>{{ coach.fullName }}</h4>
-              <p class="role">{{ coach.role || 'Entraîneur' }}</p>
-              <p class="subline">{{ coach.nationality || 'Nationalité non renseignée' }}</p>
-            </div>
-          </article>
+              <div class="coach-meta">
+                <h4>{{ coach.fullName }}</h4>
+                <p class="role">{{ coach.role || 'Entraîneur' }}</p>
+                <p class="subline">{{ coach.nationality || 'Nationalité non renseignée' }}</p>
+              </div>
+            </article>
+          </a>
         }
       </div>
     }
