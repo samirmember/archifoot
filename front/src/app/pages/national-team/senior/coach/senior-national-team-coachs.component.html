@@ -40,7 +40,7 @@
     <p class="results-count">{{ total() }} entraîneur(s) trouvé(s)</p>
 
     @if (isLoading()) {
-      <div class="state-card">Chargement des entraîneurs...</div>
+      <app-persons-skeleton [count]="perPage()" />
     } @else if (coaches().length === 0) {
       <div class="state-card">Aucun entraîneur trouvé pour ce filtre.</div>
     } @else {
