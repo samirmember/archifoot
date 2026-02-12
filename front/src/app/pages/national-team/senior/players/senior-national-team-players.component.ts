@@ -7,10 +7,11 @@ import {
   SeniorPlayersResponse,
 } from '../../../../services/player.service';
 import { PlayersListComponent } from '../../../../components/players-list/players-list.component';
+import { PersonsSkeletonComponent } from '../../../../components/persons-skeleton/persons-skeleton.component';
 
 @Component({
   selector: 'app-senior-national-team-players',
-  imports: [FormsModule, PlayersListComponent],
+  imports: [FormsModule, PlayersListComponent, PersonsSkeletonComponent],
   templateUrl: './senior-national-team-players.component.html',
   styleUrl: './senior-national-team-players.component.scss',
 })
