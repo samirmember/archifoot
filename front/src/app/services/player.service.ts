@@ -54,11 +54,12 @@ export interface SeniorPlayerDetail {
     caps: number;
     goals: number;
     starts: number;
-    benchAppearances: number;
+    subIn: number;
     captaincies: number;
     scoredGoalsFromMatchEvents: number;
     yellowCards: number;
     redCards: number;
+    lastCapDate: string;
   };
   timeline: {
     memberships: SeniorPlayerDetail['memberships'];
@@ -150,9 +151,9 @@ export class PlayerService {
       );
   }
 
-  public getSeniorNationalTeamPlayerProfile(slug: string): Observable<PlayerProfile> {
+  public getSeniorNationalTeamPlayerProfile(slug: string): Observable<SeniorPlayerDetail> {
     return this.apiClient
-      .get<PlayerProfile>(`senior-national-team/players/${encodeURIComponent(slug)}`)
+      .get<SeniorPlayerDetail>(`senior-national-team/players/${encodeURIComponent(slug)}`)
       .pipe(
         map((profile) => ({
           ...profile,

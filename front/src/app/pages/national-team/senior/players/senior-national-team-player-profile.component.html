@@ -20,16 +20,22 @@
           <p class="eyebrow">Fiche internationale</p>
           <h1>{{ pageTitle() }}</h1>
           <div class="identity-grid">
-            <span>{{ asBadgeLabel(profile()!.position) }}</span>
-            <span>{{ asBadgeLabel(profile()!.nationality) }}</span>
-            <span>{{ asBadgeLabel(profile()!.birthDateLabel, 'Date de naissance inconnue') }}</span>
-            <span>{{ asBadgeLabel(profile()!.birthPlace, 'Lieu de naissance inconnu') }}</span>
-            <span>{{ asBadgeLabel(profile()!.currentClub, 'Club inconnu') }}</span>
-            <span>{{ asBadgeLabel(profile()!.shirtNumber, 'Numéro inconnu') }}</span>
+            <span>{{ asBadgeLabel(profile()!.profile.primaryPositionLabel) }}</span>
+            <span>Algérien</span>
+            <span>{{
+              asBadgeLabel(profile()!.profile.birthDate, 'Date de naissance inconnue')
+            }}</span>
+            <span>{{
+              asBadgeLabel(
+                profile()!.profile.birthCity + ' ' + profile()?.profile?.birthCountry,
+                'Lieu de naissance inconnu'
+              )
+            }}</span>
+            <span>{{ asBadgeLabel(profile()!.memberships[0].countryName) }}</span>
+            <!-- <span>{{ asBadgeLabel(profile()!.profile.shirtNumber, 'Numéro inconnu') }}</span> -->
           </div>
         </div>
       </article>
-
       <section class="stats-grid">
         <article class="card-like stat-card">
           <h2>Statistiques Algérie</h2>
@@ -39,7 +45,7 @@
               <span>Sélections</span>
             </div>
             <div>
-              <strong>{{ profile()!.stats.goals }}</strong>
+              <strong>{{ profile()!.stats.scoredGoalsFromMatchEvents }}</strong>
               <span>Buts</span>
             </div>
             <div>
@@ -65,20 +71,20 @@
               <span>Rouges</span>
             </div>
             <div>
-              <strong>{{ profile()!.stats.captainMatches }}</strong>
+              <strong>{{ profile()!.stats.captaincies }}</strong>
               <span>Matchs capitaine</span>
             </div>
             <div>
-              <strong>{{ profile()!.stats.lastCapDate ?? '—' }}</strong>
+              <strong>{{ profile()!.stats.lastCapDate }}</strong>
               <span>Dernière sélection</span>
             </div>
           </div>
         </article>
       </section>
 
-      <section class="card-like section-block">
+      <!-- <section class="card-like section-block">
         <h2>Historique clubs</h2>
-        @if (profile()!.clubHistory.length === 0) {
+        @if (profile()!.clubHistory && profile()!.clubHistory.length === 0) {
           <p class="muted">Aucune information club disponible.</p>
         } @else {
           <ul class="timeline-list">
@@ -105,7 +111,7 @@
             </article>
           }
         </div>
-      </section>
+      </section> -->
     }
   </div>
 </section>

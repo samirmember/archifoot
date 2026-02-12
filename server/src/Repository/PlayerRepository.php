@@ -98,6 +98,8 @@ class PlayerRepository extends ServiceEntityRepository
         $lineupStats = $this->fetchLineupStats($playerId);
         $disciplineStats = $this->fetchDisciplineStats($playerId);
 
+        $lastCapDate = isset($memberships[0]) ? substr($memberships[0]['toDate'], 0, 4) : null;
+
         return [
             'id' => $playerId,
             'slug' => $slug,
@@ -112,17 +114,17 @@ class PlayerRepository extends ServiceEntityRepository
                 'primaryPositionCode' => $matchedPlayer['primaryPositionCode'],
                 'primaryPositionLabel' => $matchedPlayer['primaryPositionLabel'],
             ],
-            'memberships' => $memberships,
             'nationalStats' => $nationalStats,
             'stats' => [
                 'caps' => $nationalStats['totals']['caps'],
                 'goals' => $nationalStats['totals']['goals'],
                 'starts' => $lineupStats['starts'],
-                'benchAppearances' => $lineupStats['benchAppearances'],
+                'subIn' => $lineupStats['subIn'],
                 'captaincies' => $lineupStats['captaincies'],
                 'scoredGoalsFromMatchEvents' => $disciplineStats['scoredGoalsFromMatchEvents'],
                 'yellowCards' => $disciplineStats['yellowCards'],
                 'redCards' => $disciplineStats['redCards'],
+                'lastCapDate' => $lastCapDate,
             ],
             'timeline' => [
                 'memberships' => $memberships,
@@ -174,6 +176,7 @@ class PlayerRepository extends ServiceEntityRepository
             <<<'SQL'
                 SELECT
                     ptm.id,
+                    ptm.player_id as playerId,
                     ptm.from_date AS fromDate,
                     ptm.to_date AS toDate,
                     ptm.is_current AS isCurrent,
@@ -238,7 +241,7 @@ class PlayerRepository extends ServiceEntityRepository
             <<<'SQL'
                 SELECT
                     SUM(CASE WHEN sl.lineup_role = 'STARTER' THEN 1 ELSE 0 END) AS starts,
-                    SUM(CASE WHEN sl.lineup_role = 'BENCH' THEN 1 ELSE 0 END) AS benchAppearances,
+                    SUM(CASE WHEN sl.lineup_role = 'SUB' THEN 1 ELSE 0 END) AS subIn,
                     SUM(CASE WHEN sl.is_captain = 1 THEN 1 ELSE 0 END) AS captaincies
                 FROM scoresheet_lineup sl
                 WHERE sl.player_id = :playerId
@@ -248,7 +251,7 @@ class PlayerRepository extends ServiceEntityRepository
 
         return [
             'starts' => (int) ($result['starts'] ?? 0),
-            'benchAppearances' => (int) ($result['benchAppearances'] ?? 0),
+            'subIn' => (int) ($result['subIn'] ?? 0),
             'captaincies' => (int) ($result['captaincies'] ?? 0),
         ];
     }

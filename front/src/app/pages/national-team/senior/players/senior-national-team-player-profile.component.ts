@@ -6,6 +6,7 @@ import { catchError, of } from 'rxjs';
 import {
   PlayerProfile,
   PlayerService,
+  SeniorPlayerDetail,
   StatPlaceholder,
 } from '../../../../services/player.service';
 
@@ -20,8 +21,10 @@ export class SeniorNationalTeamPlayerProfileComponent {
   private readonly playerService = inject(PlayerService);
 
   readonly isLoading = signal(false);
-  readonly profile = signal<PlayerProfile | null>(null);
-  private readonly slugParam = toSignal(this.route.paramMap, { initialValue: this.route.snapshot.paramMap });
+  readonly profile = signal<SeniorPlayerDetail | null>(null);
+  private readonly slugParam = toSignal(this.route.paramMap, {
+    initialValue: this.route.snapshot.paramMap,
+  });
 
   readonly pageTitle = computed(() => this.profile()?.fullName ?? 'Fiche joueur');
 
@@ -41,6 +44,7 @@ export class SeniorNationalTeamPlayerProfileComponent {
         .pipe(catchError(() => of(null)))
         .subscribe((response) => {
           this.profile.set(response);
+          console.log(this.profile());
           this.isLoading.set(false);
         });
 
