@@ -12,7 +12,6 @@ import { PersonsSkeletonComponent } from '../../../../components/persons-skeleto
 @Component({
   selector: 'app-senior-national-team-coachs',
   imports: [FormsModule, RouterLink, PersonsSkeletonComponent],
-  imports: [FormsModule, PersonsSkeletonComponent],
   templateUrl: './senior-national-team-coachs.component.html',
   styleUrl: './senior-national-team-coachs.component.scss',
 })
