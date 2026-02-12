@@ -1,0 +1,99 @@
+<section class="match-detail">
+  <a routerLink="/equipe-nationale/senior/matchs" class="back-link">← Retour à la liste des matchs</a>
+
+  @if (isLoading()) {
+    <div class="state-card">Chargement de la fiche technique...</div>
+  } @else if (error()) {
+    <div class="state-card">{{ error() }}</div>
+  } @else if (details(); as detailsData) {
+    <div class="card p-4 mb-4">
+      <h2 class="h4 mb-2">{{ detailsData.fixture.teamA?.teamName }} {{ detailsData.fixture.teamA?.score }} -
+        {{ detailsData.fixture.teamB?.score }} {{ detailsData.fixture.teamB?.teamName }}</h2>
+      <p class="text-muted mb-1">{{ detailsData.fixture.matchDate | date: 'd MMMM y' }} · {{ detailsData.fixture.stadiumName }},
+        {{ detailsData.fixture.cityName }} ({{ detailsData.fixture.countryStadiumName }})</p>
+      <p class="text-muted mb-0">Saison: {{ detailsData.fixture.seasonName }} · Match #{{ detailsData.fixture.externalMatchNo }}</p>
+    </div>
+
+    <div class="card p-4 mb-4">
+      <h3 class="h5">Feuille de match</h3>
+      @if (detailsData.scoresheet) {
+        <ul class="mb-0">
+          <li>Coach: {{ detailsData.scoresheet.coachName || 'N/A' }}</li>
+          <li>Affluence: {{ detailsData.scoresheet.attendance ?? 'N/A' }}</li>
+          <li>Coup d'envoi: {{ detailsData.scoresheet.kickoffTime || 'N/A' }}</li>
+          <li>Mi-temps: {{ detailsData.scoresheet.halfTime || 'N/A' }}</li>
+          <li>Fin de match: {{ detailsData.scoresheet.fullTime || 'N/A' }}</li>
+        </ul>
+      } @else {
+        <p class="mb-0">Aucune entrée scoresheet pour ce match.</p>
+      }
+    </div>
+
+    <div class="card p-4 mb-4">
+      <h3 class="h5">Buteurs ({{ detailsData.goals.length }})</h3>
+      @if (detailsData.goals.length > 0) {
+        <ul class="mb-0">
+          @for (goal of detailsData.goals; track goal.id) {
+            <li>{{ goal.minute || '?' }}' - {{ goal.scorerName || goal.scorerText }} ({{ goal.teamName }})
+              @if (goal.goalType) {
+                <span class="text-muted">· {{ goal.goalType }}</span>
+              }
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="mb-0">Aucun but enregistré.</p>
+      }
+    </div>
+
+    <div class="card p-4 mb-4">
+      <h3 class="h5">Composition titulaire ({{ starters().length }})</h3>
+      <ul class="mb-0">
+        @for (lineup of starters(); track lineup.id) {
+          <li>#{{ lineup.shirtNumber ?? '?' }} {{ lineup.playerName || lineup.playerNameText }}
+            @if (lineup.isCaptain) {
+              <strong>(C)</strong>
+            }
+            <span class="text-muted"> - {{ lineup.positionName || 'Poste non défini' }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <div class="card p-4 mb-4">
+      <h3 class="h5">Remplaçants ({{ substitutes().length }})</h3>
+      <ul class="mb-0">
+        @for (lineup of substitutes(); track lineup.id) {
+          <li>#{{ lineup.shirtNumber ?? '?' }} {{ lineup.playerName || lineup.playerNameText }}</li>
+        }
+      </ul>
+    </div>
+
+    <div class="card p-4 mb-4">
+      <h3 class="h5">Remplacements ({{ detailsData.substitutions.length }})</h3>
+      @if (detailsData.substitutions.length > 0) {
+        <ul class="mb-0">
+          @for (sub of detailsData.substitutions; track sub.id) {
+            <li>{{ sub.minute || '?' }}' - {{ sub.playerOutName || sub.playerOutText }} ⟶
+              {{ sub.playerInName || sub.playerInText }}</li>
+          }
+        </ul>
+      } @else {
+        <p class="mb-0">Aucun remplacement enregistré.</p>
+      }
+    </div>
+
+    <div class="card p-4">
+      <h3 class="h5">Officiels ({{ detailsData.officials.length }})</h3>
+      @if (detailsData.officials.length > 0) {
+        <ul class="mb-0">
+          @for (official of detailsData.officials; track official.id) {
+            <li>{{ official.role || 'Rôle non défini' }} - {{ official.personName || official.nameText }}</li>
+          }
+        </ul>
+      } @else {
+        <p class="mb-0">Aucun officiel enregistré.</p>
+      }
+    </div>
+  }
+</section>

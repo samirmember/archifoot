@@ -1,4 +1,10 @@
-<a href="#" class="card mb-4 lift result-container" [attr.data-match-id]="result().externalMatchNo">
+<div
+  class="card mb-4 lift result-container"
+  [attr.data-match-id]="result().externalMatchNo"
+  [routerLink]="result().fixtureId ? ['/equipe-nationale/senior/matchs', result().fixtureId] : null"
+  tabindex="0"
+  role="link"
+>
   <!-- @Todo: rajouter la bulle (notes) -->
   <div class="card-body p-5">
     <span class="row justify-content-between">
@@ -55,4 +61,4 @@
     </span>
   </div>
   <!-- /.card-body -->
-</a>
+</div>
