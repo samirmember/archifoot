@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { ApiClientService } from '../core/http/api-client.service';
+import { environment } from '../../environments/environment';
 
 export interface SeniorPlayer {
   id: number;
@@ -123,6 +124,8 @@ export interface PlayerProfile {
   providedIn: 'root',
 })
 export class PlayerService {
+  private readonly apiOrigin = new URL(environment.api.baseUrl).origin;
+
   constructor(private readonly apiClient: ApiClientService) {}
 
   public getSeniorNationalTeamPlayers(
@@ -130,17 +133,56 @@ export class PlayerService {
     perPage: 12 | 24,
     query = '',
   ): Observable<SeniorPlayersResponse> {
-    return this.apiClient.get<SeniorPlayersResponse>('senior-national-team/players', {
-      page,
-      perPage,
-      q: query,
-    });
+    return this.apiClient
+      .get<SeniorPlayersResponse>('senior-national-team/players', {
+        page,
+        perPage,
+        q: query,
+      })
+      .pipe(
+        map((response) => ({
+          ...response,
+          items: response.items.map((player) => ({
+            ...player,
+            photoUrl: this.toPlayerPhotoUrl(player.photoUrl),
+          })),
+        })),
+      );
   }
 
   public getSeniorNationalTeamPlayerProfile(slug: string): Observable<PlayerProfile> {
-    return this.apiClient.get<PlayerProfile>(
-      `senior-national-team/players/${encodeURIComponent(slug)}`,
-    );
+    return this.apiClient
+      .get<PlayerProfile>(`senior-national-team/players/${encodeURIComponent(slug)}`)
+      .pipe(
+        map((profile) => ({
+          ...profile,
+          photoUrl: this.toPlayerPhotoUrl(profile.photoUrl),
+        })),
+      );
+  }
+
+  private toPlayerPhotoUrl(photoUrl: string | null): string | null {
+    if (!photoUrl) {
+      return null;
+    }
+
+    if (/^(https?:)?\/\//i.test(photoUrl) || photoUrl.startsWith('data:')) {
+      return photoUrl;
+    }
+
+    const normalizedPath = photoUrl.replace(/^\/+/, '');
+
+    if (normalizedPath.startsWith('uploads/')) {
+      return `${this.apiOrigin}/${normalizedPath}`;
+    }
+
+    const encodedPath = normalizedPath
+      .split('/')
+      .filter((segment) => segment.length > 0)
+      .map((segment) => encodeURIComponent(segment))
+      .join('/');
+
+    return `${this.apiOrigin}/api/person-photo/players/${encodedPath}`;
   }
 
   public toSlug(value: string): string {
