@@ -52,8 +52,28 @@
     gap: 1rem;
   }
 
+
+  .coach-card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+
+    &:focus-visible {
+      outline: 3px solid #2e5eb7;
+      outline-offset: 3px;
+      border-radius: 16px;
+    }
+  }
+
   .coach-card {
     overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .coach-card-link:hover .coach-card,
+  .coach-card-link:focus-visible .coach-card {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(35, 45, 66, 0.12);
   }
 
   .coach-avatar {

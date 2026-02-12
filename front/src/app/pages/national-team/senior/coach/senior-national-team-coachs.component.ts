@@ -1,5 +1,6 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import {
   CoachService,
@@ -9,7 +10,7 @@ import {
 
 @Component({
   selector: 'app-senior-national-team-coachs',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './senior-national-team-coachs.component.html',
   styleUrl: './senior-national-team-coachs.component.scss',
 })
@@ -79,5 +80,15 @@ export class SeniorNationalTeamCoachsComponent {
       .slice(0, 2)
       .map((part) => part.charAt(0).toUpperCase())
       .join('');
+  }
+
+  getCoachSlug(fullName: string): string {
+    return fullName
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .replace(/-{2,}/g, '-');
   }
 }
