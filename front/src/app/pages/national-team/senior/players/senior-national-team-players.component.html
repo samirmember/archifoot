@@ -40,7 +40,7 @@
     <p class="results-count">{{ total() }} joueur(s) trouvé(s)</p>
 
     @if (isLoading()) {
-      <div class="loading-state">Chargement des joueurs...</div>
+      <app-persons-skeleton [count]="perPage()" />
     } @else if (players().length === 0) {
       <div class="empty-state">Aucun joueur trouvé pour ce filtre.</div>
     } @else {
