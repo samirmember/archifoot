@@ -1,5 +1,5 @@
 <section class="wrapper bg-light player-profile-page">
-  <div class="container py-5 py-md-6">
+  <div class="container py-4 py-md-5">
     <a class="back-link" routerLink="/equipe-nationale/senior/joueurs">← Retour à la liste</a>
 
     @if (isLoading()) {
@@ -8,82 +8,95 @@
       <div class="state-box">Fiche joueur introuvable.</div>
     } @else {
       <article class="hero card-like">
-        <div class="hero-photo-wrap">
-          <div class="hero-photo">
-            @if (profile()!.photoUrl) {
-              <img [src]="profile()!.photoUrl" [alt]="profile()!.fullName" loading="lazy" />
-            } @else {
-              <div class="photo-placeholder">{{ getPlayerInitials(profile()!.fullName) }}</div>
-            }
-          </div>
-          <div class="hero-chip">Équipe nationale A</div>
+        <div class="hero-photo">
+          @if (profile()!.photoUrl) {
+            <img [src]="profile()!.photoUrl" [alt]="profile()!.fullName" loading="lazy" />
+          } @else {
+            <div class="photo-placeholder">{{ getPlayerInitials(profile()!.fullName) }}</div>
+          }
         </div>
 
         <div class="hero-content">
           <p class="eyebrow">Fiche internationale</p>
           <h1>{{ pageTitle() }}</h1>
-
-          <div class="meta-chips">
-            @for (fact of identityFacts(); track fact.label) {
-              <span>
-                <small>{{ fact.label }}</small>
-                <strong>{{ fact.value }}</strong>
-              </span>
-            }
-          </div>
-
-          <div class="key-stats-grid">
-            @for (item of highlightStats(); track item.label) {
-              <article class="key-stat" [attr.data-accent]="item.accent">
-                <p>{{ item.label }}</p>
-                <strong>{{ item.value }}</strong>
-              </article>
-            }
+          <div class="identity-grid">
+            <span>{{ asBadgeLabel(profile()!.position) }}</span>
+            <span>{{ asBadgeLabel(profile()!.nationality) }}</span>
+            <span>{{ asBadgeLabel(profile()!.birthDateLabel, 'Date de naissance inconnue') }}</span>
+            <span>{{ asBadgeLabel(profile()!.birthPlace, 'Lieu de naissance inconnu') }}</span>
+            <span>{{ asBadgeLabel(profile()!.currentClub, 'Club inconnu') }}</span>
+            <span>{{ asBadgeLabel(profile()!.shirtNumber, 'Numéro inconnu') }}</span>
           </div>
         </div>
       </article>
 
-      <section class="content-grid">
-        <article class="card-like section-block discipline-block">
-          <h2>Discipline</h2>
-          <div class="discipline-grid">
-            @for (item of disciplineStats(); track item.label) {
-              <div class="discipline-item" [attr.data-accent]="item.accent">
-                <span>{{ item.label }}</span>
-                <strong>{{ item.value }}</strong>
-              </div>
-            }
+      <section class="stats-grid">
+        <article class="card-like stat-card">
+          <h2>Statistiques Algérie</h2>
+          <div class="big-stats">
+            <div>
+              <strong>{{ profile()!.stats.caps }}</strong>
+              <span>Sélections</span>
+            </div>
+            <div>
+              <strong>{{ profile()!.stats.goals }}</strong>
+              <span>Buts</span>
+            </div>
+            <div>
+              <strong>{{ profile()!.stats.starts }}</strong>
+              <span>Titularisations</span>
+            </div>
+            <div>
+              <strong>{{ profile()!.stats.subIn }}</strong>
+              <span>Entrées en jeu</span>
+            </div>
           </div>
         </article>
 
-        <article class="card-like section-block">
-          <h2>Historique clubs</h2>
-          @if (profile()!.clubHistory.length === 0) {
-            <p class="muted">Aucune information club disponible.</p>
-          } @else {
-            <ul class="timeline-list">
-              @for (club of profile()!.clubHistory; track $index) {
-                <li>
-                  <span class="timeline-dot"></span>
-                  <div>
-                    <strong>{{ club.teamName }}</strong>
-                    <p>{{ club.periodLabel }}</p>
-                  </div>
-                  @if (club.isCurrent) {
-                    <em>Actuel</em>
-                  }
-                </li>
-              }
-            </ul>
-          }
+        <article class="card-like stat-card">
+          <h2>Discipline & leadership</h2>
+          <div class="big-stats compact">
+            <div>
+              <strong>{{ profile()!.stats.yellowCards }}</strong>
+              <span>Jaunes</span>
+            </div>
+            <div>
+              <strong>{{ profile()!.stats.redCards }}</strong>
+              <span>Rouges</span>
+            </div>
+            <div>
+              <strong>{{ profile()!.stats.captainMatches }}</strong>
+              <span>Matchs capitaine</span>
+            </div>
+            <div>
+              <strong>{{ profile()!.stats.lastCapDate ?? '—' }}</strong>
+              <span>Dernière sélection</span>
+            </div>
+          </div>
         </article>
       </section>
 
       <section class="card-like section-block">
-        <div class="section-heading">
-          <h2>Données avancées à connecter</h2>
-          <span class="muted">Blocs préparés pour les futures intégrations API.</span>
-        </div>
+        <h2>Historique clubs</h2>
+        @if (profile()!.clubHistory.length === 0) {
+          <p class="muted">Aucune information club disponible.</p>
+        } @else {
+          <ul class="timeline-list">
+            @for (club of profile()!.clubHistory; track $index) {
+              <li>
+                <strong>{{ club.teamName }}</strong>
+                <span>{{ club.periodLabel }}</span>
+                @if (club.isCurrent) {
+                  <em>Actuel</em>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <section class="card-like section-block">
+        <h2>Blocs à dynamiser (données futures)</h2>
         <div class="future-grid">
           @for (placeholder of profile()!.futureStats; track placeholder.key) {
             <article [class]="'future-card ' + getPlaceholderState(placeholder)">
