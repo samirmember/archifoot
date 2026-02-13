@@ -38,6 +38,13 @@ export interface MatchResult {
   competitionLabel?: string;
 }
 
+export interface FixturesStats {
+  totalMatches: number;
+  totalWins: number;
+  totalGoals: number;
+  trophyWins: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -161,5 +168,9 @@ export class ResultService {
     }
 
     return params;
+  }
+
+  public buildFixturesStats(): Observable<FixturesStats> {
+    return this.apiClient.get<FixturesStats>('senior-national-team/matchs/totals');
   }
 }

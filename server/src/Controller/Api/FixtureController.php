@@ -7,10 +7,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-class SeniorNationalTeamMatchScoresheetController extends AbstractController
+class FixtureController extends AbstractController
 {
     #[Route('/api/senior-national-team/matchs/{externalMatchNo}/scoresheet', name: 'api_senior_match_scoresheet_show', methods: ['GET'])]
-    public function __invoke(int $externalMatchNo, Connection $connection): JsonResponse
+    public function scoresheet(int $externalMatchNo, Connection $connection): JsonResponse
     {
         $sql = <<<'SQL'
                 SELECT
@@ -196,6 +196,17 @@ class SeniorNationalTeamMatchScoresheetController extends AbstractController
             'substitutions' => $substitutions,
             'officials' => $officials,
             'goals' => $goals,
+        ]);
+    }
+
+    #[Route('/api/senior-national-team/matchs/totals', name: 'api_fixtures_totals', methods: ['GET'])]
+    public function totals(Connection $connection): JsonResponse
+    {
+        return $this->json([
+            'totalMatches' => 0,
+            'totalWins' => 0,
+            'totalGoals' => 0,
+            'trophyWins' => 0,
         ]);
     }
 }

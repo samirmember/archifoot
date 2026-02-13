@@ -5,9 +5,13 @@ import {
   OnDestroy,
   QueryList,
   ViewChildren,
+  inject,
+  signal,
 } from '@angular/core';
+import { catchError, of } from 'rxjs';
 import GLightbox from 'glightbox';
 import counterUp from 'counterup2';
+import { FixturesStats, ResultService } from 'src/app/services/result.service';
 
 @Component({
   selector: 'app-senior-national-team-history',
@@ -16,10 +20,11 @@ import counterUp from 'counterup2';
   styleUrl: './senior-national-team-history.component.scss',
 })
 export class SeniorNationalTeamHistoryComponent implements AfterViewInit, OnDestroy {
-  totalMatches = 768;
-  totalWins = 400;
-  totalGoals = 360;
-  trophyWins = 3;
+  resultService = inject(ResultService);
+  totalMatches = signal<number>(0);
+  totalWins = signal<number>(0);
+  totalGoals = signal<number>(0);
+  trophyWins = signal<number>(0);
 
   @ViewChildren('counterEl', { read: ElementRef })
   private counterEls!: QueryList<ElementRef<HTMLElement>>;
@@ -30,6 +35,23 @@ export class SeniorNationalTeamHistoryComponent implements AfterViewInit, OnDest
     this.lightbox = GLightbox({
       selector: '[data-glightbox]',
     });
+
+    const emptyResponse: FixturesStats = {
+      totalMatches: 0,
+      totalWins: 0,
+      totalGoals: 0,
+      trophyWins: 0,
+    };
+    const subscription = this.resultService
+      .buildFixturesStats()
+      .pipe(catchError(() => of(emptyResponse)))
+      .subscribe((response: FixturesStats) => {
+        console.log(response);
+        this.totalMatches.set(response.totalMatches);
+        this.totalWins.set(response.totalWins);
+        this.totalGoals.set(response.totalGoals);
+        this.trophyWins.set(response.trophyWins);
+      });
 
     // Déclenchement au moment où l'élément devient visible (pattern du README) :contentReference[oaicite:4]{index=4}
     this.io = new IntersectionObserver(
