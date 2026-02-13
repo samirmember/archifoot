@@ -8,6 +8,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'coach')]
 class Coach
 {
+    private ?string $newBirthCityName = null;
+    private ?string $newBirthRegionName = null;
+
     const ROLES = [
         'Head' => 'Entraîneur principal',
         'Assistant' => 'Entraîneur assistant',
@@ -86,5 +89,101 @@ class Coach
         }
 
         return $this;
+    }
+
+    public function getPersonBirthDate(): ?\DateTimeInterface
+    {
+        return $this->person?->getBirthDate();
+    }
+
+    public function setPersonBirthDate(?\DateTimeInterface $birthDate): static
+    {
+        $this->ensurePersonExists();
+        $this->person?->setBirthDate($birthDate);
+
+        return $this;
+    }
+
+    public function getPersonBirthCity(): ?City
+    {
+        return $this->person?->getBirthCity();
+    }
+
+    public function setPersonBirthCity(?City $birthCity): static
+    {
+        $this->ensurePersonExists();
+        $this->person?->setBirthCity($birthCity);
+
+        return $this;
+    }
+
+    public function getPersonBirthRegion(): ?Region
+    {
+        return $this->person?->getBirthRegion();
+    }
+
+    public function setPersonBirthRegion(?Region $birthRegion): static
+    {
+        $this->ensurePersonExists();
+        $this->person?->setBirthRegion($birthRegion);
+
+        return $this;
+    }
+
+    public function getPersonBirthCountry(): ?Country
+    {
+        return $this->person?->getBirthCountry();
+    }
+
+    public function setPersonBirthCountry(?Country $birthCountry): static
+    {
+        $this->ensurePersonExists();
+        $this->person?->setBirthCountry($birthCountry);
+
+        return $this;
+    }
+
+    public function getPersonNationalityCountry(): ?Country
+    {
+        return $this->person?->getNationalityCountry();
+    }
+
+    public function setPersonNationalityCountry(?Country $nationalityCountry): static
+    {
+        $this->ensurePersonExists();
+        $this->person?->setNationalityCountry($nationalityCountry);
+
+        return $this;
+    }
+
+    public function getNewBirthCityName(): ?string
+    {
+        return $this->newBirthCityName;
+    }
+
+    public function setNewBirthCityName(?string $newBirthCityName): static
+    {
+        $this->newBirthCityName = $newBirthCityName;
+
+        return $this;
+    }
+
+    public function getNewBirthRegionName(): ?string
+    {
+        return $this->newBirthRegionName;
+    }
+
+    public function setNewBirthRegionName(?string $newBirthRegionName): static
+    {
+        $this->newBirthRegionName = $newBirthRegionName;
+
+        return $this;
+    }
+
+    private function ensurePersonExists(): void
+    {
+        if ($this->person === null) {
+            $this->person = new Person();
+        }
     }
 }

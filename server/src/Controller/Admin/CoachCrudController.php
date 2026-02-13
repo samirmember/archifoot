@@ -2,12 +2,19 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\City;
 use App\Entity\Coach;
+use App\Entity\Country;
+use App\Entity\Region;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class CoachCrudController extends AbstractCrudController
@@ -38,8 +45,39 @@ class CoachCrudController extends AbstractCrudController
             ->setUploadedFileNamePattern('[uuid].[extension]')
             ->setRequired(false);
 
+        if ($pageName === Crud::PAGE_INDEX) {
+            return [
+                TextField::new('personFullName', 'Nom complet'),
+                ChoiceField::new('role', 'Rôle')->setChoices(array_flip(Coach::ROLES)),
+                $photoField,
+            ];
+        }
+
         return [
             TextField::new('personFullName', 'Nom complet'),
+            DateField::new('personBirthDate', 'Date de naissance')->setRequired(false),
+            Field::new('personBirthCity', 'Ville de naissance')
+                ->setFormType(EntityType::class)
+                ->setFormTypeOption('class', City::class)
+                ->setFormTypeOption('choice_label', 'name')
+                ->setFormTypeOption('required', false),
+            TextField::new('newBirthCityName', 'Nouvelle ville (si absente)')->setRequired(false),
+            Field::new('personBirthRegion', 'Région de naissance')
+                ->setFormType(EntityType::class)
+                ->setFormTypeOption('class', Region::class)
+                ->setFormTypeOption('choice_label', 'name')
+                ->setFormTypeOption('required', false),
+            TextField::new('newBirthRegionName', 'Nouvelle région (si absente)')->setRequired(false),
+            Field::new('personBirthCountry', 'Pays de naissance')
+                ->setFormType(EntityType::class)
+                ->setFormTypeOption('class', Country::class)
+                ->setFormTypeOption('choice_label', 'name')
+                ->setFormTypeOption('required', false),
+            Field::new('personNationalityCountry', 'Nationalité')
+                ->setFormType(EntityType::class)
+                ->setFormTypeOption('class', Country::class)
+                ->setFormTypeOption('choice_label', 'name')
+                ->setFormTypeOption('required', false),
             ChoiceField::new('role', 'Rôle')
                 ->setChoices(array_flip(Coach::ROLES)),
             $photoField,
@@ -48,24 +86,56 @@ class CoachCrudController extends AbstractCrudController
 
     public function persistEntity($entityManager, $entityInstance): void
     {
-        if (!$entityInstance instanceof Coach) {
+        if (!$entityInstance instanceof Coach || !$entityManager instanceof EntityManagerInterface) {
             parent::persistEntity($entityManager, $entityInstance);
             return;
         }
 
+        $this->applyDynamicLocationEntries($entityInstance, $entityManager);
         $this->optimizeProfilePhoto($entityInstance);
         parent::persistEntity($entityManager, $entityInstance);
     }
 
     public function updateEntity($entityManager, $entityInstance): void
     {
-        if (!$entityInstance instanceof Coach) {
+        if (!$entityInstance instanceof Coach || !$entityManager instanceof EntityManagerInterface) {
             parent::updateEntity($entityManager, $entityInstance);
             return;
         }
 
+        $this->applyDynamicLocationEntries($entityInstance, $entityManager);
         $this->optimizeProfilePhoto($entityInstance);
         parent::updateEntity($entityManager, $entityInstance);
+    }
+
+    private function applyDynamicLocationEntries(Coach $coach, EntityManagerInterface $entityManager): void
+    {
+        $newRegionName = trim((string) $coach->getNewBirthRegionName());
+        if ($newRegionName !== '') {
+            $region = $entityManager->getRepository(Region::class)->findOneBy(['name' => $newRegionName]);
+            if (!$region instanceof Region) {
+                $region = (new Region())
+                    ->setName($newRegionName)
+                    ->setCountry($coach->getPersonBirthCountry());
+                $entityManager->persist($region);
+            }
+            $coach->setPersonBirthRegion($region);
+            $coach->setNewBirthRegionName(null);
+        }
+
+        $newCityName = trim((string) $coach->getNewBirthCityName());
+        if ($newCityName !== '') {
+            $city = $entityManager->getRepository(City::class)->findOneBy(['name' => $newCityName]);
+            if (!$city instanceof City) {
+                $city = (new City())
+                    ->setName($newCityName)
+                    ->setCountry($coach->getPersonBirthCountry())
+                    ->setRegion($coach->getPersonBirthRegion());
+                $entityManager->persist($city);
+            }
+            $coach->setPersonBirthCity($city);
+            $coach->setNewBirthCityName(null);
+        }
     }
 
     private function optimizeProfilePhoto(Coach $coach): void
