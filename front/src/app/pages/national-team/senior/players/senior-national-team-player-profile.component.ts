@@ -66,6 +66,6 @@ export class SeniorNationalTeamPlayerProfileComponent {
   }
 
   getPlaceholderState(placeholder: StatPlaceholder): 'missing' | 'ready' {
-    return placeholder.dynamic ? 'ready' : 'missing';
+    return placeholder.value ? 'ready' : 'missing';
   }
 }

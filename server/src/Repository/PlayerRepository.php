@@ -6,6 +6,7 @@ use App\Entity\Player;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\String\Slugger\AsciiSlugger;
+use App\Service\DateFormatter;
 
 /**
  * @extends ServiceEntityRepository<Player>
@@ -15,8 +16,10 @@ class PlayerRepository extends ServiceEntityRepository
     private const ALGERIA_NAMES = ['algérie', 'algerie'];
     private const ALGERIA_ISO3 = 'DZA';
 
-    public function __construct(ManagerRegistry $registry)
-    {
+    public function __construct(
+        ManagerRegistry $registry,
+        private readonly DateFormatter $dateFormatter
+    ) {
         parent::__construct($registry, Player::class);
     }
 
@@ -106,7 +109,7 @@ class PlayerRepository extends ServiceEntityRepository
             'fullName' => $matchedPlayer['fullName'],
             'photoUrl' => $matchedPlayer['photoUrl'],
             'profile' => [
-                'birthDate' => $matchedPlayer['birthDate']?->format('Y-m-d'),
+                'birthDate' => $this->dateFormatter->short($matchedPlayer['birthDate']),
                 'birthCity' => $matchedPlayer['birthCityName'],
                 'birthRegion' => $matchedPlayer['birthRegionName'],
                 'birthCountry' => $matchedPlayer['birthCountryName'],
@@ -114,29 +117,23 @@ class PlayerRepository extends ServiceEntityRepository
                 'primaryPositionCode' => $matchedPlayer['primaryPositionCode'],
                 'primaryPositionLabel' => $matchedPlayer['primaryPositionLabel'],
             ],
-            'nationalStats' => $nationalStats,
             'stats' => [
-                'caps' => $nationalStats['totals']['caps'],
-                'goals' => $nationalStats['totals']['goals'],
                 'starts' => $lineupStats['starts'],
                 'subIn' => $lineupStats['subIn'],
                 'captaincies' => $lineupStats['captaincies'],
-                'scoredGoalsFromMatchEvents' => $disciplineStats['scoredGoalsFromMatchEvents'],
+                'goals' => $disciplineStats['goals'],
                 'yellowCards' => $disciplineStats['yellowCards'],
                 'redCards' => $disciplineStats['redCards'],
                 'lastCapDate' => $lastCapDate,
             ],
-            'timeline' => [
-                'memberships' => $memberships,
-                'nationalStatRecords' => $nationalStats['records'],
-            ],
+            'memberships' => $memberships,
             'futureDataPlaceholders' => [
-                ['label' => 'Minutes jouées', 'value' => null],
-                ['label' => 'Passes décisives', 'value' => null],
-                ['label' => 'Tacles réussis', 'value' => null],
-                ['label' => 'Duels gagnés', 'value' => null],
-                ['label' => 'Distance parcourue', 'value' => null],
-                ['label' => 'Expected Goals (xG)', 'value' => null],
+                ['label' => 'Minutes jouées', 'value' => ''],
+                ['label' => 'Passes décisives', 'value' => ''],
+                ['label' => 'Tacles réussis', 'value' => ''],
+                ['label' => 'Duels gagnés', 'value' => ''],
+                ['label' => 'Distance parcourue', 'value' => ''],
+                ['label' => 'Expected Goals (xG)', 'value' => ''],
             ],
         ];
     }
@@ -261,7 +258,7 @@ class PlayerRepository extends ServiceEntityRepository
         $result = $this->getEntityManager()->getConnection()->fetchAssociative(
             <<<'SQL'
                 SELECT
-                    (SELECT COUNT(*) FROM match_goal mg WHERE mg.scorer_id = :playerId) AS scoredGoalsFromMatchEvents,
+                    (SELECT COUNT(*) FROM match_goal mg WHERE mg.scorer_id = :playerId) AS goals,
                     (SELECT COUNT(*) FROM match_card mc WHERE mc.player_id = :playerId AND LOWER(mc.card_type) = 'y') AS yellowCards,
                     (SELECT COUNT(*) FROM match_card mc WHERE mc.player_id = :playerId AND LOWER(mc.card_type) = 'r') AS redCards
             SQL,
@@ -269,7 +266,7 @@ class PlayerRepository extends ServiceEntityRepository
         );
 
         return [
-            'scoredGoalsFromMatchEvents' => (int) ($result['scoredGoalsFromMatchEvents'] ?? 0),
+            'goals' => (int) ($result['goals'] ?? 0),
             'yellowCards' => (int) ($result['yellowCards'] ?? 0),
             'redCards' => (int) ($result['redCards'] ?? 0),
         ];

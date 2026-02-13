@@ -99,10 +99,8 @@ export interface MembershipHistoryItem {
 }
 
 export interface StatPlaceholder {
-  key: string;
-  title: string;
-  description: string;
-  dynamic: boolean;
+  label: string;
+  value: string | number | null;
 }
 
 export interface PlayerProfile {

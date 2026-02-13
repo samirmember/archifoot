@@ -20,19 +20,25 @@
           <p class="eyebrow">Fiche internationale</p>
           <h1>{{ pageTitle() }}</h1>
           <div class="identity-grid">
-            <span>{{ asBadgeLabel(profile()!.profile.primaryPositionLabel) }}</span>
-            <span>Algérien</span>
+            <span>{{
+              asBadgeLabel(
+                profile()!.profile.primaryPositionLabel +
+                  '(' +
+                  profile()!.profile.primaryPositionCode +
+                  ')'
+              )
+            }}</span>
             <span>{{
               asBadgeLabel(profile()!.profile.birthDate, 'Date de naissance inconnue')
             }}</span>
-            <span>{{
-              asBadgeLabel(
-                profile()!.profile.birthCity + ' ' + profile()?.profile?.birthCountry,
-                'Lieu de naissance inconnu'
-              )
-            }}</span>
-            <span>{{ asBadgeLabel(profile()!.memberships[0].countryName) }}</span>
-            <!-- <span>{{ asBadgeLabel(profile()!.profile.shirtNumber, 'Numéro inconnu') }}</span> -->
+            <span>
+              {{ asBadgeLabel(profile()!.profile.birthCity, 'Lieu de naissance inconnu') }}
+              @if (profile()?.profile?.birthRegion) {
+                {{ ', ' + profile()?.profile?.birthRegion }}
+              }
+            </span>
+            <span>{{ profile()?.profile?.birthCountry }}</span>
+            <span>{{ asBadgeLabel(profile()!.profile.nationalityCountry) }}</span>
           </div>
         </div>
       </article>
@@ -41,11 +47,11 @@
           <h2>Statistiques Algérie</h2>
           <div class="big-stats">
             <div>
-              <strong>{{ profile()!.stats.caps }}</strong>
+              <strong>{{ profile()!.stats.starts + profile()!.stats.subIn }}</strong>
               <span>Sélections</span>
             </div>
             <div>
-              <strong>{{ profile()!.stats.scoredGoalsFromMatchEvents }}</strong>
+              <strong>{{ profile()!.stats.goals }}</strong>
               <span>Buts</span>
             </div>
             <div>
@@ -82,36 +88,17 @@
         </article>
       </section>
 
-      <!-- <section class="card-like section-block">
-        <h2>Historique clubs</h2>
-        @if (profile()!.clubHistory && profile()!.clubHistory.length === 0) {
-          <p class="muted">Aucune information club disponible.</p>
-        } @else {
-          <ul class="timeline-list">
-            @for (club of profile()!.clubHistory; track $index) {
-              <li>
-                <strong>{{ club.teamName }}</strong>
-                <span>{{ club.periodLabel }}</span>
-                @if (club.isCurrent) {
-                  <em>Actuel</em>
-                }
-              </li>
-            }
-          </ul>
-        }
-      </section>
-
       <section class="card-like section-block">
-        <h2>Blocs à dynamiser (données futures)</h2>
+        <h2>Données futures</h2>
         <div class="future-grid">
-          @for (placeholder of profile()!.futureStats; track placeholder.key) {
+          @for (placeholder of profile()!.futureDataPlaceholders; track $index) {
             <article [class]="'future-card ' + getPlaceholderState(placeholder)">
-              <h3>{{ placeholder.title }}</h3>
-              <p>{{ placeholder.description }}</p>
+              <h3>{{ placeholder.label }}</h3>
+              <p>{{ placeholder.value }}</p>
             </article>
           }
         </div>
-      </section> -->
+      </section>
     }
   </div>
 </section>
