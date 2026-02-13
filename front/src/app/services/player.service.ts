@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { ApiClientService } from '../core/http/api-client.service';
 import { environment } from '../../environments/environment';
+import { MatchResult } from './result.service';
 
 export interface SeniorPlayer {
   id: number;
@@ -35,6 +36,7 @@ export interface SeniorPlayerDetail {
     countryName: string | null;
     nationalTeamName: string | null;
   }>;
+  appearances: MatchResult[];
   nationalStats: {
     totals: {
       caps: number;

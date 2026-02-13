@@ -108,21 +108,15 @@
       </section>
 
       <section class="card-like section-block">
-        <h2>Timeline des appartenances</h2>
-        @if (!profile()!.memberships.length) {
-          <p class="muted">Aucune donnée de membership pour ce joueur.</p>
+        <h2>Rencontres disputées</h2>
+        @if (!profile()!.appearances.length) {
+          <p class="muted">Aucune rencontre trouvée pour ce joueur.</p>
         } @else {
-          <ol class="timeline-list">
-            @for (membership of profile()!.memberships; track membership.id) {
-              <li>
-                <strong>{{ getMembershipTeamLabel(membership) }}</strong>
-                <span>{{ getMembershipPeriod(membership) }}</span>
-                @if (membership.isCurrent) {
-                  <em>Actuel</em>
-                }
-              </li>
+          <div class="results-list">
+            @for (appearance of profile()!.appearances; track appearance.fixtureId ?? $index) {
+              <app-result [result]="appearance" />
             }
-          </ol>
+          </div>
         }
       </section>
 
