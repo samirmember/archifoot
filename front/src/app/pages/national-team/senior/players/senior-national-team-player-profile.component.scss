@@ -66,13 +66,28 @@
     gap: 0.5rem;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 
-    span {
+    article {
       padding: 0.65rem 0.75rem;
       border-radius: 10px;
       background: #f4f7fb;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    label {
+      color: #5f6d88;
+      font-size: 0.77rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+
+    span {
       color: #23314f;
       font-weight: 500;
       font-size: 0.92rem;
+      line-height: 1.25;
     }
   }
 
@@ -86,6 +101,7 @@
   .stat-card,
   .section-block {
     padding: 1rem;
+    margin-bottom: 1rem;
   }
 
   h2 {

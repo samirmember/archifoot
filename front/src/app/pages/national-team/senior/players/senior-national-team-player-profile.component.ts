@@ -4,7 +4,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import {
-  PlayerProfile,
   PlayerService,
   SeniorPlayerDetail,
   StatPlaceholder,
@@ -44,7 +43,6 @@ export class SeniorNationalTeamPlayerProfileComponent {
         .pipe(catchError(() => of(null)))
         .subscribe((response) => {
           this.profile.set(response);
-          console.log(this.profile());
           this.isLoading.set(false);
         });
 
@@ -67,5 +65,25 @@ export class SeniorNationalTeamPlayerProfileComponent {
 
   getPlaceholderState(placeholder: StatPlaceholder): 'missing' | 'ready' {
     return placeholder.value ? 'ready' : 'missing';
+  }
+
+  getMembershipTeamLabel(membership: SeniorPlayerDetail['memberships'][number]): string {
+    return (
+      membership.teamDisplayName ||
+      membership.nationalTeamName ||
+      membership.clubName ||
+      'Équipe non renseignée'
+    );
+  }
+
+  getMembershipPeriod(membership: SeniorPlayerDetail['memberships'][number]): string {
+    const fromDate = membership.fromDate ? membership.fromDate.slice(0, 10) : 'Date inconnue';
+    const toDate = membership.isCurrent
+      ? 'Présent'
+      : membership.toDate
+        ? membership.toDate.slice(0, 10)
+        : 'Date inconnue';
+
+    return `${fromDate} → ${toDate}`;
   }
 }

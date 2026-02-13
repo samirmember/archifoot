@@ -59,6 +59,7 @@ export interface SeniorPlayerDetail {
     scoredGoalsFromMatchEvents: number;
     yellowCards: number;
     redCards: number;
+    duelsWon: number | null;
     lastCapDate: string;
   };
   timeline: {
@@ -69,6 +70,10 @@ export interface SeniorPlayerDetail {
     label: string;
     value: string | number | null;
   }>;
+}
+
+interface SeniorPlayerDetailApiResponse {
+  data: SeniorPlayerDetail;
 }
 
 export interface SeniorPlayersResponse {
@@ -151,13 +156,37 @@ export class PlayerService {
 
   public getSeniorNationalTeamPlayerProfile(slug: string): Observable<SeniorPlayerDetail> {
     return this.apiClient
-      .get<SeniorPlayerDetail>(`senior-national-team/players/${encodeURIComponent(slug)}`)
+      .get<SeniorPlayerDetail | SeniorPlayerDetailApiResponse>(
+        `senior-national-team/players/${encodeURIComponent(slug)}`,
+      )
       .pipe(
+        map((response) => ('data' in response ? response.data : response)),
         map((profile) => ({
           ...profile,
           photoUrl: this.toPlayerPhotoUrl(profile.photoUrl),
+          stats: {
+            ...profile.stats,
+            duelsWon: profile.stats.duelsWon ?? this.extractDuelsWon(profile.futureDataPlaceholders),
+          },
         })),
       );
+  }
+
+  private extractDuelsWon(placeholders: StatPlaceholder[] | undefined): number | null {
+    if (!placeholders?.length) {
+      return null;
+    }
+
+    const duelsPlaceholder = placeholders.find(
+      (placeholder) => placeholder.label.trim().toLowerCase() === 'duels gagnés',
+    );
+
+    if (!duelsPlaceholder || duelsPlaceholder.value === null || duelsPlaceholder.value === '') {
+      return null;
+    }
+
+    const parsedValue = Number(duelsPlaceholder.value);
+    return Number.isFinite(parsedValue) ? parsedValue : null;
   }
 
   private toPlayerPhotoUrl(photoUrl: string | null): string | null {
