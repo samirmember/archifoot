@@ -60,14 +60,20 @@ class CoachCrudController extends AbstractCrudController
                 ->setFormType(EntityType::class)
                 ->setFormTypeOption('class', City::class)
                 ->setFormTypeOption('choice_label', 'name')
+                ->setFormTypeOption('row_attr', ['class' => 'js-location-source-row'])
                 ->setFormTypeOption('required', false),
-            TextField::new('newBirthCityName', 'Nouvelle ville (si absente)')->setRequired(false),
+            TextField::new('newBirthCityName', 'Nouvelle ville (si absente)')
+                ->setFormTypeOption('row_attr', ['class' => 'js-location-target-row'])
+                ->setRequired(false),
             Field::new('personBirthRegion', 'Région de naissance')
                 ->setFormType(EntityType::class)
                 ->setFormTypeOption('class', Region::class)
                 ->setFormTypeOption('choice_label', 'name')
+                ->setFormTypeOption('row_attr', ['class' => 'js-location-source-row'])
                 ->setFormTypeOption('required', false),
-            TextField::new('newBirthRegionName', 'Nouvelle région (si absente)')->setRequired(false),
+            TextField::new('newBirthRegionName', 'Nouvelle région (si absente)')
+                ->setFormTypeOption('row_attr', ['class' => 'js-location-target-row'])
+                ->setRequired(false),
             Field::new('personBirthCountry', 'Pays de naissance')
                 ->setFormType(EntityType::class)
                 ->setFormTypeOption('class', Country::class)
