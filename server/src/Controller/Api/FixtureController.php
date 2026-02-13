@@ -9,6 +9,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class FixtureController extends AbstractController
 {
+    private const ALGERIA_TEAM_ID = 1;
+
     #[Route('/api/senior-national-team/matchs/{externalMatchNo}/scoresheet', name: 'api_senior_match_scoresheet_show', methods: ['GET'])]
     public function scoresheet(int $externalMatchNo, Connection $connection): JsonResponse
     {
@@ -202,11 +204,39 @@ class FixtureController extends AbstractController
     #[Route('/api/senior-national-team/matchs/totals', name: 'api_fixtures_totals', methods: ['GET'])]
     public function totals(Connection $connection): JsonResponse
     {
+        $totals = $connection->fetchAssociative(
+            <<<'SQL'
+                WITH algeria_matches AS (
+                    SELECT
+                        f.id,
+                        fp.score AS algeria_score,
+                        MAX(CASE WHEN fp_opponent.team_id <> :algeriaTeamId THEN fp_opponent.score END) AS opponent_score
+                    FROM fixture f
+                    INNER JOIN fixture_participant fp ON fp.fixture_id = f.id AND fp.team_id = :algeriaTeamId
+                    LEFT JOIN fixture_participant fp_opponent ON fp_opponent.fixture_id = f.id
+                    WHERE f.played = true
+                    GROUP BY f.id, fp.score
+                )
+                SELECT
+                    COUNT(*) AS total_matches,
+                    SUM(CASE WHEN algeria_score IS NOT NULL AND opponent_score IS NOT NULL AND algeria_score > opponent_score THEN 1 ELSE 0 END) AS total_wins,
+                    COALESCE(SUM(algeria_score), 0) AS total_goals,
+                    (
+                        SELECT COUNT(*)
+                        FROM trophy_award ta
+                        WHERE ta.team_id = :algeriaTeamId
+                          AND ta.rank = 1
+                    ) AS trophy_wins
+                FROM algeria_matches
+            SQL,
+            ['algeriaTeamId' => self::ALGERIA_TEAM_ID]
+        );
+
         return $this->json([
-            'totalMatches' => 0,
-            'totalWins' => 0,
-            'totalGoals' => 0,
-            'trophyWins' => 0,
+            'totalMatches' => (int) ($totals['total_matches'] ?? 0),
+            'totalWins' => (int) ($totals['total_wins'] ?? 0),
+            'totalGoals' => (int) ($totals['total_goals'] ?? 0),
+            'trophyWins' => (int) ($totals['trophy_wins'] ?? 0),
         ]);
     }
 }
