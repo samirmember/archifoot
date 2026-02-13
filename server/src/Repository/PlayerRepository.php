@@ -238,21 +238,21 @@ class PlayerRepository extends ServiceEntityRepository
     /** @return array<int, array<string, mixed>> */
     private function fetchPlayerAppearances(int $playerId): array
     {
-        return $this->getEntityManager()->getConnection()->fetchAllAssociative(
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
             <<<'SQL'
                 SELECT
                     f.id AS fixtureId,
                     f.external_match_no AS externalMatchNo,
                     teamA.display_name AS countryA,
                     teamB.display_name AS countryB,
-                    NULL AS countryCodeA,
-                    NULL AS countryCodeB,
-                    NULL AS editions,
-                    NULL AS stages,
+                    countryA.iso2 AS countryCodeA,
+                    countryB.iso2 AS countryCodeB,
+                    editions.editions AS editions,
+                    stages.stages AS stages,
                     scoreA.score AS scoreA,
                     scoreB.score AS scoreB,
-                    '' AS categoryA,
-                    '' AS categoryB,
+                    COALESCE(categoryA.name, fixtureCategory.name, '') AS categoryA,
+                    COALESCE(categoryB.name, fixtureCategory.name, '') AS categoryB,
                     f.match_date AS date,
                     season.name AS season,
                     f.is_official AS isOfficial,
@@ -269,10 +269,33 @@ class PlayerRepository extends ServiceEntityRepository
                 LEFT JOIN fixture_participant scoreB ON scoreB.fixture_id = f.id AND scoreB.role = 'B'
                 LEFT JOIN team teamA ON teamA.id = scoreA.team_id
                 LEFT JOIN team teamB ON teamB.id = scoreB.team_id
+                LEFT JOIN national_team nationalTeamA ON nationalTeamA.id = teamA.national_team_id
+                LEFT JOIN national_team nationalTeamB ON nationalTeamB.id = teamB.national_team_id
+                LEFT JOIN country countryA ON countryA.id = nationalTeamA.country_id
+                LEFT JOIN country countryB ON countryB.id = nationalTeamB.country_id
+                LEFT JOIN category categoryA ON categoryA.id = nationalTeamA.category_id
+                LEFT JOIN category categoryB ON categoryB.id = nationalTeamB.category_id
+                LEFT JOIN category fixtureCategory ON fixtureCategory.id = f.category_id
                 LEFT JOIN season season ON season.id = f.season_id
                 LEFT JOIN city city ON city.id = f.city_id
                 LEFT JOIN stadium stadium ON stadium.id = f.stadium_id
                 LEFT JOIN country country ON country.id = f.country_id
+                LEFT JOIN (
+                    SELECT
+                        fe.fixture_id,
+                        GROUP_CONCAT(DISTINCT e.name ORDER BY e.name SEPARATOR '||') AS editions
+                    FROM fixture_edition fe
+                    INNER JOIN edition e ON e.id = fe.edition_id
+                    GROUP BY fe.fixture_id
+                ) editions ON editions.fixture_id = f.id
+                LEFT JOIN (
+                    SELECT
+                        fs.fixture_id,
+                        GROUP_CONCAT(DISTINCT s.name ORDER BY s.sort_order, s.name SEPARATOR '||') AS stages
+                    FROM fixture_stage fs
+                    INNER JOIN stage s ON s.id = fs.stage_id
+                    GROUP BY fs.fixture_id
+                ) stages ON stages.fixture_id = f.id
                 LEFT JOIN (
                     SELECT
                         fc.fixture_id,
@@ -287,6 +310,18 @@ class PlayerRepository extends ServiceEntityRepository
             SQL,
             ['playerId' => $playerId]
         );
+
+        foreach ($rows as &$row) {
+            $row['editions'] = is_string($row['editions']) && $row['editions'] !== ''
+                ? explode('||', $row['editions'])
+                : null;
+            $row['stages'] = is_string($row['stages']) && $row['stages'] !== ''
+                ? explode('||', $row['stages'])
+                : null;
+        }
+        unset($row);
+
+        return $rows;
     }
 
     private function fetchLineupStats(int $playerId): array
