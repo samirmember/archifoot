@@ -11,8 +11,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class PlayerCrudController extends AbstractCrudController
@@ -43,27 +45,39 @@ class PlayerCrudController extends AbstractCrudController
             ->setUploadedFileNamePattern('[uuid].[extension]')
             ->setRequired(false);
 
+        if ($pageName === Crud::PAGE_INDEX) {
+            return [
+                TextField::new('personFullName', 'Nom complet'),
+                AssociationField::new('primaryPosition', 'Poste'),
+                $photoField,
+            ];
+        }
+
         return [
             TextField::new('personFullName', 'Nom complet'),
             DateField::new('personBirthDate', 'Date de naissance')->setRequired(false),
-            AssociationField::new('personBirthCity', 'Ville de naissance')
+            Field::new('personBirthCity', 'Ville de naissance')
+                ->setFormType(EntityType::class)
                 ->setFormTypeOption('class', City::class)
                 ->setFormTypeOption('choice_label', 'name')
-                ->autocomplete(),
+                ->setFormTypeOption('required', false),
             TextField::new('newBirthCityName', 'Nouvelle ville (si absente)')->setRequired(false),
-            AssociationField::new('personBirthRegion', 'Région de naissance')
+            Field::new('personBirthRegion', 'Région de naissance')
+                ->setFormType(EntityType::class)
                 ->setFormTypeOption('class', Region::class)
                 ->setFormTypeOption('choice_label', 'name')
-                ->autocomplete(),
+                ->setFormTypeOption('required', false),
             TextField::new('newBirthRegionName', 'Nouvelle région (si absente)')->setRequired(false),
-            AssociationField::new('personBirthCountry', 'Pays de naissance')
+            Field::new('personBirthCountry', 'Pays de naissance')
+                ->setFormType(EntityType::class)
                 ->setFormTypeOption('class', Country::class)
                 ->setFormTypeOption('choice_label', 'name')
-                ->autocomplete(),
-            AssociationField::new('personNationalityCountry', 'Nationalité')
+                ->setFormTypeOption('required', false),
+            Field::new('personNationalityCountry', 'Nationalité')
+                ->setFormType(EntityType::class)
                 ->setFormTypeOption('class', Country::class)
                 ->setFormTypeOption('choice_label', 'name')
-                ->autocomplete(),
+                ->setFormTypeOption('required', false),
             AssociationField::new('primaryPosition', 'Poste')->autocomplete(),
             $photoField,
         ];
