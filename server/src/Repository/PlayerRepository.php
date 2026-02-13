@@ -97,6 +97,7 @@ class PlayerRepository extends ServiceEntityRepository
 
         $playerId = (int) $matchedPlayer['id'];
         $memberships = $this->fetchMemberships($playerId);
+        $appearances = $this->fetchPlayerAppearances($playerId);
         $nationalStats = $this->fetchNationalStats($playerId);
         $lineupStats = $this->fetchLineupStats($playerId);
         $disciplineStats = $this->fetchDisciplineStats($playerId);
@@ -128,6 +129,7 @@ class PlayerRepository extends ServiceEntityRepository
                 'duelsWon' => $this->fetchDuelsWon($playerId),
             ],
             'memberships' => $memberships,
+            'appearances' => $appearances,
             'futureDataPlaceholders' => [
                 ['label' => 'Minutes jouées', 'value' => ''],
                 ['label' => 'Passes décisives', 'value' => ''],
@@ -231,6 +233,60 @@ class PlayerRepository extends ServiceEntityRepository
             ],
             'records' => $records,
         ];
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private function fetchPlayerAppearances(int $playerId): array
+    {
+        return $this->getEntityManager()->getConnection()->fetchAllAssociative(
+            <<<'SQL'
+                SELECT
+                    f.id AS fixtureId,
+                    f.external_match_no AS externalMatchNo,
+                    teamA.display_name AS countryA,
+                    teamB.display_name AS countryB,
+                    NULL AS countryCodeA,
+                    NULL AS countryCodeB,
+                    NULL AS editions,
+                    NULL AS stages,
+                    scoreA.score AS scoreA,
+                    scoreB.score AS scoreB,
+                    '' AS categoryA,
+                    '' AS categoryB,
+                    f.match_date AS date,
+                    season.name AS season,
+                    f.is_official AS isOfficial,
+                    f.played AS played,
+                    city.name AS city,
+                    stadium.name AS stadium,
+                    country.name AS countryStadiumName,
+                    f.notes AS notes,
+                    COALESCE(competitions.competitionLabel, '') AS competitionLabel
+                FROM scoresheet_lineup sl
+                INNER JOIN scoresheet s ON s.id = sl.scoresheet_id
+                INNER JOIN fixture f ON f.id = s.fixture_id
+                LEFT JOIN fixture_participant scoreA ON scoreA.fixture_id = f.id AND scoreA.role = 'A'
+                LEFT JOIN fixture_participant scoreB ON scoreB.fixture_id = f.id AND scoreB.role = 'B'
+                LEFT JOIN team teamA ON teamA.id = scoreA.team_id
+                LEFT JOIN team teamB ON teamB.id = scoreB.team_id
+                LEFT JOIN season season ON season.id = f.season_id
+                LEFT JOIN city city ON city.id = f.city_id
+                LEFT JOIN stadium stadium ON stadium.id = f.stadium_id
+                LEFT JOIN country country ON country.id = f.country_id
+                LEFT JOIN (
+                    SELECT
+                        fc.fixture_id,
+                        GROUP_CONCAT(c.name ORDER BY c.name SEPARATOR ' | ') AS competitionLabel
+                    FROM fixture_competition fc
+                    INNER JOIN competition c ON c.id = fc.competition_id
+                    GROUP BY fc.fixture_id
+                ) competitions ON competitions.fixture_id = f.id
+                WHERE sl.player_id = :playerId
+                GROUP BY f.id
+                ORDER BY f.match_date DESC, f.id DESC
+            SQL,
+            ['playerId' => $playerId]
+        );
     }
 
     private function fetchLineupStats(int $playerId): array

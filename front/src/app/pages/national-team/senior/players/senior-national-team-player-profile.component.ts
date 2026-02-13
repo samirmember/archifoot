@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ResultComponent } from 'src/app/components/result/result.component';
 import { catchError, of } from 'rxjs';
 import {
   PlayerService,
@@ -11,7 +12,7 @@ import {
 
 @Component({
   selector: 'app-senior-national-team-player-profile',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ResultComponent],
   templateUrl: './senior-national-team-player-profile.component.html',
   styleUrl: './senior-national-team-player-profile.component.scss',
 })
@@ -67,23 +68,4 @@ export class SeniorNationalTeamPlayerProfileComponent {
     return placeholder.value ? 'ready' : 'missing';
   }
 
-  getMembershipTeamLabel(membership: SeniorPlayerDetail['memberships'][number]): string {
-    return (
-      membership.teamDisplayName ||
-      membership.nationalTeamName ||
-      membership.clubName ||
-      'Équipe non renseignée'
-    );
-  }
-
-  getMembershipPeriod(membership: SeniorPlayerDetail['memberships'][number]): string {
-    const fromDate = membership.fromDate ? membership.fromDate.slice(0, 10) : 'Date inconnue';
-    const toDate = membership.isCurrent
-      ? 'Présent'
-      : membership.toDate
-        ? membership.toDate.slice(0, 10)
-        : 'Date inconnue';
-
-    return `${fromDate} → ${toDate}`;
-  }
 }
