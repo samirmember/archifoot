@@ -31,4 +31,16 @@ class SeniorNationalTeamCoachesController extends AbstractController
             ],
         ]);
     }
+
+    #[Route('/api/senior-national-team/coaches/{slug}', name: 'api_senior_coaches_show', methods: ['GET'])]
+    public function show(string $slug, CoachRepository $coachRepository): JsonResponse
+    {
+        $coach = $coachRepository->findSeniorNationalTeamCoachBySlug(trim($slug));
+
+        if ($coach === null) {
+            return $this->json(['message' => 'Coach introuvable'], 404);
+        }
+
+        return $this->json($coach);
+    }
 }
