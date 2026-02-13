@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Coach;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -39,7 +40,8 @@ class CoachCrudController extends AbstractCrudController
 
         return [
             TextField::new('personFullName', 'Nom complet'),
-            TextField::new('role', 'Rôle'),
+            ChoiceField::new('role', 'Rôle')
+                ->setChoices(array_flip(Coach::ROLES)),
             $photoField,
         ];
     }
