@@ -565,7 +565,7 @@ CREATE TABLE `fixture_participant` (
   `score` INT NULL COMMENT 'Goals in regular time',
   `score_extra` INT NULL COMMENT 'Extra time goals (optional)',
   `score_penalty` INT NULL COMMENT 'Penalty shootout goals (optional)',
-  `is_winner` TINYINT(1) NULL COMMENT 'Winner' CHECK (`is_winner` IN (0,1)),
+  `outcome` TINYINT(1) NULL COMMENT 'Winner or not' CHECK (`outcome` IN (0,1,2)),
   `venue_role` VARCHAR(10) NULL COMMENT 'HOME/AWAY/NEUTRAL/UNKNOWN (derived)',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_fixture_participant_fixture_id_role` (`fixture_id`, `role`),

@@ -125,6 +125,7 @@ class PlayerRepository extends ServiceEntityRepository
                 'yellowCards' => $disciplineStats['yellowCards'],
                 'redCards' => $disciplineStats['redCards'],
                 'lastCapDate' => $lastCapDate,
+                'duelsWon' => $this->fetchDuelsWon($playerId),
             ],
             'memberships' => $memberships,
             'futureDataPlaceholders' => [
@@ -270,6 +271,23 @@ class PlayerRepository extends ServiceEntityRepository
             'yellowCards' => (int) ($result['yellowCards'] ?? 0),
             'redCards' => (int) ($result['redCards'] ?? 0),
         ];
+    }
+
+    private function fetchDuelsWon(int $playerId): int
+    {
+        $result = $this->getEntityManager()->getConnection()->fetchAssociative(
+            <<<'SQL'
+                SELECT COUNT(DISTINCT sl.scoresheet_id) AS duelsWon
+                FROM scoresheet_lineup sl
+                INNER JOIN scoresheet s ON s.id = sl.scoresheet_id
+                INNER JOIN fixture_participant fp ON fp.fixture_id = s.fixture_id AND fp.team_id = sl.team_id
+                WHERE sl.player_id = :playerId
+                  AND fp.outcome = 1
+            SQL,
+            ['playerId' => $playerId]
+        );
+
+        return (int) ($result['duelsWon'] ?? 0);
     }
 
     /**

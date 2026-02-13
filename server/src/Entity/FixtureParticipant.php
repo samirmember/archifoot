@@ -9,6 +9,7 @@ use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use Symfony\Component\Serializer\Attribute\Groups;
+use App\Service\FixtureOutcomeEnum;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'fixture_participant')]
@@ -56,9 +57,9 @@ class FixtureParticipant
     #[Groups(['fixture_participant:read'])]
     private ?int $scorePenalty = null;
 
-    #[ORM\Column(name: 'is_winner', nullable: true)]
+    #[ORM\Column(name: 'outcome', type: 'smallint', enumType: FixtureOutcomeEnum::class, nullable: true)]
     #[Groups(['fixture_participant:read'])]
-    private ?bool $isWinner = null;
+    private ?FixtureOutcomeEnum $outcome = null;
 
     #[ORM\Column(name: 'venue_role', length: 10, nullable: true)]
     #[Groups(['fixture_participant:read'])]
@@ -154,16 +155,29 @@ class FixtureParticipant
         return $this;
     }
 
-    public function isWinner(): ?bool
+    public function getOutcome(): ?FixtureOutcome
     {
-        return $this->isWinner;
+        return $this->outcome;
     }
 
-    public function setIsWinner(?bool $isWinner): static
+    public function setOutcome(?FixtureOutcome $outcome): static
     {
-        $this->isWinner = $isWinner;
+        $this->outcome = $outcome; return $this;
+    }
 
-        return $this;
+    public function isWinner(): bool
+    {
+        return $this->outcome === FixtureOutcome::WINNER;
+    }
+
+    public function isLoser(): bool
+    {
+        return $this->outcome === FixtureOutcome::LOSER;
+    }
+
+    public function isDraw(): bool
+    {
+        return $this->outcome === FixtureOutcome::DRAW;
     }
 
     public function getVenueRole(): ?string
