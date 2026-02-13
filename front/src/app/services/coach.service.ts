@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 import { ApiClientService } from '../core/http/api-client.service';
+import { environment } from '../../environments/environment';
 
 export interface SeniorCoachListItem {
   id: number;
   fullName: string;
   role: string | null;
   nationality: string | null;
+  photoUrl: string | null;
 }
 
 export interface SeniorCoachesResponse {
@@ -72,7 +74,8 @@ export interface SeniorCoach {
   nationality: string;
   birthDate?: string;
   birthPlace?: string;
-  portraitUrl?: string;
+  portraitUrl?: string | null;
+  photoUrl?: string | null;
   contractUntil?: string;
   preferredSystem?: string;
   badges: string[];
@@ -87,6 +90,8 @@ export interface SeniorCoach {
 
 @Injectable({ providedIn: 'root' })
 export class CoachService {
+  private readonly apiOrigin = new URL(environment.api.baseUrl).origin;
+
   constructor(private readonly apiClient: ApiClientService) {}
 
   getSeniorNationalTeamCoaches(
@@ -94,16 +99,57 @@ export class CoachService {
     perPage: 12 | 24,
     query = '',
   ): Observable<SeniorCoachesResponse> {
-    return this.apiClient.get<SeniorCoachesResponse>('senior-national-team/coaches', {
-      page,
-      perPage,
-      q: query,
-    });
+    return this.apiClient
+      .get<SeniorCoachesResponse>('senior-national-team/coaches', {
+        page,
+        perPage,
+        q: query,
+      })
+      .pipe(
+        map((response) => ({
+          ...response,
+          items: response.items.map((coach) => ({
+            ...coach,
+            photoUrl: this.toCoachPhotoUrl(coach.photoUrl),
+          })),
+        })),
+      );
   }
 
   getSeniorNationalTeamCoachBySlug(slug: string): Observable<SeniorCoach | null> {
     return this.apiClient
       .get<SeniorCoach>(`senior-national-team/coaches/${encodeURIComponent(slug)}`)
-      .pipe(catchError(() => of(null)));
+      .pipe(
+        map((coach) => ({
+          ...coach,
+          photoUrl: this.toCoachPhotoUrl(coach.photoUrl ?? coach.portraitUrl ?? null),
+          portraitUrl: this.toCoachPhotoUrl(coach.portraitUrl ?? coach.photoUrl ?? null),
+        })),
+        catchError(() => of(null)),
+      );
+  }
+
+  private toCoachPhotoUrl(photoUrl: string | null | undefined): string | null {
+    if (!photoUrl) {
+      return null;
+    }
+
+    if (/^(https?:)?\/\//i.test(photoUrl) || photoUrl.startsWith('data:')) {
+      return photoUrl;
+    }
+
+    const normalizedPath = photoUrl.replace(/^\/+/, '');
+
+    if (normalizedPath.startsWith('uploads/')) {
+      return `${this.apiOrigin}/${normalizedPath}`;
+    }
+
+    const encodedPath = normalizedPath
+      .split('/')
+      .filter((segment) => segment.length > 0)
+      .map((segment) => encodeURIComponent(segment))
+      .join('/');
+
+    return `${this.apiOrigin}/api/person-photo/coaches/${encodedPath}`;
   }
 }

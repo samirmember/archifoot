@@ -26,6 +26,9 @@ class Coach
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $role = null;
 
+    #[ORM\Column(name: 'photo_url', length: 500, nullable: true)]
+    private ?string $photoUrl = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -51,6 +54,36 @@ class Coach
     public function setRole(?string $role): static
     {
         $this->role = $role;
+
+        return $this;
+    }
+
+    public function getPhotoUrl(): ?string
+    {
+        return $this->photoUrl;
+    }
+
+    public function setPhotoUrl(?string $photoUrl): static
+    {
+        $this->photoUrl = $photoUrl;
+
+        return $this;
+    }
+
+    public function getPersonFullName(): ?string
+    {
+        return $this->person?->getFullName();
+    }
+
+    public function setPersonFullName(?string $fullName): static
+    {
+        if ($this->person === null && $fullName !== null && $fullName !== '') {
+            $this->person = new Person();
+        }
+
+        if ($this->person !== null) {
+            $this->person->setFullName($fullName);
+        }
 
         return $this;
     }

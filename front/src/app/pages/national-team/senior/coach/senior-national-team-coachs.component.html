@@ -52,7 +52,11 @@
           >
             <article class="coach-card">
               <div class="coach-avatar">
-                <div class="avatar-placeholder">{{ getCoachInitials(coach.fullName) }}</div>
+                @if (coach.photoUrl) {
+                  <img [src]="coach.photoUrl" [alt]="coach.fullName" loading="lazy" />
+                } @else {
+                  <div class="avatar-placeholder">{{ getCoachInitials(coach.fullName) }}</div>
+                }
               </div>
 
               <div class="coach-meta">
