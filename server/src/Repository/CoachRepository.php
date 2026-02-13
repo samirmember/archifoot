@@ -21,14 +21,14 @@ class CoachRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return array{items: array<int, array{id:int,fullName:string,role:?string,nationality:?string}>, total:int}
+     * @return array{items: array<int, array{id:int,fullName:string,role:?string,nationality:?string,photoUrl:?string}>, total:int}
      */
     public function findCoaches(string $query, int $page, int $perPage): array
     {
         $qb = $this->createQueryBuilder('c')
             ->innerJoin('c.person', 'person')
             ->leftJoin('person.nationalityCountry', 'nationalityCountry')
-            ->select('c.id AS id, person.fullName AS fullName, c.role AS role, nationalityCountry.name AS nationality');
+            ->select('c.id AS id, person.fullName AS fullName, c.role AS role, c.photoUrl AS photoUrl, nationalityCountry.name AS nationality');
 
         if ($query !== '') {
             $qb
@@ -67,6 +67,7 @@ class CoachRepository extends ServiceEntityRepository
                 'person.id AS personId',
                 'person.fullName AS fullName',
                 'c.role AS role',
+                'c.photoUrl AS photoUrl',
                 'person.birthDate AS birthDate',
                 'birthCity.name AS birthCityName',
                 'birthCountry.name AS birthCountryName',
@@ -103,7 +104,8 @@ class CoachRepository extends ServiceEntityRepository
                 ? $matchedCoach['birthDate']->format('Y-m-d')
                 : null,
             'birthPlace' => $this->buildBirthPlace($matchedCoach['birthCityName'] ?? null, $matchedCoach['birthCountryName'] ?? null),
-            'portraitUrl' => null,
+            'portraitUrl' => $matchedCoach['photoUrl'],
+            'photoUrl' => $matchedCoach['photoUrl'],
             'contractUntil' => null,
             'preferredSystem' => null,
             'badges' => ['Données API'],
