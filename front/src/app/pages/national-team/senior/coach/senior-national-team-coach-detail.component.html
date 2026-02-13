@@ -1,6 +1,8 @@
 <section class="wrapper bg-light coach-detail-page">
-  <div class="container py-12 py-md-14">
-    <a class="back-link" routerLink="/equipe-nationale/senior/entraineurs">← Retour à la liste des entraîneurs</a>
+  <div class="container py-4 py-md-5">
+    <a class="back-link" routerLink="/equipe-nationale/senior/entraineurs">
+      ← Retour à la liste des entraîneurs
+    </a>
 
     @if (isLoading()) {
       <div class="state-card">Chargement de la fiche entraîneur...</div>
@@ -29,7 +31,12 @@
             </span>
             <span>Lieu de naissance: {{ coach()!.birthPlace || 'N/A' }}</span>
             <span>Système préféré: {{ coach()!.preferredSystem || 'N/A' }}</span>
-            <span>Fin de contrat: {{ coach()!.contractUntil ? (coach()!.contractUntil | date: 'MM/yyyy') : 'N/A' }}</span>
+            <span
+              >Fin de contrat:
+              {{
+                coach()!.contractUntil ? (coach()!.contractUntil | date: 'MM/yyyy') : 'N/A'
+              }}</span
+            >
             <span>Win rate: {{ getWinRate(coach()!) }}%</span>
           </div>
 
@@ -65,7 +72,13 @@
                   <p>
                     {{ step.startDate | date: 'MM/yyyy' }}
                     —
-                    {{ step.endDate ? (step.endDate | date: 'MM/yyyy') : (step.isCurrent ? "Aujourd'hui" : '...') }}
+                    {{
+                      step.endDate
+                        ? (step.endDate | date: 'MM/yyyy')
+                        : step.isCurrent
+                          ? "Aujourd'hui"
+                          : '...'
+                    }}
                   </p>
                 </div>
               </li>

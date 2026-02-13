@@ -96,13 +96,11 @@ class PlayerRepository extends ServiceEntityRepository
         }
 
         $playerId = (int) $matchedPlayer['id'];
-        $memberships = $this->fetchMemberships($playerId);
         $appearances = $this->fetchPlayerAppearances($playerId);
         $nationalStats = $this->fetchNationalStats($playerId);
         $lineupStats = $this->fetchLineupStats($playerId);
         $disciplineStats = $this->fetchDisciplineStats($playerId);
-
-        $lastCapDate = isset($memberships[0]) ? substr($memberships[0]['toDate'], 0, 4) : null;
+        $lastCapDate = isset($appearances[0]) ? substr($appearances[0]['date'], 0, 4) : null;
 
         return [
             'id' => $playerId,
@@ -128,7 +126,6 @@ class PlayerRepository extends ServiceEntityRepository
                 'lastCapDate' => $lastCapDate,
                 'duelsWon' => $this->fetchDuelsWon($playerId),
             ],
-            'memberships' => $memberships,
             'appearances' => $appearances,
             'futureDataPlaceholders' => [
                 ['label' => 'Minutes jouées', 'value' => ''],

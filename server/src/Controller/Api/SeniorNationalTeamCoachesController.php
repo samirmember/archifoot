@@ -11,6 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/senior-national-team/coaches', name: 'api_senior_coaches_', methods: ['GET'])]
 class SeniorNationalTeamCoachesController extends AbstractController
 {
+    #[Route('', name: 'list', methods: ['GET'])]
     public function __invoke(Request $request, CoachRepository $coachRepository): JsonResponse
     {
         $query = trim((string) $request->query->get('q', ''));
@@ -32,7 +33,7 @@ class SeniorNationalTeamCoachesController extends AbstractController
         ]);
     }
 
-    #[Route('/api/senior-national-team/coaches/{slug}', name: 'api_senior_coaches_show', methods: ['GET'])]
+    #[Route('/{slug}', name: 'api_senior_coaches_show', methods: ['GET'])]
     public function show(string $slug, CoachRepository $coachRepository): JsonResponse
     {
         $coach = $coachRepository->findSeniorNationalTeamCoachBySlug(trim($slug));

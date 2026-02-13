@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 // use App\Entity\Category;
 // use App\Entity\City;
 // use App\Entity\Club;
-// use App\Entity\Coach;
+use App\Entity\Coach;
 // use App\Entity\Competition;
 // use App\Entity\Country;
 // use App\Entity\Division;
@@ -74,7 +74,6 @@ class AdminDashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Catégories', 'fas fa-tags', Category::class)->setController(CategoryCrudController::class);
         yield MenuItem::linkToCrud('Villes', 'fas fa-city', City::class)->setController(CityCrudController::class);
     //     yield MenuItem::linkToCrud('Clubs', 'fas fa-shield-alt', Club::class);
-    //     yield MenuItem::linkToCrud('Coachs', 'fas fa-chalkboard-teacher', Coach::class);
         yield MenuItem::linkToCrud('Compétitions', 'fas fa-trophy', Competition::class)->setController(CompetitionCrudController::class);
         yield MenuItem::linkToCrud('Pays', 'fas fa-flag', Country::class)->setController(CountryCrudController::class);
     //     yield MenuItem::linkToCrud('Divisions', 'fas fa-sitemap', Division::class)->setController(DivisionCrudController::class);
@@ -90,6 +89,7 @@ class AdminDashboardController extends AbstractDashboardController
     //     yield MenuItem::linkToCrud('Personnes', 'fas fa-user', Person::class)->setController(PersonCrudController::class);
     //     yield MenuItem::linkToCrud('Historique clubs', 'fas fa-history', PersonClubHistory::class)->setController(PersonClubHistoryCrudController::class);
         yield MenuItem::linkToCrud('Joueurs', 'fas fa-running', Player::class)->setController(PlayerCrudController::class);
+        yield MenuItem::linkToCrud('Coachs', 'fas fa-chalkboard-teacher', Coach::class);
     //     yield MenuItem::linkToCrud('Stats sélections', 'fas fa-chart-line', PlayerNationalStats::class)->setController(PlayerNationalStatsCrudController::class);
         yield MenuItem::linkToCrud('Postes', 'fas fa-map-pin', Position::class)->setController(PositionCrudController::class);
         // yield MenuItem::linkToCrud('Arbitres', 'fas fa-whistle', Referee::class)->setController(RefereeCrudController::class);

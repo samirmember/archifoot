@@ -8,6 +8,12 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'coach')]
 class Coach
 {
+    const ROLES = [
+        'Head' => 'Entraîneur principal',
+        'Assistant' => 'Entraîneur assistant',
+        'Trainer' => 'Entraîneur stagiaire'
+    ];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

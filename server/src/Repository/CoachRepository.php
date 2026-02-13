@@ -97,7 +97,7 @@ class CoachRepository extends ServiceEntityRepository
             'id' => (string) $matchedCoach['id'],
             'slug' => $slug,
             'fullName' => $matchedCoach['fullName'],
-            'role' => $matchedCoach['role'] ?? 'Entraîneur',
+            'role' => Coach::ROLES[$matchedCoach['role']] ?? 'Entraîneur',
             'nationality' => $matchedCoach['nationality'] ?? 'Nationalité non renseignée',
             'birthDate' => isset($matchedCoach['birthDate']) && $matchedCoach['birthDate'] instanceof \DateTimeInterface
                 ? $matchedCoach['birthDate']->format('Y-m-d')
