@@ -20,25 +20,40 @@
           <p class="eyebrow">Fiche internationale</p>
           <h1>{{ pageTitle() }}</h1>
           <div class="identity-grid">
-            <span>{{
-              asBadgeLabel(
-                profile()!.profile.primaryPositionLabel +
-                  '(' +
-                  profile()!.profile.primaryPositionCode +
-                  ')'
-              )
-            }}</span>
-            <span>{{
-              asBadgeLabel(profile()!.profile.birthDate, 'Date de naissance inconnue')
-            }}</span>
-            <span>
-              {{ asBadgeLabel(profile()!.profile.birthCity, 'Lieu de naissance inconnu') }}
-              @if (profile()?.profile?.birthRegion) {
-                {{ ', ' + profile()?.profile?.birthRegion }}
-              }
-            </span>
-            <span>{{ profile()?.profile?.birthCountry }}</span>
-            <span>{{ asBadgeLabel(profile()!.profile.nationalityCountry) }}</span>
+            <article>
+              <label>Poste principal</label>
+              <span>{{
+                asBadgeLabel(
+                  profile()!.profile.primaryPositionLabel +
+                    '(' +
+                    profile()!.profile.primaryPositionCode +
+                    ')'
+                )
+              }}</span>
+            </article>
+            <article>
+              <label>Date de naissance</label>
+              <span>{{
+                asBadgeLabel(profile()!.profile.birthDate, 'Date de naissance inconnue')
+              }}</span>
+            </article>
+            <article>
+              <label>Lieu de naissance</label>
+              <span>
+                {{ asBadgeLabel(profile()!.profile.birthCity, 'Lieu de naissance inconnu') }}
+                @if (profile()?.profile?.birthRegion) {
+                  {{ ', ' + profile()?.profile?.birthRegion }}
+                }
+              </span>
+            </article>
+            <article>
+              <label>Pays de naissance</label>
+              <span>{{ asBadgeLabel(profile()?.profile?.birthCountry) }}</span>
+            </article>
+            <article>
+              <label>Nationalité</label>
+              <span>{{ asBadgeLabel(profile()!.profile.nationalityCountry) }}</span>
+            </article>
           </div>
         </div>
       </article>
@@ -61,6 +76,10 @@
             <div>
               <strong>{{ profile()!.stats.subIn }}</strong>
               <span>Entrées en jeu</span>
+            </div>
+            <div>
+              <strong>{{ asBadgeLabel(profile()!.stats.duelsWon?.toString(), 'N/A') }}</strong>
+              <span>Duels gagnés</span>
             </div>
           </div>
         </article>
@@ -86,6 +105,25 @@
             </div>
           </div>
         </article>
+      </section>
+
+      <section class="card-like section-block">
+        <h2>Timeline des appartenances</h2>
+        @if (!profile()!.memberships.length) {
+          <p class="muted">Aucune donnée de membership pour ce joueur.</p>
+        } @else {
+          <ol class="timeline-list">
+            @for (membership of profile()!.memberships; track membership.id) {
+              <li>
+                <strong>{{ getMembershipTeamLabel(membership) }}</strong>
+                <span>{{ getMembershipPeriod(membership) }}</span>
+                @if (membership.isCurrent) {
+                  <em>Actuel</em>
+                }
+              </li>
+            }
+          </ol>
+        }
       </section>
 
       <section class="card-like section-block">
