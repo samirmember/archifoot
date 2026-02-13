@@ -278,14 +278,24 @@
     }
 }
 
+.ea-location-toggle__widget {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.ea-location-toggle__widget > :first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
 .ea-location-toggle__button {
-    margin-left: 0.5rem;
     border: 1px solid #94a3b8;
     background: #ffffff;
     color: #0f172a;
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 999px;
+    width: 2.25rem;
+    min-width: 2.25rem;
+    border-radius: 0.5rem;
     font-weight: 700;
     line-height: 1;
     display: inline-flex;
