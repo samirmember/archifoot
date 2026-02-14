@@ -119,18 +119,6 @@
           </div>
         }
       </section>
-
-      <section class="card-like section-block">
-        <h2>Données futures</h2>
-        <div class="future-grid">
-          @for (placeholder of profile()!.futureDataPlaceholders; track $index) {
-            <article [class]="'future-card ' + getPlaceholderState(placeholder)">
-              <h3>{{ placeholder.label }}</h3>
-              <p>{{ placeholder.value }}</p>
-            </article>
-          }
-        </div>
-      </section>
     }
   </div>
 </section>

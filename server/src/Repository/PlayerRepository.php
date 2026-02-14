@@ -127,14 +127,6 @@ class PlayerRepository extends ServiceEntityRepository
                 'duelsWon' => $this->fetchDuelsWon($playerId),
             ],
             'appearances' => $appearances,
-            'futureDataPlaceholders' => [
-                ['label' => 'Minutes jouées', 'value' => ''],
-                ['label' => 'Passes décisives', 'value' => ''],
-                ['label' => 'Tacles réussis', 'value' => ''],
-                ['label' => 'Duels gagnés', 'value' => ''],
-                ['label' => 'Distance parcourue', 'value' => ''],
-                ['label' => 'Expected Goals (xG)', 'value' => ''],
-            ],
         ];
     }
 
@@ -563,32 +555,6 @@ class PlayerRepository extends ServiceEntityRepository
                 'lastCapDate' => $this->formatDate($lineupStats['lastCapDate'] ?? null),
             ],
             'clubHistory' => $clubHistory,
-            'futureStats' => [
-                [
-                    'key' => 'minutes-played',
-                    'title' => 'Minutes jouées',
-                    'description' => 'Bloc prévu pour afficher le volume de minutes en sélection (à brancher sur les feuilles de match détaillées).',
-                    'dynamic' => false,
-                ],
-                [
-                    'key' => 'xg-xa',
-                    'title' => 'xG / xA internationaux',
-                    'description' => 'Bloc analytique avancé pour mesurer la qualité des occasions créées et converties.',
-                    'dynamic' => false,
-                ],
-                [
-                    'key' => 'def-actions',
-                    'title' => 'Actions défensives',
-                    'description' => 'Interceptions, tacles gagnés, duels défensifs : idéal pour valoriser les profils défensifs.',
-                    'dynamic' => false,
-                ],
-                [
-                    'key' => 'passing-profile',
-                    'title' => 'Profil de passe',
-                    'description' => 'Précision de passe, passes progressives et passes clés en sélection.',
-                    'dynamic' => false,
-                ],
-            ],
         ];
     }
 

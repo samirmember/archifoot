@@ -443,6 +443,7 @@ CREATE TABLE `coach` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
   `person_id` INT NULL COMMENT 'FK person',
   `role` VARCHAR(50) NULL COMMENT 'Head/Assistant/Trainer',
+  `photo_url` VARCHAR(255) NULL COMMENT 'Coach photo',
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_coach_person_id` FOREIGN KEY (`person_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
