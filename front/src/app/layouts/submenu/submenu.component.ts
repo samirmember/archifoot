@@ -42,38 +42,28 @@ export class SubmenuComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.items[0].styleClass += ' active';
-
-    // Ajout d'un gestionnaire pour récupérer l'item cliqué
-    // this.items.forEach((item) => {
-    //   item.command = (event) => {
-    //     // event.originalEvent contient l'event natif, event.item l'item MenuItem
-    //     const clickedItem = event.item;
-
-    //     console.log('Menu item cliqué:', clickedItem);
-    //     // Vous pouvez ici stocker l'item sélectionné ou effectuer d'autres actions
-
-    //     // clickedItem?.styleClass = 'active';
-    //   };
-    // });
+    this.updateActiveItem(this.router.url);
 
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        const activeUrl = event.urlAfterRedirects;
-        this.items.forEach((item) => {
-          item.styleClass = item.styleClass?.replace(' active', '') || '';
-        });
-
-        const activeItem = this.items.find((item) => {
-          const itemUrl = item.routerLink?.toString() ?? '';
-          return activeUrl.startsWith(itemUrl);
-        });
-
-        if (activeItem) {
-          activeItem.styleClass += ' active';
-        }
+        this.updateActiveItem(event.urlAfterRedirects);
       }
     });
+  }
+
+  private updateActiveItem(activeUrl: string): void {
+    this.items.forEach((item) => {
+      item.styleClass = item.styleClass?.replace(' active', '') || '';
+    });
+
+    const activeItem = this.items.find((item) => {
+      const itemUrl = item.routerLink?.toString() ?? '';
+      return activeUrl.startsWith(itemUrl);
+    });
+
+    if (activeItem) {
+      activeItem.styleClass += ' active';
+    }
   }
 
   // ngAfterViewInit(): void {
