@@ -127,6 +127,9 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                 $this->upsertFixtureParticipant($fixtureId, $teamAId, 'A', $scoreA, null);
                 $this->upsertFixtureParticipant($fixtureId, $teamBId, 'B', $scoreB, null);
 
+                // @Todo: ensureReferee: récupérer plusieurs arbitres dans le même champ séparé par des virgules
+                // Cas: Nicholas Haïni, Didamanti, Raphael Zader, tous de nationalité suisse
+
                 // Scoresheet (créé même si vide -> utile pour enrichissement)
                 $coach = $this->toStr($row['BJ'] ?? null);
                 if ($coach === null) {
@@ -367,6 +370,8 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
             'AK', 'AL', 'AM', 'AN', 'AO',
             'AP', 'AQ', 'AR', 'AS',
         ];
+        // @Todo: in some cases, we can add minute of the substitution. So the function must take this in consideration
+        // Player name + min' (Like in cell AD596)
         foreach ($substitutionCols as $colKey) {
             $val = $this->toStr($row[$colKey] ?? null);
             $colIn = $this->shiftLetters($colKey, -9);
