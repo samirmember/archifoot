@@ -503,6 +503,7 @@ CREATE TABLE `fixture` (
   `played` TINYINT(1) NULL COMMENT 'Played' CHECK (`played` IN (0,1)),
   `is_official` TINYINT(1) NULL COMMENT 'Official match' CHECK (`is_official` IN (0,1)),
   `notes` TEXT NULL COMMENT 'Notes',
+  `internal_notes` TEXT NULL COMMENT 'Notes internes',
   PRIMARY KEY (`id`),
   KEY `ix_fixture_match_date` (`match_date`),
   KEY `ix_fixture_season_id` (`season_id`),

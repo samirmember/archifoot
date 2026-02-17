@@ -130,6 +130,9 @@ class Fixture
     #[Groups(['fixture:read'])]
     private ?string $notes = null;
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $internalNotes = null;
+
     #[ORM\OneToMany(mappedBy: 'fixture', targetEntity: FixtureParticipant::class)]
     private Collection $participants;
 
@@ -485,6 +488,18 @@ class Fixture
     public function setNotes(?string $notes): static
     {
         $this->notes = $notes;
+
+        return $this;
+    }
+
+    public function getInternalNotes(): ?string
+    {
+        return $this->internalNotes;
+    }
+
+    public function setInternalNotes(?string $internalNotes): static
+    {
+        $this->internalNotes = $internalNotes;
 
         return $this;
     }
