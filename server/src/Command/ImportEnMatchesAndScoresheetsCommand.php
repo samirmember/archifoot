@@ -130,13 +130,18 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                 // @Todo: ensureReferee: récupérer plusieurs arbitres dans le même champ séparé par des virgules
                 // Cas: Nicholas Haïni, Didamanti, Raphael Zader, tous de nationalité suisse
 
-                // Scoresheet (créé même si vide -> utile pour enrichissement)
+                // Entraineur principal
                 $coach = $this->toStr($row['BJ'] ?? null);
-                if ($coach === null) {
-                    $coach = $this->toStr($this->get($row, $headers, ['entraineur', 'entraîneur']));
-                }
-                $coachPersonId = $coach ? $this->ensureCoachPerson($coach) : null;
-                $report = $this->toStr($this->get($row, $headers, ['rapport','report']));
+                $coachPersonId = $coach ? $this->ensureCoachPerson($coach, 'Head') : null;
+                $coachAdv = $this->toStr($row['BK'] ?? null);
+                $coachAdvPersonId = $coachAdv ? $this->ensureCoachPerson($coachAdv, 'Head') : null;
+
+                // Entraineurs assistants 1 et 2
+                $coachAssistDz1 = $this->toStr($row['BM'] ?? null);
+                $coachAssistDz2 = $this->toStr($row['BN'] ?? null);
+                $coachAssistantDz1PersonId = $coachAssistDz1 ? $this->ensureCoachPerson($coachAssistDz1, 'Assistant') : null;
+                $coachAssistantDz2PersonId = $coachAssistDz2 ? $this->ensureCoachPerson($coachAssistDz2, 'Assistant') : null;
+
                 $scoresheetId = $this->ensureScoresheet($fixtureId, [
                     'attendance' => $this->toInt($this->get($row, $headers, ['nbr_spectateur','spectateur','attendance'])),
                     'fixed_time' => $this->toStr($this->get($row, $headers, ['heure_fixe'])),
@@ -147,12 +152,26 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                     'stoppage_time' => $this->toStr($this->get($row, $headers, ['heure_arret'])),
                     'match_stop_time' => null,
                     'reservations' => $this->toStr($this->get($row, $headers, ['reserve','réserve','reservations'])),
-                    'report' => $report,
+                    'report' => null,
                     'signed_place' => $this->toStr($this->get($row, $headers, ['fait_a','fait à','fait a'])),
                     'signed_on' => $this->parseDateToYmd($this->get($row, $headers, ['le'])),
                     'coach_id' => $coachPersonId,
                     'form_state' => '0',
                 ]);
+attendance
+fixed_time
+kickoff_time
+half_time
+second_half_start
+full_time
+stoppage_time
+match_stop_time
+reservations
+report
+signed_place
+signed_on
+coach_id
+form_state
 
                 // === Lineups (j1..j18 etc) ===
                 $algeriaTeamId = $this->resolveAlgeriaTeamId($teamAName, $teamBName, $teamAId, $teamBId);
@@ -905,7 +924,7 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
             'score'=>$score,
             'score_extra'=>null,
             'score_penalty'=>null,
-            'is_winner'=>null,
+            'outcome'=>null,
             'venue_role'=>$venueRole,
         ];
 
@@ -928,7 +947,7 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
         return (int)$this->db->lastInsertId();
     }
 
-    private function ensureCoachPerson(string $fullName): int
+    private function ensureCoachPerson(string $fullName, $role): int
     {
         $fullName = trim($fullName);
         $personId = $this->ensurePerson($fullName);
@@ -940,14 +959,14 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
         if (!$coachId) {
             $this->db->insert('coach', [
                 'person_id'=>$personId,
-                'role'=>'Head',
+                'role'=>$role,
             ]);
         }
 
         return $personId;
     }
 
-    private function ensurePlayerPerson(string $fullName): int
+    private function ensurePlayerPerson(string $fullName): ?int
     {
         $fullName = trim($fullName);
         $personId = $this->ensurePerson($fullName);
@@ -966,6 +985,8 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
 
             return $playerId;
         }
+
+        return null;
     }
 
     private function ensurePerson(string $fullName): ?int
