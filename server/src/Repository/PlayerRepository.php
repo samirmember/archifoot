@@ -29,7 +29,7 @@ class PlayerRepository extends ServiceEntityRepository
     public function findAlgeriaSeniorPlayers(string $query, int $page, int $perPage): array
     {
         $baseQb = $this->createAlgeriaSeniorPlayersQueryBuilder()
-            ->select('DISTINCT p.id AS id, person.fullName AS fullName, p.photoUrl AS photoUrl');
+            ->select('DISTINCT p.id AS id, person.fullName AS fullName, person.photoUrl AS photoUrl');
 
         if ($query !== '') {
             $baseQb
@@ -62,7 +62,7 @@ class PlayerRepository extends ServiceEntityRepository
             ->select(
                 'DISTINCT p.id AS id',
                 'person.fullName AS fullName',
-                'p.photoUrl AS photoUrl',
+                'person.photoUrl AS photoUrl',
                 'person.birthDate AS birthDate',
                 'birthCity.name AS birthCityName',
                 'birthRegion.name AS birthRegionName',
@@ -408,7 +408,7 @@ class PlayerRepository extends ServiceEntityRepository
             ->select(
                 'p.id AS id',
                 'person.fullName AS fullName',
-                'p.photoUrl AS photoUrl',
+                'person.photoUrl AS photoUrl',
                 'position.label AS positionName',
                 'nationality.name AS nationalityName',
                 'person.birthDate AS birthDateName',

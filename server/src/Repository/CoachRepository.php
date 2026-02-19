@@ -28,7 +28,7 @@ class CoachRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('c')
             ->innerJoin('c.person', 'person')
             ->leftJoin('person.nationalityCountry', 'nationalityCountry')
-            ->select('c.id AS id, person.fullName AS fullName, c.role AS role, c.photoUrl AS photoUrl, nationalityCountry.name AS nationality');
+            ->select('c.id AS id, person.fullName AS fullName, c.role AS role, person.photoUrl AS photoUrl, nationalityCountry.name AS nationality');
 
         if ($query !== '') {
             $qb
@@ -67,7 +67,7 @@ class CoachRepository extends ServiceEntityRepository
                 'person.id AS personId',
                 'person.fullName AS fullName',
                 'c.role AS role',
-                'c.photoUrl AS photoUrl',
+                'person.photoUrl AS photoUrl',
                 'person.birthDate AS birthDate',
                 'birthCity.name AS birthCityName',
                 'birthCountry.name AS birthCountryName',
