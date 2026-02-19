@@ -413,6 +413,7 @@ CREATE TABLE `person` (
   `birth_region_id` INT NULL COMMENT 'FK region',
   `birth_country_id` INT NULL COMMENT 'FK country',
   `nationality_country_id` INT NULL COMMENT 'FK country',
+  `photo_url` VARCHAR(150) DEFAULT NULL COMMENT 'Photo URL',
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_person_birth_city_id` FOREIGN KEY (`birth_city_id`) REFERENCES `city`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT `fk_person_birth_region_id` FOREIGN KEY (`birth_region_id`) REFERENCES `region`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
@@ -443,7 +444,6 @@ CREATE TABLE `coach` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
   `person_id` INT NULL COMMENT 'FK person',
   `role` VARCHAR(50) NULL COMMENT 'Head/Assistant/Trainer',
-  `photo_url` VARCHAR(255) NULL COMMENT 'Coach photo',
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_coach_person_id` FOREIGN KEY (`person_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -593,12 +593,20 @@ CREATE TABLE `scoresheet` (
   `report` TEXT NULL COMMENT 'Report',
   `signed_place` VARCHAR(150) NULL COMMENT 'Signed at',
   `signed_on` DATE NULL COMMENT 'Signed on',
-  `coach_id` INT NULL COMMENT 'FK coach (person)',
-  `form_state` VARCHAR(1) NULL COMMENT '0=draft,1=validated,2=archived',
+  -- `coach_id` INT NULL COMMENT 'FK coach DZ (person)',
+  -- `coach_assistant_dz1_id` INT NULL COMMENT 'FK coach assistant DZ 1 (person)',
+  -- `coach_assistant_dz2_id` INT NULL COMMENT 'FK coach assistant DZ 2 (person)',
+  -- `coach_adv_id` INT NULL COMMENT 'FK coach adv (person)',
+  -- `coach_adv_assistant_id` INT NULL COMMENT 'FK coach adv assistant (person)',
+  `status` VARCHAR(1) NULL COMMENT '0=draft,1=validated,2=archived',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_scoresheet_fixture_id` (`fixture_id`),
   CONSTRAINT `fk_scoresheet_fixture_id` FOREIGN KEY (`fixture_id`) REFERENCES `fixture`(`id`) ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT `fk_scoresheet_coach_id` FOREIGN KEY (`coach_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE SET NULL
+  -- CONSTRAINT `fk_scoresheet_coach_id` FOREIGN KEY (`coach_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
+  -- CONSTRAINT `fk_scoresheet_coach_assistant_dz1_id` FOREIGN KEY (`coach_assistant_dz1_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
+  -- CONSTRAINT `fk_scoresheet_coach_assistant_dz2_id` FOREIGN KEY (`coach_assistant_dz2_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
+  -- CONSTRAINT `fk_scoresheet_coach_adv_id` FOREIGN KEY (`coach_adv_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
+  -- CONSTRAINT `fk_scoresheet_coach_adv_assistant_id` FOREIGN KEY (`coach_adv_assistant_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `scoresheet_official`;
@@ -649,6 +657,19 @@ CREATE TABLE `scoresheet_substitution` (
   CONSTRAINT `fk_scoresheet_substitution_team_id` FOREIGN KEY (`team_id`) REFERENCES `team`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT `fk_scoresheet_substitution_player_out_id` FOREIGN KEY (`player_out_id`) REFERENCES `player`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT `fk_scoresheet_substitution_player_in_id` FOREIGN KEY (`player_in_id`) REFERENCES `player`(`id`) ON UPDATE CASCADE ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `scoresheet_staff`;
+CREATE TABLE `scoresheet_staff` (
+  `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
+  `scoresheet_id` INT NULL COMMENT 'FK scoresheet',
+  `team_id` INT NULL COMMENT 'FK team',
+  `person_id` INT NULL COMMENT 'FK person',
+  `role_code` VARCHAR(32) NOT NULL COMMENT 'HEAD_COACH / ASSISTANT_COACH',
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_scoresheet_staff_scoresheet_id` FOREIGN KEY (`scoresheet_id`) REFERENCES `scoresheet`(`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT `fk_scoresheet_staff_team_id` FOREIGN KEY (`team_id`) REFERENCES `team`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
+  CONSTRAINT `fk_scoresheet_staff_person_id` FOREIGN KEY (`person_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `match_goal`;
@@ -1007,7 +1028,6 @@ CREATE INDEX ix_team_type
 
 
 # MIGRATIONS
-ALTER TABLE player ADD photo_url VARCHAR(500) DEFAULT NULL;
 CREATE TABLE user (
 	id INT AUTO_INCREMENT NOT NULL,
 	email VARCHAR(180) NOT NULL,

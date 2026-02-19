@@ -35,7 +35,7 @@ class Person
     #[ORM\JoinColumn(name: 'nationality_country_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Country $nationalityCountry = null;
 
-    #[ORM\Column(name: 'photo_url', length: 500, nullable: true)]
+    #[ORM\Column(name: 'photo_url', length: 150, nullable: true)]
     private ?string $photoUrl = null;
 
     public function getId(): ?int
