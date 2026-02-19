@@ -20,8 +20,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 class CoachCrudController extends AbstractCrudController
 {
     public function __construct(
-        #[Autowire('%kernel.project_dir%/public/uploads/coaches')]
-        private readonly string $coachPhotoUploadDir,
+        #[Autowire('%kernel.project_dir%/public/uploads/person')]
+        private readonly string $personPhotoUploadDir,
     ) {
     }
 
@@ -40,8 +40,8 @@ class CoachCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         $photoField = ImageField::new('photoUrl', 'Photo')
-            ->setBasePath('/uploads/coaches')
-            ->setUploadDir('public/uploads/coaches')
+            ->setBasePath('/uploads/person')
+            ->setUploadDir('public/uploads/person')
             ->setUploadedFileNamePattern('[uuid].[extension]')
             ->setRequired(false);
 
@@ -152,7 +152,7 @@ class CoachCrudController extends AbstractCrudController
         }
 
         $relativePath = ltrim($photoUrl, '/');
-        $fullPath = dirname($this->coachPhotoUploadDir) . '/' . $relativePath;
+        $fullPath = dirname($this->personPhotoUploadDir) . '/' . $relativePath;
 
         if (!is_file($fullPath) || !function_exists('getimagesize')) {
             return;

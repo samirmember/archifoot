@@ -35,6 +35,9 @@ class Person
     #[ORM\JoinColumn(name: 'nationality_country_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Country $nationalityCountry = null;
 
+    #[ORM\Column(name: 'photo_url', length: 500, nullable: true)]
+    private ?string $photoUrl = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -108,6 +111,18 @@ class Person
     public function setNationalityCountry(?Country $nationalityCountry): static
     {
         $this->nationalityCountry = $nationalityCountry;
+
+        return $this;
+    }
+
+    public function getPhotoUrl(): ?string
+    {
+        return $this->photoUrl;
+    }
+
+    public function setPhotoUrl(?string $photoUrl): static
+    {
+        $this->photoUrl = $photoUrl;
 
         return $this;
     }

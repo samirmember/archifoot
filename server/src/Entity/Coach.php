@@ -29,8 +29,6 @@ class Coach
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $role = null;
 
-    #[ORM\Column(name: 'photo_url', length: 500, nullable: true)]
-    private ?string $photoUrl = null;
 
     public function getId(): ?int
     {
@@ -63,12 +61,13 @@ class Coach
 
     public function getPhotoUrl(): ?string
     {
-        return $this->photoUrl;
+        return $this->person?->getPhotoUrl();
     }
 
     public function setPhotoUrl(?string $photoUrl): static
     {
-        $this->photoUrl = $photoUrl;
+        $this->ensurePersonExists();
+        $this->person?->setPhotoUrl($photoUrl);
 
         return $this;
     }
