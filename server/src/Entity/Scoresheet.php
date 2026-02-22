@@ -58,8 +58,8 @@ class Scoresheet
     #[ORM\JoinColumn(name: 'coach_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Person $coach = null;
 
-    #[ORM\Column(name: 'form_state', length: 1, nullable: true)]
-    private ?string $formState = null;
+    #[ORM\Column(name: 'status', length: 1, nullable: true)]
+    private ?string $status = null;
 
     public function getId(): ?int
     {
@@ -234,14 +234,14 @@ class Scoresheet
         return $this;
     }
 
-    public function getFormState(): ?string
+    public function getStatus(): ?string
     {
-        return $this->formState;
+        return $this->status;
     }
 
-    public function setFormState(?string $formState): static
+    public function setStatus(?string $status): static
     {
-        $this->formState = $formState;
+        $this->status = $status;
 
         return $this;
     }

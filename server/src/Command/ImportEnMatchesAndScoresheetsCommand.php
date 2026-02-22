@@ -16,7 +16,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class ImportEnMatchesAndScoresheetsCommand extends Command
 {
-    public function __construct(private readonly Connection $db) { parent::__construct(); }
+    private int $seasonId;
+
+    public function __construct(private readonly Connection $db) {
+        parent::__construct();
+    }
 
     protected function configure(): void
     {
@@ -71,6 +75,7 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
 
                 $competitionIds = $this->ensureCompetitions($row['B'], $seniorCategoryId);
                 $seasonId = $this->ensureSeason($row['D']);
+                $this->seasonId = $seasonId;
                 $editionIds = $this->ensureEditions($competitionIds, $seasonId, $row['C']);
                 $stageIds = $this->ensureStages($editionIds, $row['E']);
 
@@ -93,6 +98,7 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                 $played = 1; // par défaut joué
                 $isOfficial = $row['B'] !== 'Match Amical' ? 1 : 0;
                 $notes = $row['P'] ?? null;
+                $internalNotes = $row['DC'] ?? null;
 
                 // Venue
                 $stadiumName = $this->toStr($this->get($row, $headers, ['stade','stade ']));
@@ -115,6 +121,7 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                     $played,
                     $isOfficial,
                     $notes,
+                    $internalNotes,
                     $competitionIds,
                     $editionIds,
                     $stageIds
@@ -130,17 +137,25 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                 // @Todo: ensureReferee: récupérer plusieurs arbitres dans le même champ séparé par des virgules
                 // Cas: Nicholas Haïni, Didamanti, Raphael Zader, tous de nationalité suisse
 
+                $algeriaTeamId = $this->resolveAlgeriaTeamId($teamAName, $teamBName, $teamAId, $teamBId);
+                $otherTeamId = $algeriaTeamId === $teamAId ? $teamBId : $teamAId;
+
+                $dzTeamCountryId = $this->getCountryByTeamId($algeriaTeamId);
+                $otherTeamCountryId = $this->getCountryByTeamId($otherTeamId);
+
                 // Entraineur principal
                 $coach = $this->toStr($row['BJ'] ?? null);
-                $coachPersonId = $coach ? $this->ensureCoachPerson($coach, 'Head') : null;
+                $coachPersonId = $coach ? $this->ensureCoachPerson($coach, 'HEAD_COACH', $dzTeamCountryId) : null;
                 $coachAdv = $this->toStr($row['BK'] ?? null);
-                $coachAdvPersonId = $coachAdv ? $this->ensureCoachPerson($coachAdv, 'Head') : null;
+                $coachAdvPersonId = $coachAdv ? $this->ensureCoachPerson($coachAdv, 'HEAD_COACH', $otherTeamCountryId) : null;
+                // $coachAdvAssist = $this->toStr($row['BL'] ?? null);
+                // $coachAdvAssistantPersonId = $coachAdvAssist ? $this->ensureCoachPerson($coachAdvAssist, 'ASSISTANT_COACH', $otherTeamCountryId) : null;
 
                 // Entraineurs assistants 1 et 2
                 $coachAssistDz1 = $this->toStr($row['BM'] ?? null);
                 $coachAssistDz2 = $this->toStr($row['BN'] ?? null);
-                $coachAssistantDz1PersonId = $coachAssistDz1 ? $this->ensureCoachPerson($coachAssistDz1, 'Assistant') : null;
-                $coachAssistantDz2PersonId = $coachAssistDz2 ? $this->ensureCoachPerson($coachAssistDz2, 'Assistant') : null;
+                $coachAssistantDz1PersonId = $coachAssistDz1 ? $this->ensureCoachPerson($coachAssistDz1, 'ASSISTANT_COACH', $dzTeamCountryId) : null;
+                $coachAssistantDz2PersonId = $coachAssistDz2 ? $this->ensureCoachPerson($coachAssistDz2, 'ASSISTANT_COACH', $dzTeamCountryId) : null;
 
                 $scoresheetId = $this->ensureScoresheet($fixtureId, [
                     'attendance' => $this->toInt($this->get($row, $headers, ['nbr_spectateur','spectateur','attendance'])),
@@ -155,36 +170,23 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                     'report' => null,
                     'signed_place' => $this->toStr($this->get($row, $headers, ['fait_a','fait à','fait a'])),
                     'signed_on' => $this->parseDateToYmd($this->get($row, $headers, ['le'])),
-                    'coach_id' => $coachPersonId,
-                    'form_state' => '0',
+                    'status' => '1',
                 ]);
-attendance
-fixed_time
-kickoff_time
-half_time
-second_half_start
-full_time
-stoppage_time
-match_stop_time
-reservations
-report
-signed_place
-signed_on
-coach_id
-form_state
 
-                // === Lineups (j1..j18 etc) ===
-                $algeriaTeamId = $this->resolveAlgeriaTeamId($teamAName, $teamBName, $teamAId, $teamBId);
-                $otherTeamId = $algeriaTeamId === $teamAId ? $teamBId : $teamAId;
-                $this->importLineups($scoresheetId, $matchDate, $row);
+                // === Lineups (j1..j20 for Algeria and adv) ===
+                $this->importLineups($scoresheetId, $matchDate, $row, $algeriaTeamId, $otherTeamId);
 
-                // === Substitutions (chang1..5 etc) ===
-                // if (!in_array($row['A'], ['5', '11', '33', '50', '71', '84', '87', '91'])) {
-                    $this->importSubstitutions($scoresheetId, $matchDate, $row);
-                // }
+                // Les coachs
+                $this->importCoaches($scoresheetId, $matchDate, $row, $algeriaTeamId, $otherTeamId);
+
+                // === Substitutions (chang1..5 for Algeria and adv) ===
+                $this->importSubstitutions($scoresheetId, $matchDate, $row, $algeriaTeamId, $otherTeamId);
 
                 // === Goals (but1..butN, but_local/but_visiteur) ===
                 $this->importGoals($fixtureId, $algeriaTeamId, $otherTeamId, $matchDate, $row);
+
+                // === Referees (arbitre1..3) ===
+                $this->importReferees($scoresheetId, $matchDate, $row);
 
                 $inserted++;
             }
@@ -198,6 +200,57 @@ form_state
 
         $output->writeln("<info>OK fixtures traités=$inserted skipped=$skipped</info>");
         return Command::SUCCESS;
+    }
+
+    private function importCoaches(int $scoresheetId, string $matchDate, array $row, int $algeriaTeamId, int $otherTeamId): void
+    {
+        $dzTeamCountryId = $this->getCountryByTeamId($algeriaTeamId);
+        $otherTeamCountryId = $this->getCountryByTeamId($otherTeamId);
+
+        $coach = $this->toStr($row['BJ'] ?? null);
+        if ($coach) {
+            $role = 'HEAD_COACH';
+            $coachId = $this->ensureCoachPerson($coach, $role, $dzTeamCountryId);
+            $personId = $this->getPersonIdByCoachId($coachId);
+            $this->ensurePersonAssignmentRecord($personId, $matchDate, 2); // 2 = Entraineur
+            $scoresheetLineupId = $this->ensureScoresheetStaffRecord($scoresheetId, $personId, $role, $algeriaTeamId);
+        }
+
+        $coachAssistant1 = $this->toStr($row['BM'] ?? null);
+        if ($coachAssistant1) {
+            $role = 'ASSISTANT_COACH';
+            $coachId = $this->ensureCoachPerson($coachAssistant1, $role, $dzTeamCountryId);
+            $personId = $this->getPersonIdByCoachId($coachId);
+            $this->ensurePersonAssignmentRecord($personId, $matchDate, 3); // 3 = Entraineur Assistant
+            $scoresheetLineupId = $this->ensureScoresheetStaffRecord($scoresheetId, $personId, $role, $algeriaTeamId);
+        }
+
+        $coachAssistant2 = $this->toStr($row['BN'] ?? null);
+        if ($coachAssistant2) {
+            $role = 'ASSISTANT_COACH';
+            $coachId = $this->ensureCoachPerson($coachAssistant2, $role, $dzTeamCountryId);
+            $personId = $this->getPersonIdByCoachId($coachId);
+            $this->ensurePersonAssignmentRecord($personId, $matchDate, 3); // 3 = Entraineur Assistant
+            $scoresheetLineupId = $this->ensureScoresheetStaffRecord($scoresheetId, $personId, $role, $algeriaTeamId);
+        }
+
+        $coach = $this->toStr($row['BK'] ?? null);
+        if ($coach) {
+            $role = 'HEAD_COACH';
+            $coachId = $this->ensureCoachPerson($coach, $role, $otherTeamCountryId);
+            $personId = $this->getPersonIdByCoachId($coachId);
+            $this->ensurePersonAssignmentRecord($personId, $matchDate, 2); // 2 = Entraineur
+            $scoresheetLineupId = $this->ensureScoresheetStaffRecord($scoresheetId, $personId, $role, $otherTeamId);
+        }
+
+        // $coachAdvAssist = $this->toStr($row['BL'] ?? null);
+        // if ($coachAdvAssist) {
+        //     $role = 'ASSISTANT_COACH';
+        //     $coachId = $this->ensureCoachPerson($coachAdvAssist, $role, $otherTeamCountryId);
+        //     $this->ensurePersonAssignmentRecord($coachId, $matchDate, 3); // 3 = Entraineur Assistant
+        //     $personId = $this->getPersonIdByCoachId($coachId);
+        //     $scoresheetLineupId = $this->ensureScoresheetStaffRecord($scoresheetId, $personId, $role, $otherTeamId);
+        // }
     }
 
     // ----------------- Helpers (header + parsing) -----------------
@@ -310,135 +363,207 @@ form_state
 
     // ----------------- Import blocks: lineups/subs/goals -----------------
 
-    private function importLineups(int $scoresheetId, string $matchDate, array $row): void
+    private function importLineups(int $scoresheetId, string $matchDate, array $row, int $algeriaTeamId, int $otherTeamId): void
     {
         $lineupsCols = [
             'Q', 'R', 'S', 'T', 'U', 'V',
             'W', 'X', 'Y', 'Z', 'AA', 'AB',
-            'AC', 'AD', 'AE', 'AF', 'AG', 'AH',
+            'AC', 'AD', 'AE', 'AF', 'AG',
+            'AH', 'AI', 'AJ'
         ];
         $i = 1;
+
+        $dzTeamCountryId = $this->getCountryByTeamId($algeriaTeamId);
+        $otherTeamCountryId = $this->getCountryByTeamId($otherTeamId);
+
+        $captainColDZ = 'BO';
+        $captainColAdv = 'BP';
+
         foreach ($lineupsCols as $colKey) {
             $val = $this->toStr($row[$colKey] ?? null);
             if (!$val) continue;
+            $isDZCaptain = $val === $this->toStr($row[$captainColDZ] ?? null);          
             $role = ($i <= 11) ? 'STARTER' : 'SUB';
-            $playerId = $this->ensurePlayerPerson($val);
-            $this->ensurePlayerTeamMembershipRecord($playerId, $matchDate);
-            $scoresheetLineupId = $this->ensureScoresheetLineupRecord($scoresheetId, $playerId, $val, $role, $i);
+            $playerId = $this->ensurePlayerPerson($val, $dzTeamCountryId);
+            $personId = $this->getPersonIdByPlayerId($playerId);
+            $this->ensurePersonAssignmentRecord($personId, $matchDate);
+            $scoresheetLineupId = $this->ensureScoresheetLineupRecord($scoresheetId, $playerId, $val, $role, $i, $algeriaTeamId, $isDZCaptain);
+            $i++;
+        }
+
+        $advLineupsCols = [
+            'BY', 'BZ', 'CA', 'CB', 'CC', 'CD',
+            'CE', 'CF', 'CG', 'CH', 'CI', 'CJ',
+            'CK', 'CL', 'CM', 'CN', 'CO',
+            'CP', 'CQ', 'CR'
+        ];
+
+        $i = 1;
+        foreach ($advLineupsCols as $colKey) {
+            $val = $this->toStr($row[$colKey] ?? null);
+            if (!$val) continue;
+            $isAdvCaptain = $val === $this->toStr($row[$captainColAdv] ?? null);
+            $role = ($i <= 11) ? 'STARTER' : 'SUB';
+            $playerId = $this->ensurePlayerPerson($val, $otherTeamCountryId);
+            $scoresheetLineupId = $this->ensureScoresheetLineupRecord($scoresheetId, $playerId, $val, $role, $i, $otherTeamId, $isAdvCaptain);
             $i++;
         }
     }
 
-    private function ensurePlayerTeamMembershipRecord(int $playerId, string $matchDate, int $teamId = 1): int
+    private function ensurePersonAssignmentRecord(int $personId, string $matchDate, int $roleId = 1): int
     {
         $year = (int)substr($matchDate, 0, 4);
         $playerData = [
-            'player_id' => $playerId,
-            'team_id' => $teamId,
+            'person_id' => $personId,
+            'team_id' => 1, // Algérie par défaut, on sauvegarde que l'historique pour l'Algérie.
             'from_date' => "{$year}-01-01",
             'to_date' => "{$year}-12-31",
+            'season_id' => $this->seasonId,
+            'role_id' => $roleId,
         ];
 
-        $id = $this->db->fetchOne("SELECT id FROM player_team_membership 
-            WHERE player_id = :player_id 
+        $id = $this->db->fetchOne("SELECT id FROM person_assignment 
+            WHERE person_id = :person_id 
             AND team_id = :team_id
             AND from_date = :from_date
             AND to_date = :to_date
+            AND season_id = :season_id
+            AND role_id = :role_id
             ", $playerData
         );
         if ($id) return (int)$id;
 
-        $playerData['is_current'] = 0;
-        $this->db->insert('player_team_membership', $playerData);
+        $this->db->insert('person_assignment', $playerData);
         return (int)$this->db->lastInsertId();
     }
 
-    private function ensureScoresheetLineupRecord($scoresheetId, $playerId, $val, $role, $i): int
+    private function ensureScoresheetLineupRecord(int $scoresheetId, int $playerId, ?string $val, string $role, int $i, int $teamId = 1, bool $isCaptain): int
     {
+        $playerLineUp = [
+            'scoresheet_id' => $scoresheetId,
+            'team_id' => $teamId,
+            'player_id' => $playerId,
+            'player_name_text' => $val,
+            'is_captain' => $isCaptain ? 1 : 0,
+            'lineup_role' => $role,
+            'sort_order' => $i,
+        ];
         $id = $this->db->fetchOne("SELECT id FROM scoresheet_lineup 
-            WHERE scoresheet_id = :sid 
-            AND team_id = :tid 
-            AND player_id = :pid 
-            AND player_name_text = :name 
-            AND lineup_role = :role 
-            AND sort_order = :sort_order", [
-                'sid' => $scoresheetId,
-                'tid' => 1,
-                'pid' => $playerId,
-                'name' => $val,
-                'role' => $role,
-                'sort_order' => $i,
-            ]
+            WHERE scoresheet_id = :scoresheet_id 
+            AND team_id = :team_id 
+            AND player_id = :player_id 
+            AND player_name_text = :player_name_text
+            AND is_captain = :is_captain
+            AND lineup_role = :lineup_role 
+            AND sort_order = :sort_order", $playerLineUp
         );
         if ($id) return (int)$id;
         
-        $this->db->insert('scoresheet_lineup', [
-            'scoresheet_id' => $scoresheetId,
-            'team_id' => 1,
-            'player_id' => $playerId,
-            'player_name_text' => $val,
-            'lineup_role' => $role,
-            'sort_order' => $i,
-        ]);
+        $this->db->insert('scoresheet_lineup', $playerLineUp);
         return (int)$this->db->lastInsertId();
     }
 
-    private function importSubstitutions(int $scoresheetId, string $matchDate, array $row): void
+    private function ensureScoresheetStaffRecord(int $scoresheetId, int $personId, string $roleCode, int $teamId = 1): int
+    {
+        $staffLineUp = [
+            'scoresheet_id' => $scoresheetId,
+            'team_id' => $teamId,
+            'person_id' => $personId,
+            'role' => $roleCode,
+        ];
+        $id = $this->db->fetchOne("SELECT id FROM scoresheet_staff 
+            WHERE scoresheet_id = :scoresheet_id 
+            AND team_id = :team_id 
+            AND person_id = :person_id 
+            AND role = :role", $staffLineUp
+        );
+        if ($id) return (int)$id;
+        
+        $this->db->insert('scoresheet_staff', $staffLineUp);
+        return (int)$this->db->lastInsertId();
+    }
+
+    private function importSubstitutions(int $scoresheetId, string $matchDate, array $row, int $algeriaTeamId, int $otherTeamId): void
     {
         $substitutionCols = [
             'AK', 'AL', 'AM', 'AN', 'AO',
-            'AP', 'AQ', 'AR', 'AS',
+            'AP', 'AQ', 'AR', 'AS', 'AT'
         ];
-        // @Todo: in some cases, we can add minute of the substitution. So the function must take this in consideration
-        // Player name + min' (Like in cell AD596)
+
+        $dzTeamCountryId = $this->getCountryByTeamId($algeriaTeamId);
+        $otherTeamCountryId = $this->getCountryByTeamId($otherTeamId);
+
         foreach ($substitutionCols as $colKey) {
             $val = $this->toStr($row[$colKey] ?? null);
+            if (!$val) continue;
+            [$val, $minute] = $this->parseSubstitutionValue($val);
             $colIn = $this->shiftLetters($colKey, -9);
             $valIn = $this->toStr($row[$colIn] ?? null);
-            // if (($val && !$valIn) || (!$val && $valIn)) {
-            //     dd('Problème de substitution', $row['A'], $val, $valIn, $colKey, $colIn);
-            // }
-            // if (!$val || $val === null) continue;
-            $playerId = null;
+            $playerIdOut = null;
             $playerIdIn = null;
             if ($val) {
-                $playerId = $this->ensurePlayerPerson($val);
-                $this->ensurePlayerTeamMembershipRecord($playerId, $matchDate);
+                $playerIdOut = $this->ensurePlayerPerson($val, $dzTeamCountryId);
+                $personIdOut = $this->getPersonIdByPlayerId($playerIdOut);
+                $this->ensurePersonAssignmentRecord($personIdOut, $matchDate);
             }
             if ($valIn) {
-                $playerIdIn = $this->ensurePlayerPerson($valIn);
+                $playerIdIn = $this->ensurePlayerPerson($valIn, $dzTeamCountryId);
             }
-            if ($playerId || $playerIdIn) {
-                $scoresheetSubstitutionId = $this->ensureScoresheetSubstitutionRecord($scoresheetId, 1, $playerId, $playerIdIn, $val, $valIn);
+            if ($playerIdOut || $playerIdIn) {
+                $scoresheetSubstitutionId = $this->ensureScoresheetSubstitutionRecord($scoresheetId, $algeriaTeamId, $playerIdOut, $playerIdIn, $val, $valIn, $minute);
+            }
+        }
+
+        $advSubstitutionCols = [
+            'CS', 'CT', 'CU', 'CV', 'CW',
+            'CX', 'CY', 'CZ', 'DA', 'DB'
+        ];
+
+        foreach ($advSubstitutionCols as $colKey) {
+            $val = $this->toStr($row[$colKey] ?? null);
+            if (!$val) continue;
+            [$val, $minute] = $this->parseSubstitutionValue($val);
+            $colIn = $this->shiftLetters($colKey, -9);
+            $valIn = $this->toStr($row[$colIn] ?? null);
+            $playerIdOut = null;
+            $playerIdIn = null;
+            if ($val) {
+                $playerIdOut = $this->ensurePlayerPerson($val, $otherTeamCountryId);
+                $personIdOut = $this->getPersonIdByPlayerId($playerIdOut);
+                $this->ensurePersonAssignmentRecord($personIdOut, $matchDate);
+            }
+            if ($valIn) {
+                $playerIdIn = $this->ensurePlayerPerson($valIn, $otherTeamCountryId);
+            }
+            if ($playerIdOut || $playerIdIn) {
+                $scoresheetSubstitutionId = $this->ensureScoresheetSubstitutionRecord($scoresheetId, $otherTeamId, $playerIdOut, $playerIdIn, $val, $valIn, $minute);
             }
         }
     }
 
-    private function ensureScoresheetSubstitutionRecord($scoresheetId, $algeriaTeamId, $playerId, $playerIdIn, $val, $valIn): int
+    private function ensureScoresheetSubstitutionRecord($scoresheetId, $teamId, $playerIdOut, $playerIdIn, $val, $valIn, $minute): int
     {
-        $id = $this->db->fetchOne("SELECT id FROM scoresheet_substitution 
-            WHERE scoresheet_id = :sid 
-            AND team_id = :tid 
-            AND player_out_id = :pid 
-            AND player_in_id = :pidin
-            AND player_out_text = :name", [
-                'sid' => $scoresheetId,
-                'tid' => $algeriaTeamId,
-                'pid' => $playerId,
-                'pidin' => $playerIdIn,
-                'name' => $val,
-            ]
-        );
-        if ($id) return (int)$id;
-        
-        $this->db->insert('scoresheet_substitution', [
+        $subData = [
             'scoresheet_id' => $scoresheetId,
-            'team_id' => $algeriaTeamId,
-            'player_out_id' => $playerId,
+            'team_id' => $teamId,
+            'player_out_id' => $playerIdOut,
             'player_in_id' => $playerIdIn,
             'player_out_text' => $val,
             'player_in_text' => $valIn,
-        ]);
+            'minute' => $minute,
+        ];
+        $id = $this->db->fetchOne("SELECT id FROM scoresheet_substitution 
+            WHERE scoresheet_id = :scoresheet_id 
+            AND team_id = :team_id
+            AND player_out_id = :player_out_id 
+            AND player_in_id = :player_in_id
+            AND player_out_text = :player_out_text
+            AND player_in_text = :player_in_text
+            AND minute = :minute", $subData
+        );
+        if ($id) return (int)$id;
+        
+        $this->db->insert('scoresheet_substitution', $subData);
         return (int)$this->db->lastInsertId();
     }
 
@@ -458,23 +583,22 @@ form_state
             [$player, $minute, $type] = $this->parseButValue($val);
             if (!$player && !$minute) continue;
 
-            $this->ensureGoalRecord($fixtureId, $otherTeamId, $player, $matchDate, $minute, $type);
+            $this->ensureGoalRecord($fixtureId, $player, $matchDate, $minute, $type);
         }
     }
 
-    private function ensureGoalRecord(int $fixtureId, ?int $otherTeamId, string $playerName, string $matchDate, ?string $minute, string $type): ?int
+    private function ensureGoalRecord(int $fixtureId, string $playerName, string $matchDate, ?string $minute, string $type): ?int
     {
-        // @Todo: récupérer le player id de playerName si possible (via persons + national_team_player + team_id)
-        // Je ne sais plus quoi ici.
         if (!$playerName) {
             return null;
         }
         $playerId = $this->ensurePlayerPerson($playerName);
+        $personId = $this->getPersonIdByPlayerId($playerId);
 
-        // pour own_goal, on associe le joueur à l'historique de l'équipe adverse. Sinon Algérie par défaut
-        $teamId = $type === 'own_goal' ? $otherTeamId : 1;
-
-        $this->ensurePlayerTeamMembershipRecord($playerId, $matchDate, $teamId);
+        // On enregistre pas l'historique pour les joueurs adverses (own goal).
+        if ($type !== 'own_goal') {
+            $this->ensurePersonAssignmentRecord($personId, $matchDate);
+        }
         $playerData = [
             'fixture_id' => $fixtureId,
             'team_id' => 1,
@@ -536,6 +660,45 @@ form_state
             $minute,
             $type,
         ];
+    }
+
+    /**
+     * Parse une valeur de remplaçant:
+     * - "Belbekri"
+     * - "Belbekri 62'"
+     * - "Belbekri62'"
+     * - "Belbekri 90+2’"
+     *
+     * @return array{0:string, 1:?string} [player, minute|null]
+     */
+    private function parseSubstitutionValue(string $value): array
+    {
+        $value = trim($value);
+
+        if ($value === '') {
+            dd('Remplaçant vide');
+        }
+
+        // Cas 1: "Nom ... 23'" ou "Nom...23'" ou "Nom 90+2’"
+        // Groupe 1: nom joueur (tout avant la minute)
+        // Groupe 2: minute (ex: 23, 90+2)
+        // ['’]    : supporte les deux types d'apostrophes
+        $withMinute = "/^(.+?)\s*(\d+(?:\+\d+)?)['’]\s*$/u";
+
+        if (preg_match($withMinute, $value, $m)) {
+            $player = trim($m[1]);
+            $minute = $m[2];
+
+            if ($player === '') {
+                dd("Remplaçant invalide (nom vide): {$value}");
+            }
+
+            return [$player, $minute];
+        }
+
+        // Cas 2: juste le nom (aucune minute)
+        // On accepte tout texte non-vide
+        return [$value, null];
     }
 
     private function splitEvents(string $s): array
@@ -789,6 +952,7 @@ form_state
         int $played,
         int $isOfficial,
         ?string $notes,
+        ?string $internalNotes,
         array $competitionIds = [],
         array $editionIds = [],
         array $stageIds = [],
@@ -817,6 +981,7 @@ form_state
             'played'            => $played,
             'is_official'       => $isOfficial,
             'notes'             => $notes,
+            'internal_notes'    => $internalNotes,
         ];
 
         if ($existing) {
@@ -937,7 +1102,7 @@ form_state
 
     private function ensureScoresheet(int $fixtureId, array $vals): int
     {
-        $id = $this->db->fetchOne("SELECT id FROM scoresheet WHERE fixture_id=:f", ['f'=>$fixtureId]);
+        $id = $this->db->fetchOne("SELECT id FROM scoresheet WHERE fixture_id=:f", ['f' => $fixtureId]);
         if ($id) {
             $this->db->update('scoresheet', $vals, ['id'=>(int)$id]);
             return (int)$id;
@@ -947,29 +1112,34 @@ form_state
         return (int)$this->db->lastInsertId();
     }
 
-    private function ensureCoachPerson(string $fullName, $role): int
+    private function ensureCoachPerson(string $fullName, string $role, int $nationalityId = 1): ?int
     {
         $fullName = trim($fullName);
-        $personId = $this->ensurePerson($fullName);
+        $personId = $this->ensurePerson($fullName, $nationalityId);
 
+        if ($personId) {
         $coachId = $this->db->fetchOne(
             "SELECT id FROM coach WHERE person_id = :p",
-            ['p'=>$personId]
+                ['p' => $personId]
         );
         if (!$coachId) {
             $this->db->insert('coach', [
-                'person_id'=>$personId,
-                'role'=>$role,
+                    'person_id' => $personId,
+                    'role' => $role,
             ]);
+                $coachId = (int)$this->db->lastInsertId();
         }
 
-        return $personId;
+            return $coachId;
+        }
+
+        return null;
     }
 
-    private function ensurePlayerPerson(string $fullName): ?int
+    private function ensurePlayerPerson(string $fullName, int $nationalityId = 1): ?int
     {
         $fullName = trim($fullName);
-        $personId = $this->ensurePerson($fullName);
+        $personId = $this->ensurePerson($fullName, $nationalityId);
 
         if ($personId) {
             $playerId = $this->db->fetchOne(
@@ -989,7 +1159,7 @@ form_state
         return null;
     }
 
-    private function ensurePerson(string $fullName): ?int
+    private function ensurePerson(string $fullName, ?int $nationalityId = null): ?int
     {
         if (!$fullName) {
             return null;
@@ -999,9 +1169,13 @@ form_state
             ['n' => $fullName]
         );
         if (!$personId) {
-            $this->db->insert('person', [
-                'full_name' => $fullName
-            ]);
+            $data = [
+                'full_name' => $fullName,
+            ];
+            if ($nationalityId) {
+                $data['nationality_country_id'] = $nationalityId;
+            }
+            $this->db->insert('person', $data);
             $personId = (int)$this->db->lastInsertId();
         } else {
             $personId = (int)$personId;
@@ -1050,5 +1224,118 @@ form_state
         }
 
         return $out;
+    }
+
+    private function importReferees(int $scoresheetId, string $matchDate, array $row): void
+    {
+        $mainReferee = $this->toStr($row['BQ'] ?? null);
+        if ($mainReferee) {
+            $countryName = $this->toStr($row['BR'] ?? null);
+            $countryId = $countryName ? $this->ensureCountry($countryName) : null;
+            $refereeId = $this->ensureRefereePerson($mainReferee, $countryId);
+            $personId = $this->getPersonIdByRefereeId($refereeId);
+            if ($refereeId) {
+                $this->ensureScoresheetOfficialRecord($scoresheetId, $personId, 'MAIN_REFEREE', $mainReferee);
+            }
+        }
+
+        $assistant1Referee = $this->toStr($row['BS'] ?? null);
+        if ($assistant1Referee) {
+            $countryName = $this->toStr($row['BT'] ?? null);
+            $countryId = $countryName ? $this->ensureCountry($countryName) : null;
+            $refereeId = $this->ensureRefereePerson($assistant1Referee, $countryId);
+            $personId = $this->getPersonIdByRefereeId($refereeId);
+            if ($refereeId) {
+                $this->ensureScoresheetOfficialRecord($scoresheetId, $personId, 'ASSISTANT_REFEREE', $assistant1Referee);
+            }
+        }
+
+        $assistant2Referee = $this->toStr($row['BU'] ?? null);
+        if ($assistant2Referee) {
+            $countryName = $this->toStr($row['BV'] ?? null);
+            $countryId = $countryName ? $this->ensureCountry($countryName) : null;
+            $refereeId = $this->ensureRefereePerson($assistant2Referee, $countryId);
+            $personId = $this->getPersonIdByRefereeId($refereeId);
+            if ($refereeId) {
+                $this->ensureScoresheetOfficialRecord($scoresheetId, $personId, 'ASSISTANT_REFEREE', $assistant2Referee);
+            }
+        }
+
+        $fourthReferee = $this->toStr($row['BW'] ?? null);
+        if ($fourthReferee) {
+            $countryName = $this->toStr($row['BX'] ?? null);
+            $countryId = $countryName ? $this->ensureCountry($countryName) : null;
+            $refereeId = $this->ensureRefereePerson($fourthReferee, $countryId);
+            $personId = $this->getPersonIdByRefereeId($refereeId);
+            if ($refereeId) {
+                $this->ensureScoresheetOfficialRecord($scoresheetId, $personId, 'FOURTH_OFFICIAL', $fourthReferee);
+            }
+        }
+    }
+
+    private function ensureScoresheetOfficialRecord(int $scoresheetId, int $personId, string $roleCode, string $name): int
+    {
+        $officialReferee = [
+            'scoresheet_id' => $scoresheetId,
+            'role' => $roleCode,
+            'person_id' => $personId,
+            'name_text' => $name,
+        ];
+        $id = $this->db->fetchOne("SELECT id FROM scoresheet_official 
+            WHERE scoresheet_id = :scoresheet_id
+            AND role = :role
+            AND person_id = :person_id 
+            AND name_text = :name_text", $officialReferee
+        );
+        if ($id) return (int)$id;
+        
+        $this->db->insert('scoresheet_official', $officialReferee);
+        return (int)$this->db->lastInsertId();
+    }
+
+    private function ensureRefereePerson(string $fullName, int $nationalityId = null): ?int
+    {
+        $fullName = trim($fullName);
+        $personId = $this->ensurePerson($fullName, $nationalityId);
+
+        if ($personId) {
+            $refereeId = $this->db->fetchOne(
+                "SELECT id FROM referee WHERE person_id = :p",
+                    ['p' => $personId]
+            );
+            if (!$refereeId) {
+                $this->db->insert('referee', [
+                        'person_id' => $personId,
+                        'level' => 'International' // par défaut
+                ]);
+                $refereeId = (int)$this->db->lastInsertId();
+            }
+
+            return $refereeId;
+        }
+
+        return null;
+    }
+
+    private function getCountryByTeamId(int $teamId): ?int
+    {
+        return $this->db->fetchOne("SELECT country_id FROM national_team
+        LEFT JOIN team ON national_team.id = team.national_team_id
+        WHERE team.id = :team_id", ['team_id' => $teamId]);
+    }
+
+    private function getPersonIdByPlayerId(int $playerId): ?int
+    {
+        return $this->db->fetchOne("SELECT person_id FROM player WHERE id = :pid", ['pid' => $playerId]);
+    }
+
+    private function getPersonIdByCoachId(int $coachId): ?int
+    {
+        return $this->db->fetchOne("SELECT person_id FROM coach WHERE id = :cid", ['cid' => $coachId]);
+    }
+
+    private function getPersonIdByRefereeId(int $refereeId): ?int
+    {
+        return $this->db->fetchOne("SELECT person_id FROM referee WHERE id = :rid", ['rid' => $refereeId]);
     }
 }

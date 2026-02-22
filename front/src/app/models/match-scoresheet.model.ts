@@ -36,7 +36,7 @@ export interface MatchScoresheet {
   report: string | null;
   signedPlace: string | null;
   signedOn: string | null;
-  formState: string | null;
+  status: string | null;
   coachName: string | null;
 }
 

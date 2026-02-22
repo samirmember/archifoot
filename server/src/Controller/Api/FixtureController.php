@@ -91,7 +91,7 @@ class FixtureController extends AbstractController
                     sc.report,
                     sc.signed_place AS "signedPlace",
                     sc.signed_on AS "signedOn",
-                    sc.form_state AS "formState",
+                    sc.status AS "status",
                     p.full_name AS "coachName"
                 FROM scoresheet sc
                 LEFT JOIN person p ON p.id = sc.coach_id

@@ -17,10 +17,6 @@ class Referee
     #[ORM\JoinColumn(name: 'person_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
     private ?Person $person = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'country_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private ?Country $country = null;
-
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $level = null;
 
@@ -37,18 +33,6 @@ class Referee
     public function setPerson(?Person $person): static
     {
         $this->person = $person;
-
-        return $this;
-    }
-
-    public function getCountry(): ?Country
-    {
-        return $this->country;
-    }
-
-    public function setCountry(?Country $country): static
-    {
-        $this->country = $country;
 
         return $this;
     }

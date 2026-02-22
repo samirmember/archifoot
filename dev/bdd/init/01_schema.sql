@@ -452,11 +452,9 @@ DROP TABLE IF EXISTS `referee`;
 CREATE TABLE `referee` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
   `person_id` INT NULL COMMENT 'FK person',
-  `country_id` INT NULL COMMENT 'FK country',
   `level` VARCHAR(50) NULL COMMENT 'International/National',
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_referee_person_id` FOREIGN KEY (`person_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT `fk_referee_country_id` FOREIGN KEY (`country_id`) REFERENCES `country`(`id`) ON UPDATE CASCADE ON DELETE SET NULL
+  CONSTRAINT `fk_referee_person_id` FOREIGN KEY (`person_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `player_national_stats`;
@@ -593,20 +591,10 @@ CREATE TABLE `scoresheet` (
   `report` TEXT NULL COMMENT 'Report',
   `signed_place` VARCHAR(150) NULL COMMENT 'Signed at',
   `signed_on` DATE NULL COMMENT 'Signed on',
-  -- `coach_id` INT NULL COMMENT 'FK coach DZ (person)',
-  -- `coach_assistant_dz1_id` INT NULL COMMENT 'FK coach assistant DZ 1 (person)',
-  -- `coach_assistant_dz2_id` INT NULL COMMENT 'FK coach assistant DZ 2 (person)',
-  -- `coach_adv_id` INT NULL COMMENT 'FK coach adv (person)',
-  -- `coach_adv_assistant_id` INT NULL COMMENT 'FK coach adv assistant (person)',
   `status` VARCHAR(1) NULL COMMENT '0=draft,1=validated,2=archived',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_scoresheet_fixture_id` (`fixture_id`),
-  CONSTRAINT `fk_scoresheet_fixture_id` FOREIGN KEY (`fixture_id`) REFERENCES `fixture`(`id`) ON UPDATE CASCADE ON DELETE CASCADE,
-  -- CONSTRAINT `fk_scoresheet_coach_id` FOREIGN KEY (`coach_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
-  -- CONSTRAINT `fk_scoresheet_coach_assistant_dz1_id` FOREIGN KEY (`coach_assistant_dz1_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
-  -- CONSTRAINT `fk_scoresheet_coach_assistant_dz2_id` FOREIGN KEY (`coach_assistant_dz2_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
-  -- CONSTRAINT `fk_scoresheet_coach_adv_id` FOREIGN KEY (`coach_adv_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
-  -- CONSTRAINT `fk_scoresheet_coach_adv_assistant_id` FOREIGN KEY (`coach_adv_assistant_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE SET NULL
+  CONSTRAINT `fk_scoresheet_fixture_id` FOREIGN KEY (`fixture_id`) REFERENCES `fixture`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `scoresheet_official`;
@@ -665,7 +653,7 @@ CREATE TABLE `scoresheet_staff` (
   `scoresheet_id` INT NULL COMMENT 'FK scoresheet',
   `team_id` INT NULL COMMENT 'FK team',
   `person_id` INT NULL COMMENT 'FK person',
-  `role_code` VARCHAR(32) NOT NULL COMMENT 'HEAD_COACH / ASSISTANT_COACH',
+  `role` VARCHAR(32) NOT NULL COMMENT 'HEAD_COACH / ASSISTANT_COACH',
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_scoresheet_staff_scoresheet_id` FOREIGN KEY (`scoresheet_id`) REFERENCES `scoresheet`(`id`) ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT `fk_scoresheet_staff_team_id` FOREIGN KEY (`team_id`) REFERENCES `team`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
@@ -814,6 +802,54 @@ CREATE TABLE `import_batch` (
 SET FOREIGN_KEY_CHECKS=1;
 
 
+DROP TABLE IF EXISTS `role`;
+CREATE TABLE `role` (
+  `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
+  `type` ENUM('PLAYER', 'COACH', 'REFEREE') NOT NULL COMMENT 'Person type (PLAYER, COACH, REFEREE...)',
+  `code` VARCHAR(30) NOT NULL COMMENT 'Code technique (PLAYER, HEAD_COACH...)',
+  `label` VARCHAR(80) NOT NULL COMMENT 'Libellé',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_role_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `role` (`type`, `code`, `label`) VALUES
+('PLAYER','PLAYER','Joueur'),
+('COACH','HEAD_COACH','Entraîneur principal'),
+('COACH','ASSISTANT_COACH','Entraîneur assistant'),
+('REFEREE','MAIN_REFEREE','Arbitre principal'),
+('REFEREE','ASSISTANT_REFEREE','Arbitre assistant'),
+('REFEREE','FOURTH_OFFICIAL','Quatrième arbitre')
+;
+
+DROP TABLE IF EXISTS `person_assignment`;
+CREATE TABLE `person_assignment` (
+  `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
+  `person_id` INT NOT NULL COMMENT 'FK person',
+  `team_id`   INT NOT NULL COMMENT 'FK team',
+  `role_id`   INT NOT NULL COMMENT 'FK role',
+  `season_id` INT NULL COMMENT 'FK season',  -- saison optionnelle (utile quand tu sais juste "saison 2019/2020" sans dates précises)
+  `from_date` DATE NULL COMMENT 'Début (NULL si inconnu)', -- dates optionnelles (utile quand tu sais les dates exactes ou approximatives)
+  `to_date`   DATE NULL COMMENT 'Fin (NULL = en cours / inconnu)',
+  PRIMARY KEY (`id`),
+  KEY `ix_tpr_role_dates` (`team_id`, `role_id`, `from_date`, `to_date`),
+  KEY `ix_tpr_person_dates` (`person_id`, `from_date`, `to_date`),
+  KEY `ix_tpr_season` (`season_id`),
+  UNIQUE KEY `uq_tpr_exact` (`person_id`, `team_id`, `role_id`, `season_id`, `from_date`, `to_date`),
+  CONSTRAINT `fk_tpr_person_id`
+    FOREIGN KEY (`person_id`) REFERENCES `person`(`id`)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT `fk_tpr_team_id`
+    FOREIGN KEY (`team_id`) REFERENCES `team`(`id`)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT `fk_tpr_role_id`
+    FOREIGN KEY (`role_id`) REFERENCES `role`(`id`)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT `fk_tpr_season_id`
+    FOREIGN KEY (`season_id`) REFERENCES `season`(`id`)
+    ON UPDATE CASCADE ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 
 # Liaison joueur - clubs ou équipe nationale
 -- =========================================================
@@ -832,200 +868,123 @@ INSERT IGNORE INTO `team` (`team_type`, `club_id`, `national_team_id`, `display_
 SELECT 'CLUB', c.id, NULL, COALESCE(c.short_name, c.name)
 FROM `club` c;
 
--- 2) Table d'appartenance joueur -> club (via team_id)
-DROP TABLE IF EXISTS `player_team_membership`;
-CREATE TABLE `player_team_membership` (
-  `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
-  `player_id` INT NOT NULL COMMENT 'FK player',
-  `team_id` INT NOT NULL COMMENT 'FK team',
-  `from_date` DATE NULL COMMENT 'Début (NULL si inconnu)',
-  `to_date` DATE NULL COMMENT 'Fin (NULL = en cours / inconnu)',
-  `is_current` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 = club actuel (règle forte)' CHECK (`is_current` IN (0,1)),
-  `source_note` VARCHAR(200) NULL COMMENT 'Source / note',
-
-  PRIMARY KEY (`id`),
-
-  -- Pour tes 3 use-cases
-  KEY `ix_pcm_player_current` (`player_id`, `is_current`),
-  KEY `ix_pcm_player_period` (`player_id`, `from_date`, `to_date`),
-  KEY `ix_pcm_team_period` (`team_id`, `from_date`, `to_date`),
-
-  -- Eviter les doublons exacts
-  UNIQUE KEY `uq_pcm_exact` (`player_id`, `team_id`, `from_date`, `to_date`),
-
-  CONSTRAINT `fk_pcm_player_id`
-    FOREIGN KEY (`player_id`) REFERENCES `player`(`id`)
-    ON UPDATE CASCADE ON DELETE CASCADE,
-
-  CONSTRAINT `fk_pcm_team_id`
-    FOREIGN KEY (`team_id`) REFERENCES `team`(`id`)
-    ON UPDATE CASCADE ON DELETE CASCADE,
-
-  CONSTRAINT `ck_pcm_dates`
-    CHECK (`from_date` IS NULL OR `to_date` IS NULL OR `from_date` <= `to_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =========================================================
--- Triggers robustesse - player_team_membership
--- Règles :
--- 1) team_id doit exister (et team_type = 'CLUB' ou 'NATIONAL')
--- 2) un seul is_current=1 par (player_id, team_type)
--- 3) anti-chevauchement par (player_id, team_type)
+-- VUES "CURRENT" basées sur person_assignment + role=PLAYER
 -- =========================================================
-
-DROP TRIGGER IF EXISTS trg_ptm_validate_ins;
-DROP TRIGGER IF EXISTS trg_ptm_validate_upd;
-
-DELIMITER $$
-
-CREATE TRIGGER trg_ptm_validate_ins
-BEFORE INSERT ON player_team_membership
-FOR EACH ROW
-BEGIN
-  DECLARE v_type ENUM('CLUB','NATIONAL');
-
-  -- team_id doit exister + récupérer team_type
-  SELECT team_type INTO v_type
-  FROM team
-  WHERE id = NEW.team_id;
-
-  IF v_type IS NULL THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'player_team_membership.team_id references an unknown team';
-  END IF;
-
-  -- Si current => un seul current par type (CLUB ou NATIONAL)
-  IF NEW.is_current = 1 THEN
-    UPDATE player_team_membership m
-    JOIN team t ON t.id = m.team_id
-    SET m.is_current = 0
-    WHERE m.player_id = NEW.player_id
-      AND t.team_type = v_type;
-
-    -- Forcer fin NULL si current (recommandé)
-    SET NEW.to_date = NULL;
-  END IF;
-
-  -- Anti-chevauchement par team_type (même player, même type)
-  IF EXISTS (
-    SELECT 1
-    FROM player_team_membership m
-    JOIN team t ON t.id = m.team_id
-    WHERE m.player_id = NEW.player_id
-      AND t.team_type = v_type
-      AND (m.to_date IS NULL OR NEW.from_date IS NULL OR m.to_date >= NEW.from_date)
-      AND (NEW.to_date IS NULL OR m.from_date IS NULL OR NEW.to_date >= m.from_date)
-  ) THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Overlapping memberships for same player and team_type';
-  END IF;
-END$$
-
-
-CREATE TRIGGER trg_ptm_validate_upd
-BEFORE UPDATE ON player_team_membership
-FOR EACH ROW
-BEGIN
-  DECLARE v_type ENUM('CLUB','NATIONAL');
-
-  -- team_id doit exister + récupérer team_type
-  SELECT team_type INTO v_type
-  FROM team
-  WHERE id = NEW.team_id;
-
-  IF v_type IS NULL THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'player_team_membership.team_id references an unknown team';
-  END IF;
-
-  -- Si current => un seul current par type (CLUB ou NATIONAL)
-  IF NEW.is_current = 1 THEN
-    UPDATE player_team_membership m
-    JOIN team t ON t.id = m.team_id
-    SET m.is_current = 0
-    WHERE m.player_id = NEW.player_id
-      AND m.id <> NEW.id
-      AND t.team_type = v_type;
-
-    SET NEW.to_date = NULL;
-  END IF;
-
-  -- Anti-chevauchement par team_type (même player, même type)
-  IF EXISTS (
-    SELECT 1
-    FROM player_team_membership m
-    JOIN team t ON t.id = m.team_id
-    WHERE m.player_id = NEW.player_id
-      AND m.id <> NEW.id
-      AND t.team_type = v_type
-      AND (m.to_date IS NULL OR NEW.from_date IS NULL OR m.to_date >= NEW.from_date)
-      AND (NEW.to_date IS NULL OR m.from_date IS NULL OR NEW.to_date >= m.from_date)
-  ) THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Overlapping memberships for same player and team_type';
-  END IF;
-END$$
-
-DELIMITER ;
-
 
 DROP VIEW IF EXISTS v_player_current_club;
 CREATE VIEW v_player_current_club AS
 SELECT
-  m.player_id,
-  m.team_id,
+  pa.person_id AS player_id,
+  pa.team_id,
   t.display_name AS club_name,
-  m.from_date
-FROM player_team_membership m
-JOIN team t ON t.id = m.team_id
-WHERE m.is_current = 1
-  AND t.team_type = 'CLUB';
+  pa.from_date
+FROM person_assignment pa
+JOIN team t   ON t.id = pa.team_id
+JOIN role r   ON r.id = pa.role_id
+WHERE r.code = 'PLAYER'
+  AND t.team_type = 'CLUB'
+  AND (pa.from_date IS NULL OR pa.from_date <= CURDATE())
+  AND (pa.to_date   IS NULL OR pa.to_date   >= CURDATE());
 
 
 DROP VIEW IF EXISTS v_player_current_national;
 CREATE VIEW v_player_current_national AS
 SELECT
-  m.player_id,
-  m.team_id,
+  pa.person_id AS player_id,
+  pa.team_id,
   t.display_name AS national_team_name,
-  m.from_date
-FROM player_team_membership m
-JOIN team t ON t.id = m.team_id
-WHERE m.is_current = 1
-  AND t.team_type = 'NATIONAL';
+  pa.from_date
+FROM person_assignment pa
+JOIN team t ON t.id = pa.team_id
+JOIN role r ON r.id = pa.role_id
+WHERE r.code = 'PLAYER'
+  AND t.team_type = 'NATIONAL'
+  AND (pa.from_date IS NULL OR pa.from_date <= CURDATE())
+  AND (pa.to_date   IS NULL OR pa.to_date   >= CURDATE());
+
 
 DROP VIEW IF EXISTS v_player_current_team;
 CREATE VIEW v_player_current_team AS
 SELECT
-  m.player_id,
+  pa.person_id AS player_id,
   t.team_type,
-  m.team_id,
+  pa.team_id,
   t.display_name AS team_name,
-  m.from_date
-FROM player_team_membership m
-JOIN team t ON t.id = m.team_id
-WHERE m.is_current = 1;
+  pa.from_date
+FROM person_assignment pa
+JOIN team t ON t.id = pa.team_id
+JOIN role r ON r.id = pa.role_id
+WHERE r.code = 'PLAYER'
+  AND (pa.from_date IS NULL OR pa.from_date <= CURDATE())
+  AND (pa.to_date   IS NULL OR pa.to_date   >= CURDATE());
 
--- Lookup current (par player)
-CREATE INDEX ix_ptm_player_current
-  ON player_team_membership(player_id, is_current);
 
--- Requêtes à date (player + période)
-CREATE INDEX ix_ptm_player_from_to
-  ON player_team_membership(player_id, from_date, to_date);
+-- =========================================================
+-- INDEX person_assignment (ex-ptm)
+-- =========================================================
 
--- Variante utile si tu as beaucoup de to_date NULL
-CREATE INDEX ix_ptm_player_to_from
-  ON player_team_membership(player_id, to_date, from_date);
+-- Lookup "current" (par person + role) : utile pour vues current et requêtes rapides
+CREATE INDEX ix_pa_person_role_current
+  ON person_assignment(person_id, role_id, to_date, from_date);
+
+-- Requêtes à date (person + période)
+CREATE INDEX ix_pa_person_from_to
+  ON person_assignment(person_id, from_date, to_date);
+
+-- Variante utile si beaucoup de to_date NULL
+CREATE INDEX ix_pa_person_to_from
+  ON person_assignment(person_id, to_date, from_date);
 
 -- Requêtes par team (effectif à date / historique)
-CREATE INDEX ix_ptm_team_from_to
-  ON player_team_membership(team_id, from_date, to_date);
+CREATE INDEX ix_pa_team_from_to
+  ON person_assignment(team_id, from_date, to_date);
 
+-- Filtre rôle (PLAYER vs HEAD_COACH...) quand tu requêtes beaucoup par rôle
+CREATE INDEX ix_pa_role_team_dates
+  ON person_assignment(role_id, team_id, from_date, to_date);
+
+-- (inchangé) filtre team_type
 CREATE INDEX ix_team_type
   ON team(team_type);
 
 
+
+
+# Les vues:
+-- 1) Team_id de l'Equipe Nationale d'Algérie
+CREATE OR REPLACE VIEW v_team_nt_alg AS
+SELECT t.id AS team_id
+FROM team t
+JOIN national_team nt ON nt.id = t.national_team_id
+WHERE t.team_type = 'NATIONAL'
+  AND (
+    nt.country_id = 1
+  );
+
+-- 2) Liste des joueurs de l'EN Algérie (toutes périodes / sans date)
+CREATE OR REPLACE VIEW v_nt_alg_players AS
+SELECT DISTINCT
+  p.id        AS person_id,
+  p.full_name AS full_name
+FROM person_assignment pa
+JOIN v_team_nt_alg alg ON alg.team_id = pa.team_id
+JOIN role r ON r.id = pa.role_id
+JOIN person p ON p.id = pa.person_id
+WHERE r.code = 'PLAYER';
+
+-- 3) Liste des entraîneurs de l'EN Algérie (toutes périodes / sans date)
+CREATE OR REPLACE VIEW v_nt_alg_coaches AS
+SELECT DISTINCT
+  p.id        AS person_id,
+  p.full_name AS full_name,
+  r.code      AS role_code
+FROM person_assignment pa
+JOIN v_team_nt_alg alg ON alg.team_id = pa.team_id
+JOIN role r ON r.id = pa.role_id
+JOIN person p ON p.id = pa.person_id
+WHERE r.code IN ('HEAD_COACH', 'ASSISTANT_COACH');
 
 # MIGRATIONS
 CREATE TABLE user (
