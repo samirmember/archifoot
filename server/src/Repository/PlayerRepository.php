@@ -134,28 +134,32 @@ class PlayerRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->innerJoin('p.person', 'person')
-            ->innerJoin('App\\Entity\\PlayerTeamMembership', 'membership', 'WITH', 'membership.player = p')
-            ->innerJoin('membership.team', 'team')
+            ->innerJoin('App\\Entity\\PersonAssignment', 'assignment', 'WITH', 'assignment.person = person')
+            ->innerJoin('assignment.team', 'team')
+            ->innerJoin('assignment.role', 'assignmentRole')
             ->innerJoin('team.nationalTeam', 'nationalTeam')
             ->innerJoin('nationalTeam.country', 'country')
             ->where('LOWER(country.name) IN (:algeriaNames) OR UPPER(country.iso3) = :algeriaIso3')
             ->andWhere(
                 'NOT EXISTS (
-                    SELECT 1 FROM App\\Entity\\PlayerTeamMembership newerMembership
-                    WHERE newerMembership.player = p
+                    SELECT 1 FROM App\\Entity\\PersonAssignment newerMembership
+                    WHERE newerMembership.person = person
+                    AND newerMembership.role = assignmentRole
                     AND (
-                        COALESCE(newerMembership.fromDate, newerMembership.toDate) > COALESCE(membership.fromDate, membership.toDate)
+                        COALESCE(newerMembership.fromDate, newerMembership.toDate) > COALESCE(assignment.fromDate, assignment.toDate)
                         OR (
-                            COALESCE(newerMembership.fromDate, newerMembership.toDate) = COALESCE(membership.fromDate, membership.toDate)
-                            AND newerMembership.id > membership.id
+                            COALESCE(newerMembership.fromDate, newerMembership.toDate) = COALESCE(assignment.fromDate, assignment.toDate)
+                            AND newerMembership.id > assignment.id
                         )
                     )
                 )'
             )
             ->andWhere('UPPER(team.teamType) = :teamTypeNational')
+            ->andWhere('UPPER(assignmentRole.code) = :playerRoleCode')
             ->setParameter('teamTypeNational', 'NATIONAL')
             ->setParameter('algeriaNames', self::ALGERIA_NAMES)
-            ->setParameter('algeriaIso3', self::ALGERIA_ISO3);
+            ->setParameter('algeriaIso3', self::ALGERIA_ISO3)
+            ->setParameter('playerRoleCode', 'PLAYER');
     }
 
     /** @return array<int, array<string, mixed>> */
@@ -165,22 +169,24 @@ class PlayerRepository extends ServiceEntityRepository
             <<<'SQL'
                 SELECT
                     ptm.id,
-                    ptm.player_id as playerId,
+                    player_entity.id as playerId,
                     ptm.from_date AS fromDate,
                     ptm.to_date AS toDate,
-                    ptm.is_current AS isCurrent,
-                    ptm.source_note AS sourceNote,
+                    CASE WHEN ptm.to_date IS NULL THEN 1 ELSE 0 END AS isCurrent,
+                    NULL AS sourceNote,
                     t.display_name AS teamDisplayName,
                     t.team_type AS teamType,
                     c.name AS clubName,
                     country.name AS countryName,
                     nt.name AS nationalTeamName
-                FROM player_team_membership ptm
+                FROM person_assignment ptm
+                INNER JOIN player player_entity ON player_entity.person_id = ptm.person_id
+                INNER JOIN role role ON role.id = ptm.role_id AND role.code = 'PLAYER'
                 LEFT JOIN team t ON t.id = ptm.team_id
                 LEFT JOIN club c ON c.id = t.club_id
                 LEFT JOIN national_team nt ON nt.id = t.national_team_id
                 LEFT JOIN country country ON country.id = nt.country_id
-                WHERE ptm.player_id = :playerId
+                WHERE player_entity.id = :playerId
                 ORDER BY COALESCE(ptm.from_date, ptm.to_date) DESC, ptm.id DESC
             SQL,
             ['playerId' => $playerId]
@@ -378,15 +384,18 @@ class PlayerRepository extends ServiceEntityRepository
         $playerRows = $this->createQueryBuilder('p')
             ->select('p.id AS id, person.fullName AS fullName')
             ->innerJoin('p.person', 'person')
-            ->innerJoin('App\\Entity\\PlayerTeamMembership', 'membership', 'WITH', 'membership.player = p')
-            ->innerJoin('membership.team', 'team')
+            ->innerJoin('App\\Entity\\PersonAssignment', 'assignment', 'WITH', 'assignment.person = person')
+            ->innerJoin('assignment.team', 'team')
+            ->innerJoin('assignment.role', 'assignmentRole')
             ->innerJoin('team.nationalTeam', 'nationalTeam')
             ->innerJoin('nationalTeam.country', 'country')
             ->where('UPPER(team.teamType) = :teamTypeNational')
+            ->andWhere('UPPER(assignmentRole.code) = :playerRoleCode')
             ->andWhere('LOWER(country.name) IN (:algeriaNames) OR UPPER(country.iso3) = :algeriaIso3')
             ->setParameter('teamTypeNational', 'NATIONAL')
             ->setParameter('algeriaNames', ['algérie', 'algerie'])
             ->setParameter('algeriaIso3', 'DZA')
+            ->setParameter('playerRoleCode', 'PLAYER')
             ->orderBy('person.fullName', 'ASC')
             ->getQuery()
             ->getArrayResult();
@@ -433,14 +442,21 @@ class PlayerRepository extends ServiceEntityRepository
 
         $clubHistoryRows = $this->getEntityManager()
             ->createQuery(
-                'SELECT team.displayName AS teamName, membership.fromDate AS fromDate, membership.toDate AS toDate, membership.isCurrent AS isCurrent
-                 FROM App\\Entity\\PlayerTeamMembership membership
+                'SELECT team.displayName AS teamName, membership.fromDate AS fromDate, membership.toDate AS toDate,
+                        CASE WHEN membership.toDate IS NULL THEN true ELSE false END AS isCurrent
+                 FROM App\\Entity\\PersonAssignment membership
+                 INNER JOIN membership.person person
+                 INNER JOIN App\\Entity\\Player player WITH player.person = person
+                 INNER JOIN membership.role membershipRole
                  INNER JOIN membership.team team
-                 WHERE membership.player = :playerId AND UPPER(team.teamType) = :teamTypeClub
-                 ORDER BY membership.isCurrent DESC, membership.fromDate DESC, membership.id DESC'
+                 WHERE player.id = :playerId
+                   AND UPPER(team.teamType) = :teamTypeClub
+                   AND UPPER(membershipRole.code) = :playerRoleCode
+                 ORDER BY membership.toDate DESC, membership.fromDate DESC, membership.id DESC'
             )
             ->setParameter('playerId', $playerId)
             ->setParameter('teamTypeClub', 'CLUB')
+            ->setParameter('playerRoleCode', 'PLAYER')
             ->getArrayResult();
 
         $currentClub = null;

@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
@@ -40,14 +38,6 @@ class Team
 
     #[ORM\Column(name: 'display_name', length: 200, nullable: true)]
     private ?string $displayName = null;
-
-    #[ORM\OneToMany(mappedBy: 'team', targetEntity: PlayerTeamMembership::class, orphanRemoval: true)]
-    private Collection $playerClubMemberships;
-
-    public function __construct()
-    {
-        $this->playerClubMemberships = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -100,10 +90,5 @@ class Team
         $this->displayName = $displayName;
 
         return $this;
-    }
-
-    public function getPlayerTeamMemberships(): Collection
-    {
-        return $this->playerClubMemberships;
     }
 }

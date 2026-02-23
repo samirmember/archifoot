@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\PlayerRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PlayerRepository::class)]
@@ -25,15 +23,6 @@ class Player
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'primary_position_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Position $primaryPosition = null;
-
-    #[ORM\OneToMany(mappedBy: 'player', targetEntity: PlayerTeamMembership::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
-    #[ORM\OrderBy(['fromDate' => 'DESC'])]
-    private Collection $clubMemberships;
-
-    public function __construct()
-    {
-        $this->clubMemberships = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -62,11 +51,6 @@ class Player
         $this->primaryPosition = $primaryPosition;
 
         return $this;
-    }
-
-    public function getClubMemberships(): Collection
-    {
-        return $this->clubMemberships;
     }
 
     public function getPhotoUrl(): ?string
@@ -189,50 +173,6 @@ class Player
         return $this;
     }
 
-    public function addClubMembership(PlayerTeamMembership $membership): self
-    {
-        if (!$this->clubMemberships->contains($membership)) {
-            $this->clubMemberships->add($membership);
-            $membership->setPlayer($this);
-        }
-        return $this;
-    }
-
-    public function removeClubMembership(PlayerTeamMembership $membership): self
-    {
-        if ($this->clubMemberships->removeElement($membership)) {
-            if ($membership->getPlayer() === $this) {
-                $membership->setPlayer(null);
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * Club actuel (si tu appliques la règle is_current=1).
-     */
-    public function getCurrentClubMembership(): ?PlayerTeamMembership
-    {
-        foreach ($this->clubMemberships as $m) {
-            if ($m->isCurrent()) {
-                return $m;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Club à une date (match_date), sans requête DB additionnelle si la collection est hydratée.
-     */
-    public function getClubMembershipAt(\DateTimeInterface $date): ?PlayerTeamMembership
-    {
-        foreach ($this->clubMemberships as $m) {
-            if ($m->covers($date)) {
-                return $m;
-            }
-        }
-        return null;
-    }
 
     private function ensurePersonExists(): void
     {

@@ -151,7 +151,9 @@ class CoachRepository extends ServiceEntityRepository
                 INNER JOIN national_team nta ON nta.id = ta.national_team_id
                 INNER JOIN country ca ON ca.id = nta.country_id
                 INNER JOIN fixture_participant fpo ON fpo.fixture_id = f.id AND fpo.role <> fpa.role
-                WHERE sc.coach_id = :personId
+                INNER JOIN scoresheet_staff ssf ON ssf.scoresheet_id = sc.id
+                WHERE ssf.person_id = :personId
+                  AND ssf.role IN ('HEAD_COACH', 'ASSISTANT_COACH')
                   AND f.played = 1
                   AND (
                     LOWER(ca.name) IN (:algeriaNames)
