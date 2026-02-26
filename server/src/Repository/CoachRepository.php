@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Coach;
+use App\Entity\Role;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\String\Slugger\AsciiSlugger;
@@ -28,7 +29,8 @@ class CoachRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('c')
             ->innerJoin('c.person', 'person')
             ->leftJoin('person.nationalityCountry', 'nationalityCountry')
-            ->select('c.id AS id, person.fullName AS fullName, c.role AS role, person.photoUrl AS photoUrl, nationalityCountry.name AS nationality');
+            ->leftJoin(Role::class, 'role', 'WITH', 'role.code = c.role')
+            ->select('c.id AS id, person.fullName AS fullName, role.label AS roleName, person.photoUrl AS photoUrl, nationalityCountry.name AS nationality');
 
         if ($query !== '') {
             $qb
