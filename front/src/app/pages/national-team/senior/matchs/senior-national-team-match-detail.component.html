@@ -1,19 +1,27 @@
 <section class="match-page container py-4 py-lg-5">
   <a routerLink="/equipe-nationale/senior/matchs" class="back-link">← Retour à la liste des matchs</a>
 
-  <app-result [result]="dummyResult" />
+  <app-result [result]="headerResult()" />
+
+  @if (isLoading()) {
+    <div class="alert alert-info mb-4">Chargement de la fiche match...</div>
+  }
+
+  @if (error()) {
+    <div class="alert alert-warning mb-4">{{ error() }}</div>
+  }
 
   <article class="summary-card card shadow-sm mb-4">
     <div class="card-body p-4 p-lg-5">
       <div class="summary-head text-center">
-        <p class="date">10 janv. 2026</p>
-        <div class="score-pill">0 - 2</div>
-        <p class="competition mb-1">1/4 de finale CAN 2025 au Maroc</p>
-        <p class="location mb-0"><i class="uil uil-map-marker"></i> Grand stade. Marrakech, Maroc.</p>
+        <p class="date">{{ headerResult().date | date: 'd MMM y' }}</p>
+        <div class="score-pill">{{ headerResult().scoreA ?? 0 }} - {{ headerResult().scoreB ?? 0 }}</div>
+        <p class="competition mb-1">{{ fallbackStage }} {{ fallbackCompetition }} {{ fallbackEdition }}</p>
+        <p class="location mb-0"><i class="uil uil-map-marker"></i> {{ headerResult().stadium }}, {{ headerResult().city }}, {{ headerResult().countryStadiumName }}.</p>
       </div>
 
       <div class="meta-grid mt-4">
-        @for (item of matchMeta; track item.label) {
+        @for (item of matchMeta(); track item.label) {
           <div class="meta-item">
             <span>{{ item.label }}</span>
             <strong>{{ item.value }}</strong>
@@ -23,7 +31,7 @@
 
       <div class="notes-banner mt-3">
         <h6 class="mb-1">Notes</h6>
-        <p class="mb-0">L’Algérie a subi une forte pression dans le dernier tiers malgré une bonne première période.</p>
+        <p class="mb-0">{{ headerResult().notes }}</p>
       </div>
     </div>
   </article>
@@ -34,7 +42,7 @@
         <div class="card-body p-4">
           <h3 class="section-title mb-4"><i class="uil uil-clock"></i> Match Timeline</h3>
           <div class="timeline">
-            @for (event of timelineEvents; track event.minute + event.title) {
+            @for (event of timelineEvents(); track event.minute + event.title) {
               <div class="timeline-item" [class.goal]="event.type === 'goal'" [class.card-event]="event.type === 'card'">
                 <div class="dot"></div>
                 <div class="event-body">
@@ -60,7 +68,7 @@
         <div class="card-body p-4">
           <h3 class="section-title mb-3"><i class="uil uil-users-alt"></i> Staff & Officials</h3>
           <div class="staff-grid">
-            @for (staff of staffs; track staff.role + staff.name) {
+            @for (staff of staffs(); track staff.role + staff.name) {
               <div class="staff-item">
                 <div>
                   <p class="role">{{ staff.role }}</p>
@@ -78,7 +86,7 @@
         <div class="card-body p-4">
           <h3 class="section-title light mb-3"><i class="uil uil-file-alt"></i> Match Notes</h3>
           <ul>
-            @for (note of notes; track note) {
+            @for (note of notes(); track note) {
               <li>{{ note }}</li>
             }
           </ul>
@@ -94,9 +102,9 @@
       <div class="row g-4">
         <div class="col-lg-6">
           <div class="lineup-card">
-            <header>{{ lineupAlgeria.title }}</header>
+            <header>{{ lineupAlgeria().title }}</header>
             <ul>
-              @for (player of lineupAlgeria.players; track player.name) {
+              @for (player of lineupAlgeria().players; track player.name) {
                 <li>
                   <span class="role" [class.captain]="player.captain">{{ player.role }}</span>
                   <strong>{{ player.name }}</strong>
@@ -109,9 +117,9 @@
 
         <div class="col-lg-6">
           <div class="lineup-card">
-            <header>{{ lineupOpponent.title }}</header>
+            <header>{{ lineupOpponent().title }}</header>
             <ul>
-              @for (player of lineupOpponent.players; track player.name) {
+              @for (player of lineupOpponent().players; track player.name) {
                 <li>
                   <span class="role">{{ player.role }}</span>
                   <strong>{{ player.name }}</strong>
@@ -131,7 +139,7 @@
         <div class="card-body p-4">
           <h3 class="section-title mb-3">Les changements dans le match (Algérie)</h3>
           <ul class="simple-list">
-            @for (change of algeriaChanges; track change) {
+            @for (change of algeriaChanges(); track change) {
               <li>{{ change }}</li>
             }
           </ul>
@@ -144,7 +152,7 @@
         <div class="card-body p-4">
           <h3 class="section-title mb-3">Changements de l'équipe adverse</h3>
           <ul class="simple-list">
-            @for (change of opponentChanges; track change) {
+            @for (change of opponentChanges(); track change) {
               <li>{{ change }}</li>
             }
           </ul>
@@ -157,7 +165,7 @@
     <div class="card-body p-4">
       <h3 class="section-title mb-3">Arbitrage détaillé</h3>
       <div class="officials-grid">
-        @for (official of officials; track official.role + official.name) {
+        @for (official of officials(); track official.role + official.name) {
           <div class="official-item">
             <span>{{ official.role }}</span>
             <strong>{{ official.name }}</strong>
