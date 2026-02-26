@@ -7,6 +7,12 @@
         "@angular/cli",
         "mcp"
       ]
+    },
+    "stitch": {
+      "serverUrl": "https://stitch.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "AQ.Ab8RN6IFh-XNye3RQ0qmwv8QMNAKimoyXdVUfW6eYIqC7mwVxw"
+      }
     }
   }
 }

@@ -3,6 +3,7 @@
     <a
       class="player-card"
       [routerLink]="['/equipe-nationale/senior/joueurs', getPlayerSlug(player.fullName)]"
+      [attr.data-id]="player.id"
     >
       <div class="player-photo">
         @if (player.photoUrl) {

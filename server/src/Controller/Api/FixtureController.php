@@ -92,9 +92,14 @@ class FixtureController extends AbstractController
                     sc.signed_place AS "signedPlace",
                     sc.signed_on AS "signedOn",
                     sc.status AS "status",
-                    p.full_name AS "coachName"
+                    (
+                        SELECT GROUP_CONCAT(ps.full_name ORDER BY ssf.id SEPARATOR ', ')
+                        FROM scoresheet_staff ssf
+                        INNER JOIN person ps ON ps.id = ssf.person_id
+                        WHERE ssf.scoresheet_id = sc.id
+                          AND ssf.role IN ('HEAD_COACH', 'ASSISTANT_COACH')
+                    ) AS "coachName"
                 FROM scoresheet sc
-                LEFT JOIN person p ON p.id = sc.coach_id
                 WHERE sc.fixture_id = :fixtureId
             SQL,
             ['fixtureId' => $fixtureId]

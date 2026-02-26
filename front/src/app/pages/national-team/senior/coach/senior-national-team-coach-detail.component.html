@@ -25,34 +25,35 @@
 
           <div class="chips">
             <span>Nationalité: {{ coach()!.nationality }}</span>
-            <span>
-              Date de naissance:
-              {{ coach()!.birthDate ? (coach()!.birthDate | date: 'dd/MM/yyyy') : 'N/A' }}
-            </span>
-            <span>Lieu de naissance: {{ coach()!.birthPlace || 'N/A' }}</span>
-            <span>Système préféré: {{ coach()!.preferredSystem || 'N/A' }}</span>
-            <span
-              >Fin de contrat:
-              {{
+            @if (coach()!.birthDate) {
+              <span>
+                Date de naissance:
+                {{ coach()!.birthDate ? (coach()!.birthDate | date: 'dd/MM/yyyy') : 'N/A' }}
+              </span>
+            }
+            @if (coach()!.birthPlace) {
+              <span>Lieu de naissance: {{ coach()!.birthPlace || 'N/A' }}</span>
+            }
+            @if (coach()!.preferredSystem) {
+              <span>Système préféré: {{ coach()!.preferredSystem || 'N/A' }}</span>
+            }
+            @if (coach()!.contractUntil) {
+              <span
+                >Fin de contrat:
+                {{
                 coach()!.contractUntil ? (coach()!.contractUntil | date: 'MM/yyyy') : 'N/A'
               }}</span
             >
-            <span>Win rate: {{ getWinRate(coach()!) }}%</span>
-          </div>
-
-          <p class="bio">{{ coach()!.biography }}</p>
-
-          <div class="badges">
-            @for (badge of coach()!.badges; track badge) {
-              <span>{{ badge }}</span>
             }
+            <span>Taux de victoire: {{ getWinRate(coach()!) }}%</span>
           </div>
+
         </div>
       </div>
 
       <div class="stats-grid">
         @for (stat of keyStats(); track stat.label) {
-          <article class="stat-card">
+          <article class="stat-card" [attr.title]="stat.tooltip ? stat.tooltip : null">
             <span>{{ stat.label }}</span>
             <strong>{{ stat.value }}</strong>
           </article>
@@ -136,7 +137,7 @@
         </article>
 
         <article class="panel">
-          <h2>Composition du staff (à connecter)</h2>
+          <h2>Composition du staff</h2>
           <div class="staff-grid">
             @for (member of coach()!.staff; track member) {
               <div class="staff-item">{{ member }}</div>
@@ -146,7 +147,7 @@
       </div>
 
       <article class="panel placeholder-panel">
-        <h2>Stats avancées (blocs statiques à dynamiser)</h2>
+        <h2>Stats avancées</h2>
         <div class="placeholder-grid">
           @for (item of coach()!.futureDataPlaceholders; track item.label) {
             <div class="placeholder-item">

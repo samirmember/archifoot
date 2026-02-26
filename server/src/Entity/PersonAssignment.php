@@ -21,15 +21,15 @@ class PersonAssignment
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(optional: false)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'person_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private Person $person;
 
-    #[ORM\ManyToOne(optional: false)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'team_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private Team $team;
 
-    #[ORM\ManyToOne(optional: false)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'role_id', referencedColumnName: 'id', nullable: false, onDelete: 'RESTRICT')]
     private Role $role;
 

@@ -54,10 +54,6 @@ class Scoresheet
     #[ORM\Column(name: 'signed_on', type: 'date', nullable: true)]
     private ?\DateTimeInterface $signedOn = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'coach_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private ?Person $coach = null;
-
     #[ORM\Column(name: 'status', length: 1, nullable: true)]
     private ?string $status = null;
 
@@ -218,18 +214,6 @@ class Scoresheet
     public function setSignedOn(?\DateTimeInterface $signedOn): static
     {
         $this->signedOn = $signedOn;
-
-        return $this;
-    }
-
-    public function getCoach(): ?Person
-    {
-        return $this->coach;
-    }
-
-    public function setCoach(?Person $coach): static
-    {
-        $this->coach = $coach;
 
         return $this;
     }

@@ -13,9 +13,6 @@ use App\Service\DateFormatter;
  */
 class PlayerRepository extends ServiceEntityRepository
 {
-    private const ALGERIA_NAMES = ['algérie', 'algerie'];
-    private const ALGERIA_ISO3 = 'DZA';
-
     public function __construct(
         ManagerRegistry $registry,
         private readonly DateFormatter $dateFormatter
@@ -134,28 +131,31 @@ class PlayerRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->innerJoin('p.person', 'person')
-            ->innerJoin('App\\Entity\\PlayerTeamMembership', 'membership', 'WITH', 'membership.player = p')
-            ->innerJoin('membership.team', 'team')
+            ->innerJoin('App\\Entity\\PersonAssignment', 'assignment', 'WITH', 'assignment.person = person')
+            ->innerJoin('assignment.team', 'team')
+            ->innerJoin('assignment.role', 'assignmentRole')
             ->innerJoin('team.nationalTeam', 'nationalTeam')
             ->innerJoin('nationalTeam.country', 'country')
-            ->where('LOWER(country.name) IN (:algeriaNames) OR UPPER(country.iso3) = :algeriaIso3')
+            ->where('person.nationalityCountry = :nationalityCountryId')
             ->andWhere(
                 'NOT EXISTS (
-                    SELECT 1 FROM App\\Entity\\PlayerTeamMembership newerMembership
-                    WHERE newerMembership.player = p
+                    SELECT 1 FROM App\\Entity\\PersonAssignment newerMembership
+                    WHERE newerMembership.person = person
+                    AND newerMembership.role = assignmentRole
                     AND (
-                        COALESCE(newerMembership.fromDate, newerMembership.toDate) > COALESCE(membership.fromDate, membership.toDate)
+                        COALESCE(newerMembership.fromDate, newerMembership.toDate) > COALESCE(assignment.fromDate, assignment.toDate)
                         OR (
-                            COALESCE(newerMembership.fromDate, newerMembership.toDate) = COALESCE(membership.fromDate, membership.toDate)
-                            AND newerMembership.id > membership.id
+                            COALESCE(newerMembership.fromDate, newerMembership.toDate) = COALESCE(assignment.fromDate, assignment.toDate)
+                            AND newerMembership.id > assignment.id
                         )
                     )
                 )'
             )
             ->andWhere('UPPER(team.teamType) = :teamTypeNational')
+            ->andWhere('UPPER(assignmentRole.code) = :playerRoleCode')
             ->setParameter('teamTypeNational', 'NATIONAL')
-            ->setParameter('algeriaNames', self::ALGERIA_NAMES)
-            ->setParameter('algeriaIso3', self::ALGERIA_ISO3);
+            ->setParameter('playerRoleCode', 'PLAYER')
+            ->setParameter('nationalityCountryId', 1);
     }
 
     /** @return array<int, array<string, mixed>> */
@@ -165,22 +165,24 @@ class PlayerRepository extends ServiceEntityRepository
             <<<'SQL'
                 SELECT
                     ptm.id,
-                    ptm.player_id as playerId,
+                    player_entity.id as playerId,
                     ptm.from_date AS fromDate,
                     ptm.to_date AS toDate,
-                    ptm.is_current AS isCurrent,
-                    ptm.source_note AS sourceNote,
+                    CASE WHEN ptm.to_date IS NULL THEN 1 ELSE 0 END AS isCurrent,
+                    NULL AS sourceNote,
                     t.display_name AS teamDisplayName,
                     t.team_type AS teamType,
                     c.name AS clubName,
                     country.name AS countryName,
                     nt.name AS nationalTeamName
-                FROM player_team_membership ptm
+                FROM person_assignment ptm
+                INNER JOIN player player_entity ON player_entity.person_id = ptm.person_id
+                INNER JOIN role role ON role.id = ptm.role_id AND role.code = 'PLAYER'
                 LEFT JOIN team t ON t.id = ptm.team_id
                 LEFT JOIN club c ON c.id = t.club_id
                 LEFT JOIN national_team nt ON nt.id = t.national_team_id
                 LEFT JOIN country country ON country.id = nt.country_id
-                WHERE ptm.player_id = :playerId
+                WHERE player_entity.id = :playerId
                 ORDER BY COALESCE(ptm.from_date, ptm.to_date) DESC, ptm.id DESC
             SQL,
             ['playerId' => $playerId]
@@ -368,194 +370,6 @@ class PlayerRepository extends ServiceEntityRepository
         );
 
         return (int) ($result['duelsWon'] ?? 0);
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function findAlgeriaSeniorPlayerProfileBySlug(string $slug): ?array
-    {
-        $playerRows = $this->createQueryBuilder('p')
-            ->select('p.id AS id, person.fullName AS fullName')
-            ->innerJoin('p.person', 'person')
-            ->innerJoin('App\\Entity\\PlayerTeamMembership', 'membership', 'WITH', 'membership.player = p')
-            ->innerJoin('membership.team', 'team')
-            ->innerJoin('team.nationalTeam', 'nationalTeam')
-            ->innerJoin('nationalTeam.country', 'country')
-            ->where('UPPER(team.teamType) = :teamTypeNational')
-            ->andWhere('LOWER(country.name) IN (:algeriaNames) OR UPPER(country.iso3) = :algeriaIso3')
-            ->setParameter('teamTypeNational', 'NATIONAL')
-            ->setParameter('algeriaNames', ['algérie', 'algerie'])
-            ->setParameter('algeriaIso3', 'DZA')
-            ->orderBy('person.fullName', 'ASC')
-            ->getQuery()
-            ->getArrayResult();
-
-        $targetPlayer = null;
-        foreach ($playerRows as $row) {
-            if ($this->slugify((string) ($row['fullName'] ?? '')) === $slug) {
-                $targetPlayer = $row;
-                break;
-            }
-        }
-
-        if ($targetPlayer === null) {
-            return null;
-        }
-
-        $playerId = (int) $targetPlayer['id'];
-        $detail = $this->createQueryBuilder('p')
-            ->select(
-                'p.id AS id',
-                'person.fullName AS fullName',
-                'person.photoUrl AS photoUrl',
-                'position.label AS positionName',
-                'nationality.name AS nationalityName',
-                'person.birthDate AS birthDateName',
-                'birthCity.name AS birthCityName',
-                'birthRegion.name AS birthRegionName',
-                'birthCountry.name AS birthCountrNamey'
-            )
-            ->leftJoin('p.person', 'person')
-            ->leftJoin('p.primaryPosition', 'position')
-            ->leftJoin('person.nationalityCountry', 'nationality')
-            ->leftJoin('person.birthCity', 'birthCity')
-            ->leftJoin('person.birthRegion', 'birthRegion')
-            ->leftJoin('person.birthCountry', 'birthCountry')
-            ->where('p.id = :playerId')
-            ->setParameter('playerId', $playerId)
-            ->getQuery()
-            ->getOneOrNullResult();
-
-        if ($detail === null) {
-            return null;
-        }
-
-        $clubHistoryRows = $this->getEntityManager()
-            ->createQuery(
-                'SELECT team.displayName AS teamName, membership.fromDate AS fromDate, membership.toDate AS toDate, membership.isCurrent AS isCurrent
-                 FROM App\\Entity\\PlayerTeamMembership membership
-                 INNER JOIN membership.team team
-                 WHERE membership.player = :playerId AND UPPER(team.teamType) = :teamTypeClub
-                 ORDER BY membership.isCurrent DESC, membership.fromDate DESC, membership.id DESC'
-            )
-            ->setParameter('playerId', $playerId)
-            ->setParameter('teamTypeClub', 'CLUB')
-            ->getArrayResult();
-
-        $currentClub = null;
-        $clubHistory = [];
-        foreach ($clubHistoryRows as $row) {
-            if ($currentClub === null && !empty($row['teamName'])) {
-                $currentClub = $row['teamName'];
-            }
-
-            $clubHistory[] = [
-                'teamName' => $row['teamName'] ?: 'Club non renseigné',
-                'periodLabel' => $this->formatPeriod($row['fromDate'] ?? null, $row['toDate'] ?? null, (bool) ($row['isCurrent'] ?? false)),
-                'isCurrent' => (bool) ($row['isCurrent'] ?? false),
-            ];
-        }
-
-        $nationalStatsRows = $this->getEntityManager()
-            ->createQuery(
-                'SELECT stats.caps AS caps, stats.goals AS goals
-                 FROM App\\Entity\\PlayerNationalStats stats
-                 INNER JOIN stats.team team
-                 INNER JOIN team.nationalTeam nationalTeam
-                 INNER JOIN nationalTeam.country country
-                 WHERE stats.player = :playerId
-                   AND UPPER(team.teamType) = :teamTypeNational
-                   AND (LOWER(country.name) IN (:algeriaNames) OR UPPER(country.iso3) = :algeriaIso3)'
-            )
-            ->setParameter('playerId', $playerId)
-            ->setParameter('teamTypeNational', 'NATIONAL')
-            ->setParameter('algeriaNames', ['algérie', 'algerie'])
-            ->setParameter('algeriaIso3', 'DZA')
-            ->getArrayResult();
-
-        $caps = 0;
-        $goals = 0;
-        foreach ($nationalStatsRows as $row) {
-            $caps += (int) ($row['caps'] ?? 0);
-            $goals += (int) ($row['goals'] ?? 0);
-        }
-
-        $lineupStats = $this->getEntityManager()
-            ->createQuery(
-                'SELECT
-                    COUNT(lineup.id) AS caps,
-                    SUM(CASE WHEN UPPER(COALESCE(lineup.lineupRole, \'\')) = \'STARTER\' THEN 1 ELSE 0 END) AS starts,
-                    SUM(CASE WHEN UPPER(COALESCE(lineup.lineupRole, \'\')) IN (\'SUB\', \'SUBSTITUTE\', \'BENCH\') THEN 1 ELSE 0 END) AS subIn,
-                    SUM(CASE WHEN lineup.isCaptain = true THEN 1 ELSE 0 END) AS captainMatches,
-                    MAX(fixture.matchDate) AS lastCapDate,
-                    MAX(lineup.shirtNumber) AS shirtNumber
-                 FROM App\\Entity\\ScoresheetLineup lineup
-                 LEFT JOIN lineup.scoresheet scoresheet
-                 LEFT JOIN scoresheet.fixture fixture
-                 INNER JOIN lineup.team team
-                 INNER JOIN team.nationalTeam nationalTeam
-                 INNER JOIN nationalTeam.country country
-                 WHERE lineup.player = :playerId
-                   AND UPPER(team.teamType) = :teamTypeNational
-                   AND (LOWER(country.name) IN (:algeriaNames) OR UPPER(country.iso3) = :algeriaIso3)'
-            )
-            ->setParameter('playerId', $playerId)
-            ->setParameter('teamTypeNational', 'NATIONAL')
-            ->setParameter('algeriaNames', ['algérie', 'algerie'])
-            ->setParameter('algeriaIso3', 'DZA')
-            ->getSingleResult();
-
-        $cardStats = $this->getEntityManager()
-            ->createQuery(
-                'SELECT
-                    SUM(CASE WHEN UPPER(COALESCE(card.cardType, \'\')) IN (\'Y\', \'YC\') THEN 1 ELSE 0 END) AS yellowCards,
-                    SUM(CASE WHEN UPPER(COALESCE(card.cardType, \'\')) IN (\'R\', \'RC\') THEN 1 ELSE 0 END) AS redCards
-                 FROM App\\Entity\\MatchCard card
-                 INNER JOIN card.team team
-                 INNER JOIN team.nationalTeam nationalTeam
-                 INNER JOIN nationalTeam.country country
-                 WHERE card.player = :playerId
-                   AND UPPER(team.teamType) = :teamTypeNational
-                   AND (LOWER(country.name) IN (:algeriaNames) OR UPPER(country.iso3) = :algeriaIso3)'
-            )
-            ->setParameter('playerId', $playerId)
-            ->setParameter('teamTypeNational', 'NATIONAL')
-            ->setParameter('algeriaNames', ['algérie', 'algerie'])
-            ->setParameter('algeriaIso3', 'DZA')
-            ->getSingleResult();
-
-        $birthChunks = array_filter([
-            $detail['birthCityName'] ?? null,
-            $detail['birthRegionName'] ?? null,
-            $detail['birthCountryName'] ?? null,
-        ]);
-
-        return [
-            'id' => $playerId,
-            'slug' => $slug,
-            'fullName' => $detail['fullName'],
-            'photoUrl' => $detail['photoUrl'],
-            'position' => $detail['positionName'],
-            'nationality' => $detail['nationalityName'],
-            'birthDateLabel' => $this->formatDate($detail['birthDateName'] ?? null),
-            'birthPlace' => count($birthChunks) ? implode(', ', $birthChunks) : null,
-            'currentClub' => $currentClub,
-            'shirtNumber' => isset($lineupStats['shirtNumber']) && $lineupStats['shirtNumber'] !== null
-                ? (string) $lineupStats['shirtNumber']
-                : null,
-            'stats' => [
-                'caps' => max($caps, (int) ($lineupStats['caps'] ?? 0)),
-                'goals' => $goals,
-                'starts' => (int) ($lineupStats['starts'] ?? 0),
-                'subIn' => (int) ($lineupStats['subIn'] ?? 0),
-                'yellowCards' => (int) ($cardStats['yellowCards'] ?? 0),
-                'redCards' => (int) ($cardStats['redCards'] ?? 0),
-                'captainMatches' => (int) ($lineupStats['captainMatches'] ?? 0),
-                'lastCapDate' => $this->formatDate($lineupStats['lastCapDate'] ?? null),
-            ],
-            'clubHistory' => $clubHistory,
-        ];
     }
 
     private function slugify(string $value): string

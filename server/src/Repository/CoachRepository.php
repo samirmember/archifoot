@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Coach;
+use App\Entity\Role;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\String\Slugger\AsciiSlugger;
@@ -28,7 +29,8 @@ class CoachRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('c')
             ->innerJoin('c.person', 'person')
             ->leftJoin('person.nationalityCountry', 'nationalityCountry')
-            ->select('c.id AS id, person.fullName AS fullName, c.role AS role, person.photoUrl AS photoUrl, nationalityCountry.name AS nationality');
+            ->leftJoin(Role::class, 'role', 'WITH', 'role.code = c.role')
+            ->select('c.id AS id, person.fullName AS fullName, role.label AS roleName, person.photoUrl AS photoUrl, nationalityCountry.name AS nationality');
 
         if ($query !== '') {
             $qb
@@ -151,7 +153,9 @@ class CoachRepository extends ServiceEntityRepository
                 INNER JOIN national_team nta ON nta.id = ta.national_team_id
                 INNER JOIN country ca ON ca.id = nta.country_id
                 INNER JOIN fixture_participant fpo ON fpo.fixture_id = f.id AND fpo.role <> fpa.role
-                WHERE sc.coach_id = :personId
+                INNER JOIN scoresheet_staff ssf ON ssf.scoresheet_id = sc.id
+                WHERE ssf.person_id = :personId
+                  AND ssf.role IN ('HEAD_COACH', 'ASSISTANT_COACH')
                   AND f.played = 1
                   AND (
                     LOWER(ca.name) IN (:algeriaNames)

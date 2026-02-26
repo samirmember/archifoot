@@ -30,7 +30,7 @@ export class SeniorNationalTeamCoachDetailComponent {
       { label: 'Défaites', value: current.highlights.losses },
       { label: 'Buts marqués', value: current.highlights.goalsFor },
       { label: 'Buts encaissés', value: current.highlights.goalsAgainst },
-      { label: 'Clean sheets', value: current.highlights.cleanSheets },
+      { label: 'Clean sheets', value: current.highlights.cleanSheets, tooltip: 'Matchs sans encaisser de but' },
       { label: 'Titres', value: current.highlights.trophies },
     ];
   });
