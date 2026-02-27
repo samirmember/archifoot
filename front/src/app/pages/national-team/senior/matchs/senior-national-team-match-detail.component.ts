@@ -165,7 +165,7 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
       return fromApi.map((o) => ({
         role: o.role || 'Officiel',
         name: o.personName || o.nameText || 'N/A',
-        nationality: 'N/A', // non fourni dans cette API
+        nationality: o.nationality || 'N/A',
       }));
     }
 

@@ -67,6 +67,7 @@ export interface MatchOfficial {
   role: string | null;
   nameText: string | null;
   personName: string | null;
+  nationality: string | null;
 }
 
 export interface MatchGoal {
