@@ -167,9 +167,9 @@
     <div class="col-lg-6">
       <article class="card shadow-sm h-100">
         <div class="card-body p-6">
-          <h3 class="section-title mb-3">Les changements (Algérie)</h3>
+          <h3 class="section-title mb-3">{{ teamAChangesTitle() }}</h3>
           <ul class="simple-list">
-            @for (change of algeriaChanges(); track change) {
+            @for (change of teamAChanges(); track change) {
               <li>{{ change }}</li>
             }
           </ul>
@@ -180,9 +180,9 @@
     <div class="col-lg-6">
       <article class="card shadow-sm h-100">
         <div class="card-body p-6">
-          <h3 class="section-title mb-3">Changements de l'équipe adverse</h3>
+          <h3 class="section-title mb-3">{{ teamBChangesTitle() }}</h3>
           <ul class="simple-list">
-            @for (change of opponentChanges(); track change) {
+            @for (change of teamBChanges(); track change) {
               <li>{{ change }}</li>
             }
           </ul>
