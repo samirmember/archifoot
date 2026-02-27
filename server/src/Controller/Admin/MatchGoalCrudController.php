@@ -32,10 +32,13 @@ class MatchGoalCrudController extends AbstractCrudController
         if (Crud::PAGE_NEW === $pageName || Crud::PAGE_EDIT === $pageName) {
             return [
                 AssociationField::new('fixture')
+                    ->autocomplete()
                     ->setFormTypeOption('choice_label', static fn (Fixture $fixture): string => sprintf('Match #%d', $fixture->getId() ?? 0)),
                 AssociationField::new('team')
+                    ->autocomplete()
                     ->setFormTypeOption('choice_label', static fn (Team $team): string => $team->getDisplayName() ?: sprintf('Team #%d', $team->getId() ?? 0)),
                 AssociationField::new('scorer')
+                    ->autocomplete()
                     ->setFormTypeOption('choice_label', static fn (Player $player): string => $player->getPerson()?->getFullName() ?: sprintf('Player #%d', $player->getId() ?? 0)),
                 TextField::new('scorerText'),
                 TextField::new('minute'),
