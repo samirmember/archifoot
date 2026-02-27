@@ -209,8 +209,26 @@
 
 .staff-grid {
   display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @media (max-width: 991.98px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.staff-column {
+  display: grid;
   gap: 0.8rem;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.staff-column-title {
+  margin: 0;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid #e7ecf6;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f2d3d;
 }
 
 .staff-grid app-staff-card {

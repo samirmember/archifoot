@@ -133,17 +133,30 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
     ];
   });
 
-  readonly staffs = computed(() => {
+  readonly staffsByTeam = computed(() => {
     const coach = this.details()?.scoresheet?.coachName;
-    return [
-      { role: 'Entraîneur', name: coach || 'Vladimir Petković', nation: 'Algérie', iso2: 'dz' },
-      { role: 'Entraîneur adverse', name: 'José Peseiro', nation: 'Portugal', iso2: 'pt' },
-      { role: 'Assistant adverse', name: 'Assistant adverse', nation: 'Nigeria', iso2: 'ng' },
-      { role: 'Assistant 1 (ALG)', name: 'Madjid Bougherra', nation: 'Algérie', iso2: 'dz' },
-      { role: 'Assistant 2 (ALG)', name: 'Nabil Neghiz', nation: 'Algérie', iso2: 'dz' },
-      { role: 'Capitaine (ALG)', name: this.findCaptain(this.details()?.fixture?.teamA?.teamName) || 'Riyad Mahrez', nation: 'Algérie', iso2: 'dz' },
-      { role: 'Capitaine (ADV)', name: this.findCaptain(this.details()?.fixture?.teamB?.teamName) || 'William Troost-Ekong', nation: 'Nigeria', iso2: 'ng' },
-    ];
+    const teamAName = this.details()?.fixture?.teamA?.teamName || 'Algérie';
+    const teamBName = this.details()?.fixture?.teamB?.teamName || 'Adversaire';
+
+    return {
+      teamA: {
+        name: teamAName,
+        staffs: [
+          { role: 'Entraîneur', name: coach || 'Vladimir Petković', nation: 'Algérie', iso2: 'dz' },
+          { role: 'Assistant 1', name: 'Madjid Bougherra', nation: 'Algérie', iso2: 'dz' },
+          { role: 'Assistant 2', name: 'Nabil Neghiz', nation: 'Algérie', iso2: 'dz' },
+          { role: 'Capitaine', name: this.findCaptain(this.details()?.fixture?.teamA?.teamName) || 'Riyad Mahrez', nation: 'Algérie', iso2: 'dz' },
+        ],
+      },
+      teamB: {
+        name: teamBName,
+        staffs: [
+          { role: 'Entraîneur', name: 'José Peseiro', nation: 'Portugal', iso2: 'pt' },
+          { role: 'Assistant', name: 'Assistant adverse', nation: 'Nigeria', iso2: 'ng' },
+          { role: 'Capitaine', name: this.findCaptain(this.details()?.fixture?.teamB?.teamName) || 'William Troost-Ekong', nation: 'Nigeria', iso2: 'ng' },
+        ],
+      },
+    };
   });
 
   readonly officials = computed(() => {
