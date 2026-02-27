@@ -5,10 +5,11 @@ import { ResultComponent } from 'src/app/components/result/result.component';
 import { MatchScoresheetDetailsResponse, MatchLineupItem } from 'src/app/models/match-scoresheet.model';
 import { MatchResult } from 'src/app/services/result.service';
 import { MatchScoresheetService } from 'src/app/services/match-scoresheet.service';
+import { FlagComponent } from 'src/app/layouts/flag/flag.component';
 
 @Component({
   selector: 'app-senior-national-team-match-detail',
-  imports: [RouterLink, ResultComponent, DatePipe],
+  imports: [RouterLink, ResultComponent, DatePipe, FlagComponent],
   templateUrl: './senior-national-team-match-detail.component.html',
   styleUrl: './senior-national-team-match-detail.component.scss',
 })
@@ -58,6 +59,10 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
       competitionLabel: `${this.fallbackStage} ${this.fallbackCompetition} ${this.fallbackEdition}`,
     };
   });
+
+
+  readonly iso2A = computed(() => (this.headerResult().countryCodeA ?? '').toLowerCase());
+  readonly iso2B = computed(() => (this.headerResult().countryCodeB ?? '').toLowerCase());
 
   readonly matchMeta = computed(() => {
     const fixture = this.details()?.fixture;

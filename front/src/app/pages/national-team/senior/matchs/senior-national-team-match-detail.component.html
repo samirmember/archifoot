@@ -15,7 +15,29 @@
     <div class="card-body p-4 p-lg-5">
       <div class="summary-head text-center">
         <p class="date">{{ headerResult().date | date: 'd MMM y' }}</p>
-        <div class="score-pill">{{ headerResult().scoreA ?? 0 }} - {{ headerResult().scoreB ?? 0 }}</div>
+
+        <div class="summary-versus">
+          <div class="team-side team-side-a">
+            <app-flag
+              [position]="'A'"
+              [countryName]="headerResult().countryA"
+              [iso2]="iso2A()"
+              [category]="headerResult().categoryA"
+            />
+          </div>
+
+          <div class="score-pill">{{ headerResult().scoreA ?? 0 }} - {{ headerResult().scoreB ?? 0 }}</div>
+
+          <div class="team-side team-side-b">
+            <app-flag
+              [position]="'B'"
+              [countryName]="headerResult().countryB"
+              [iso2]="iso2B()"
+              [category]="headerResult().categoryB"
+            />
+          </div>
+        </div>
+
         <p class="competition mb-1">{{ fallbackStage }} {{ fallbackCompetition }} {{ fallbackEdition }}</p>
         <p class="location mb-0"><i class="uil uil-map-marker"></i> {{ headerResult().stadium }}, {{ headerResult().city }}, {{ headerResult().countryStadiumName }}.</p>
       </div>
