@@ -1,7 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { ResultComponent } from 'src/app/components/result/result.component';
 import { MatchScoresheetDetailsResponse, MatchLineupItem } from 'src/app/models/match-scoresheet.model';
 import { MatchResult } from 'src/app/services/result.service';
 import { MatchScoresheetService } from 'src/app/services/match-scoresheet.service';
@@ -9,7 +8,7 @@ import { FlagComponent } from 'src/app/layouts/flag/flag.component';
 
 @Component({
   selector: 'app-senior-national-team-match-detail',
-  imports: [RouterLink, ResultComponent, DatePipe, FlagComponent],
+  imports: [RouterLink, DatePipe, FlagComponent],
   templateUrl: './senior-national-team-match-detail.component.html',
   styleUrl: './senior-national-team-match-detail.component.scss',
 })

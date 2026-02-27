@@ -1,7 +1,6 @@
 <section class="match-page container py-4 py-lg-5">
   <a routerLink="/equipe-nationale/senior/matchs" class="back-link">← Retour à la liste des matchs</a>
 
-  <app-result [result]="headerResult()" />
 
   @if (isLoading()) {
     <div class="alert alert-info mb-4">Chargement de la fiche match...</div>
