@@ -99,22 +99,38 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
     const teamName = this.details()?.fixture?.teamA?.teamName;
     const fromApi = (this.details()?.substitutions ?? [])
       .filter((sub) => sub.teamName === teamName)
-      .map((sub) => `${sub.minute ?? ''} ${sub.playerOutName || sub.playerOutText || '?'} ↔ ${sub.playerInName || sub.playerInText || '?'}`);
+      .map((sub) => ({
+        minute: `${sub.minute ?? '?'}`,
+        playerOut: sub.playerOutName || sub.playerOutText || '?',
+        playerIn: sub.playerInName || sub.playerInText || '?',
+      }));
 
     return fromApi.length > 0
       ? fromApi
-      : ["46' A. Mandi remplace Y. Atal", "67' S. Benrahma remplace H. Aouar", "75' A. Gouiri remplace B. Bounedjah"];
+      : [
+        { minute: '46', playerOut: 'Y. Atal', playerIn: 'A. Mandi' },
+        { minute: '67', playerOut: 'H. Aouar', playerIn: 'S. Benrahma' },
+        { minute: '75', playerOut: 'B. Bounedjah', playerIn: 'A. Gouiri' },
+      ];
   });
 
   readonly teamBChanges = computed(() => {
     const teamName = this.details()?.fixture?.teamB?.teamName;
     const fromApi = (this.details()?.substitutions ?? [])
       .filter((sub) => sub.teamName === teamName)
-      .map((sub) => `${sub.minute ?? '?'}' ${sub.playerOutName || sub.playerOutText || '?'} ↔ ${sub.playerInName || sub.playerInText || '?'}`);
+      .map((sub) => ({
+        minute: `${sub.minute ?? '?'}`,
+        playerOut: sub.playerOutName || sub.playerOutText || '?',
+        playerIn: sub.playerInName || sub.playerInText || '?',
+      }));
 
     return fromApi.length > 0
       ? fromApi
-      : ["58' B. Onyeka remplace A. Iwobi", "70' M. Simon remplace A. Lookman", "84' C. Dessers remplace V. Osimhen"];
+      : [
+        { minute: '58', playerOut: 'A. Iwobi', playerIn: 'B. Onyeka' },
+        { minute: '70', playerOut: 'A. Lookman', playerIn: 'M. Simon' },
+        { minute: '84', playerOut: 'V. Osimhen', playerIn: 'C. Dessers' },
+      ];
   });
 
   readonly teamAChangesTitle = computed(() => this.isTeamAAlgeria() ? 'Les changements (Algérie)' : "Changements de l'équipe adverse");
@@ -236,13 +252,22 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
     });
   }
 
-  private buildLineupForTeam(teamName: string | null | undefined): { title: string; players: Array<{ role: string; name: string; number: string; captain?: boolean | null }> } {
+  private buildLineupForTeam(teamName: string | null | undefined): { title: string; iso2: string; players: Array<{ role: string; name: string; number: string; captain?: boolean | null }> } {
+    const fixture = this.details()?.fixture;
+    const normalizedTeamName = (teamName ?? '').toLowerCase();
+    const teamIso2 = fixture?.teamA?.teamName?.toLowerCase() === normalizedTeamName
+      ? fixture.teamA?.teamIso2
+      : fixture?.teamB?.teamName?.toLowerCase() === normalizedTeamName
+        ? fixture.teamB?.teamIso2
+        : null;
+
     const players = (this.details()?.lineups ?? [])
       .filter((p) => p.teamName === teamName)
       .sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999));
 
     return {
       title: `${teamName ?? 'Équipe'}`,
+      iso2: (teamIso2 ?? '').toLowerCase(),
       players: players.map((p: MatchLineupItem) => ({
         role: this.toRoleTag(p.positionName),
         name: p.playerName || p.playerNameText || 'Joueur',
