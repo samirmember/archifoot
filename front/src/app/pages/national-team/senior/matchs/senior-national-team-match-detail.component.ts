@@ -135,26 +135,47 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
 
   readonly staffsByTeam = computed(() => {
     const coach = this.details()?.scoresheet?.coachName;
-    const teamAName = this.details()?.fixture?.teamA?.teamName || 'Algérie';
-    const teamBName = this.details()?.fixture?.teamB?.teamName || 'Adversaire';
+    const fixture = this.details()?.fixture;
+    const teamA = fixture?.teamA;
+    const teamB = fixture?.teamB;
+    const teamAName = teamA?.teamName || 'Algérie';
+    const teamBName = teamB?.teamName || 'Adversaire';
+
+    const isTeamAAlgeria = this.isAlgeriaTeam(teamA?.teamIso2, teamAName);
+
+    const algeriaStaffs = [
+      { role: 'Entraîneur', name: coach || 'Vladimir Petković', nation: 'Algérie', iso2: 'dz' },
+      { role: 'Assistant 1', name: 'Madjid Bougherra', nation: 'Algérie', iso2: 'dz' },
+      { role: 'Assistant 2', name: 'Nabil Neghiz', nation: 'Algérie', iso2: 'dz' },
+      {
+        role: 'Capitaine',
+        name: this.findCaptain(isTeamAAlgeria ? teamAName : teamBName) || 'Riyad Mahrez',
+        nation: 'Algérie',
+        iso2: 'dz',
+      },
+    ];
+
+    const opponentName = isTeamAAlgeria ? teamBName : teamAName;
+    const opponentIso2 = ((isTeamAAlgeria ? teamB?.teamIso2 : teamA?.teamIso2) ?? '').toLowerCase() || 'ng';
+    const opponentStaffs = [
+      { role: 'Entraîneur', name: 'José Peseiro', nation: 'Portugal', iso2: 'pt' },
+      { role: 'Assistant', name: 'Assistant adverse', nation: opponentName, iso2: opponentIso2 },
+      {
+        role: 'Capitaine',
+        name: this.findCaptain(opponentName) || 'William Troost-Ekong',
+        nation: opponentName,
+        iso2: opponentIso2,
+      },
+    ];
 
     return {
       teamA: {
         name: teamAName,
-        staffs: [
-          { role: 'Entraîneur', name: coach || 'Vladimir Petković', nation: 'Algérie', iso2: 'dz' },
-          { role: 'Assistant 1', name: 'Madjid Bougherra', nation: 'Algérie', iso2: 'dz' },
-          { role: 'Assistant 2', name: 'Nabil Neghiz', nation: 'Algérie', iso2: 'dz' },
-          { role: 'Capitaine', name: this.findCaptain(this.details()?.fixture?.teamA?.teamName) || 'Riyad Mahrez', nation: 'Algérie', iso2: 'dz' },
-        ],
+        staffs: isTeamAAlgeria ? algeriaStaffs : opponentStaffs,
       },
       teamB: {
         name: teamBName,
-        staffs: [
-          { role: 'Entraîneur', name: 'José Peseiro', nation: 'Portugal', iso2: 'pt' },
-          { role: 'Assistant', name: 'Assistant adverse', nation: 'Nigeria', iso2: 'ng' },
-          { role: 'Capitaine', name: this.findCaptain(this.details()?.fixture?.teamB?.teamName) || 'William Troost-Ekong', nation: 'Nigeria', iso2: 'ng' },
-        ],
+        staffs: isTeamAAlgeria ? opponentStaffs : algeriaStaffs,
       },
     };
   });
@@ -235,5 +256,11 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
   private findCaptain(teamName: string | null | undefined): string | null {
     const captain = (this.details()?.lineups ?? []).find((p) => p.teamName === teamName && p.isCaptain);
     return captain?.playerName || captain?.playerNameText || null;
+  }
+
+  private isAlgeriaTeam(teamIso2: string | null | undefined, teamName: string | null | undefined): boolean {
+    const iso2 = (teamIso2 ?? '').toLowerCase();
+    const name = (teamName ?? '').toLowerCase();
+    return iso2 === 'dz' || name.includes('algérie') || name.includes('algerie');
   }
 }
