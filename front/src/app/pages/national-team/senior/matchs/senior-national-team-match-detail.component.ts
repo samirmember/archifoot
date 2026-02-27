@@ -54,7 +54,7 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
       city: fixture?.cityName ?? 'Marrakech',
       stadium: fixture?.stadiumName ?? 'Grand Stade',
       countryStadiumName: fixture?.countryStadiumName ?? 'Maroc',
-      notes: fixture?.notes ?? 'Match intense avec domination adverse en seconde période.',
+      notes: fixture?.notes ?? null,
       competitionLabel: `${this.fallbackStage} ${this.fallbackCompetition} ${this.fallbackEdition}`,
     };
   });
@@ -93,7 +93,7 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
     const teamName = this.details()?.fixture?.teamA?.teamName;
     const fromApi = (this.details()?.substitutions ?? [])
       .filter((sub) => sub.teamName === teamName)
-      .map((sub) => `${sub.minute ?? '?'}' ${sub.playerOutName || sub.playerOutText || '?'} ↔ ${sub.playerInName || sub.playerInText || '?'}`);
+      .map((sub) => `${sub.minute ?? ''} ${sub.playerOutName || sub.playerOutText || '?'} ↔ ${sub.playerInName || sub.playerInText || '?'}`);
 
     return fromApi.length > 0
       ? fromApi
@@ -198,22 +198,8 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
       .filter((p) => p.teamName === teamName)
       .sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999));
 
-    if (players.length === 0) {
-      return {
-        title: `${teamName ?? 'Équipe'} (4-3-3)`,
-        players: [
-          { role: 'GK', name: 'Anthony Mandrea', number: '#1' },
-          { role: 'DF', name: 'Youcef Atal', number: '#20' },
-          { role: 'DF', name: 'Ramy Bensebaini', number: '#21' },
-          { role: 'MF', name: 'Ismaël Bennacer', number: '#22' },
-          { role: 'MF', name: 'Riyad Mahrez (C)', number: '#7', captain: true },
-          { role: 'FW', name: 'Islam Slimani', number: '#13' },
-        ],
-      };
-    }
-
     return {
-      title: `${teamName ?? 'Équipe'} (lineup)`,
+      title: `${teamName ?? 'Équipe'}`,
       players: players.map((p: MatchLineupItem) => ({
         role: this.toRoleTag(p.positionName),
         name: p.playerName || p.playerNameText || 'Joueur',

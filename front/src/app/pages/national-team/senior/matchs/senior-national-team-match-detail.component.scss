@@ -197,7 +197,7 @@
   }
 
   .event-title {
-    font-size: 1.25rem;
+    font-size: 0.9rem;
     color: #1f2d3d;
     font-weight: 700;
   }
@@ -264,7 +264,7 @@
 
 .lineup-card {
   border: 1px solid #e6ebf4;
-  border-radius: 1rem;
+  border-radius: var(--p-menubar-border-radius);
   overflow: hidden;
 
   header {
@@ -310,7 +310,7 @@
   }
 
   strong {
-    font-size: 1.02rem;
+    font-size: 0.75rem;
     color: #1f2d3d;
   }
 

@@ -161,11 +161,12 @@ class FixtureController extends AbstractController
                 <<<'SQL'
                     SELECT
                         so.id,
-                        so.role,
+                        r.label AS "role",
                         so.name_text AS "nameText",
                         p.full_name AS "personName"
                     FROM scoresheet_official so
                     LEFT JOIN person p ON p.id = so.person_id
+                    LEFT JOIN role r ON r.code = so.role
                     WHERE so.scoresheet_id = :scoresheetId
                     ORDER BY so.id ASC
                 SQL,
