@@ -268,8 +268,8 @@
     gap: 0.75rem;
 
     .team-flag {
-      border-radius: 0.25rem;
-      box-shadow: 0 2px 8px rgba(31, 45, 61, 0.18);
+      border-radius: 0.1rem;
+      box-shadow: 0 1px 3px rgb(31 45 61 / 30%);
       object-fit: cover;
     }
   }
@@ -293,10 +293,10 @@
     }
 
     &.captain-row {
-      background: linear-gradient(90deg, #fff8e8 0%, #ffffff 30%);
+      background: linear-gradient(90deg, #fff8e8 0%, #ffffff 50%);
       border-left: 3px solid #f6c453;
-      border-radius: 0.55rem;
-      padding-left: 0.45rem;
+      margin-left: -9px;
+      padding-left: 9px;
     }
   }
 

@@ -152,7 +152,7 @@ class FixtureController extends AbstractController
                     LEFT JOIN player pl_in ON pl_in.id = ss.player_in_id
                     LEFT JOIN person p_in ON p_in.id = pl_in.person_id
                     WHERE ss.scoresheet_id = :scoresheetId
-                    ORDER BY ss.id ASC
+                    ORDER BY ss.minute ASC
                 SQL,
                 ['scoresheetId' => $scoresheetId]
             );

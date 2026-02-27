@@ -13,7 +13,7 @@
   <article class="summary-card card shadow-sm mb-4">
     <div class="card-body p-6 p-lg-5">
       <div class="summary-head text-center">
-        <p class="date">{{ headerResult().date | date: 'd MMM y' }}</p>
+        <p class="date" [title]="'Match n°' + headerResult().externalMatchNo">{{ headerResult().date | date: 'd MMM y' }}</p>
 
         <div class="summary-versus">
           <div class="team-side team-side-a">
@@ -73,6 +73,16 @@
         <div class="card-body p-6">
           <h3 class="section-title mb-4"><i class="uil uil-football"></i> Buts</h3>
           <div class="timeline">
+            @if (timelineEvents().length === 0) {
+              <div class="timeline-item">
+                <div></div>
+                <div class="event-body">
+                  <div class="event-topline">
+                    <span class="badge-tag text-center bg-light text-muted">Aucun but enregistré</span>
+                  </div>
+                </div>
+              </div>
+            }
             @for (event of timelineEvents(); track event.minute + event.title) {
               <div class="timeline-item" [class.goal]="event.type === 'goal'" [class.card-event]="event.type === 'card'">
                 <div class="dot"></div>
@@ -98,27 +108,30 @@
       <article class="card shadow-sm mb-4">
         <div class="card-body p-6">
           <h3 class="section-title mb-3"><i class="uil uil-users-alt"></i> Les entraîneurs</h3>
-          <div class="staff-grid">
-            <div class="staff-column">
-              <h4 class="staff-column-title">{{ staffsByTeam().teamA.name }}</h4>
-              @for (staff of staffsByTeam().teamA.staffs; track staff.role + staff.name) {
-                <app-staff-card
-                  [name]="staff.name"
-                  [role]="staff.role + ' · ' + staff.nation"
-                  [iso2]="staff.iso2"
-                />
-              }
+          <div class="row">
+            <div class="col-lg-6">
+              <div class="staff-column">
+                <h4 class="staff-column-title">{{ staffsByTeam().teamA.name }}</h4>
+                @for (staff of staffsByTeam().teamA.staffs; track staff.role + staff.name) {
+                  <app-staff-card
+                    [name]="staff.name"
+                    [role]="staff.role + ' · ' + staff.nation"
+                    [iso2]="staff.iso2"
+                  />
+                }
+              </div>
             </div>
-
-            <div class="staff-column">
-              <h4 class="staff-column-title">{{ staffsByTeam().teamB.name }}</h4>
-              @for (staff of staffsByTeam().teamB.staffs; track staff.role + staff.name) {
-                <app-staff-card
-                  [name]="staff.name"
-                  [role]="staff.role + ' · ' + staff.nation"
-                  [iso2]="staff.iso2"
-                />
-              }
+            <div class="col-lg-6">
+              <div class="staff-column">
+                <h4 class="staff-column-title">{{ staffsByTeam().teamB.name }}</h4>
+                @for (staff of staffsByTeam().teamB.staffs; track staff.role + staff.name) {
+                  <app-staff-card
+                    [name]="staff.name"
+                    [role]="staff.role + ' · ' + staff.nation"
+                    [iso2]="staff.iso2"
+                  />
+                }
+              </div>
             </div>
           </div>
         </div>
@@ -196,14 +209,15 @@
   </article>
 
   <div class="row g-4 mb-4">
-    <div class="col-lg-6">
+    @if (teamAChanges().length > 0) {
+    <div [class.col-lg-6]="teamBChanges().length > 0" [class.col-lg-12]="teamBChanges().length === 0">
       <article class="card shadow-sm h-100">
-        <div class="card-body p-6">
+        <div class="card-body" [class.p-6]="teamBChanges().length > 0" [class.p-12]="teamBChanges().length === 0">
           <h3 class="section-title mb-3">{{ teamAChangesTitle() }}</h3>
           <ul class="simple-list">
             @for (change of teamAChanges(); track change) {
               <li>
-                <span class="minute">{{ change.minute }}'</span>
+                <span class="minute">{{ change.minute }}</span>
                 <span class="change-chip out"><i class="uil uil-arrow-circle-left"></i> {{ change.playerOut }}</span>
                 <span class="change-chip in"><i class="uil uil-arrow-circle-right"></i> {{ change.playerIn }}</span>
               </li>
@@ -212,15 +226,16 @@
         </div>
       </article>
     </div>
-
-    <div class="col-lg-6">
+    }
+    @if (teamBChanges().length > 0) {
+    <div [class.col-lg-6]="teamAChanges().length > 0" [class.col-lg-12]="teamAChanges().length === 0">
       <article class="card shadow-sm h-100">
-        <div class="card-body p-6">
+        <div class="card-body">
           <h3 class="section-title mb-3">{{ teamBChangesTitle() }}</h3>
           <ul class="simple-list">
             @for (change of teamBChanges(); track change) {
               <li>
-                <span class="minute">{{ change.minute }}'</span>
+                <span class="minute">{{ change.minute }}</span>
                 <span class="change-chip out"><i class="uil uil-arrow-circle-left"></i> {{ change.playerOut }}</span>
                 <span class="change-chip in"><i class="uil uil-arrow-circle-right"></i> {{ change.playerIn }}</span>
               </li>
@@ -229,5 +244,6 @@
         </div>
       </article>
     </div>
+    }
   </div>
 </section>

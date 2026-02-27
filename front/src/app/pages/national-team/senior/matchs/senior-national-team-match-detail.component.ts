@@ -70,20 +70,20 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
       { label: 'N° du match', value: String(fixture?.externalMatchNo ?? 678) },
       { label: 'Compétition', value: this.fallbackCompetition },
       { label: 'Édition', value: this.fallbackEdition },
-      { label: 'Saison', value: fixture?.seasonName ?? '2025/2026' },
+      { label: 'Saison', value: fixture?.seasonName ?? null },
       { label: 'Stage', value: this.fallbackStage },
-      { label: 'Stade', value: fixture?.stadiumName ?? 'Grand Stade' },
-      { label: 'Ville - Stade', value: fixture?.cityName ?? 'Marrakech' },
-      { label: 'Pays - Stade', value: fixture?.countryStadiumName ?? 'Maroc' },
+      { label: 'Stade', value: fixture?.stadiumName ?? null },
+      { label: 'Ville - Stade', value: fixture?.cityName ?? null },
+      { label: 'Pays - Stade', value: fixture?.countryStadiumName ?? null },
       {
         label: 'Date',
-        value: fixture?.matchDate ? new Date(fixture.matchDate).toLocaleString('fr-FR') : '10 janv. 2026 · 20:00',
+        value: fixture?.matchDate ? new Date(fixture.matchDate).toLocaleString('fr-FR') : null,
       },
-      { label: 'Catégorie A', value: fixture?.teamA?.categoryName ?? 'Senior' },
-      { label: 'Pays A', value: fixture?.teamA?.teamName ?? 'Algérie' },
-      { label: 'Score', value: `${fixture?.teamA?.score ?? 0} - ${fixture?.teamB?.score ?? 2}` },
-      { label: 'Pays B', value: fixture?.teamB?.teamName ?? 'Nigeria' },
-      { label: 'Catégorie B', value: fixture?.teamB?.categoryName ?? 'Senior' },
+      { label: 'Catégorie A', value: fixture?.teamA?.categoryName ?? null },
+      { label: 'Pays A', value: fixture?.teamA?.teamName ?? null },
+      { label: 'Score', value: `${fixture?.teamA?.score ?? null} - ${fixture?.teamB?.score ?? null}` },
+      { label: 'Pays B', value: fixture?.teamB?.teamName ?? null },
+      { label: 'Catégorie B', value: fixture?.teamB?.categoryName ?? null },
     ];
   });
 
@@ -100,18 +100,12 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
     const fromApi = (this.details()?.substitutions ?? [])
       .filter((sub) => sub.teamName === teamName)
       .map((sub) => ({
-        minute: `${sub.minute ?? '?'}`,
+        minute: sub.minute ? sub.minute + "'" : null,
         playerOut: sub.playerOutName || sub.playerOutText || '?',
         playerIn: sub.playerInName || sub.playerInText || '?',
       }));
 
-    return fromApi.length > 0
-      ? fromApi
-      : [
-        { minute: '46', playerOut: 'Y. Atal', playerIn: 'A. Mandi' },
-        { minute: '67', playerOut: 'H. Aouar', playerIn: 'S. Benrahma' },
-        { minute: '75', playerOut: 'B. Bounedjah', playerIn: 'A. Gouiri' },
-      ];
+    return fromApi;
   });
 
   readonly teamBChanges = computed(() => {
@@ -119,18 +113,12 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
     const fromApi = (this.details()?.substitutions ?? [])
       .filter((sub) => sub.teamName === teamName)
       .map((sub) => ({
-        minute: `${sub.minute ?? '?'}`,
+        minute: sub.minute ? sub.minute + "'" : null,
         playerOut: sub.playerOutName || sub.playerOutText || '?',
         playerIn: sub.playerInName || sub.playerInText || '?',
       }));
 
-    return fromApi.length > 0
-      ? fromApi
-      : [
-        { minute: '58', playerOut: 'A. Iwobi', playerIn: 'B. Onyeka' },
-        { minute: '70', playerOut: 'A. Lookman', playerIn: 'M. Simon' },
-        { minute: '84', playerOut: 'V. Osimhen', playerIn: 'C. Dessers' },
-      ];
+    return fromApi;
   });
 
   readonly teamAChangesTitle = computed(() => this.isTeamAAlgeria() ? 'Les changements (Algérie)' : "Changements de l'équipe adverse");
@@ -149,12 +137,14 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
       }));
     }
 
-    return [
-      { minute: 15, tag: 'GOAL', title: 'R. Mahrez', subtitle: 'Assisted by I. Bennacer', score: '1 - 0', type: 'goal' },
-      { minute: 46, tag: 'SUBSTITUTION', title: 'Tactical Change (Algérie)', subtitle: 'A. Mandi ↔ Y. Atal', score: '', type: 'sub' },
-      { minute: 60, tag: 'GOAL', title: 'I. Slimani', subtitle: 'Header from corner', score: '2 - 0', type: 'goal' },
-      { minute: 82, tag: 'GOAL', title: 'V. Osimhen', subtitle: 'Penalty kick', score: '2 - 1', type: 'card' },
-    ];
+    return [];
+
+    // return [
+    //   { minute: 15, tag: 'GOAL', title: 'R. Mahrez', subtitle: 'Assisted by I. Bennacer', score: '1 - 0', type: 'goal' },
+    //   { minute: 46, tag: 'SUBSTITUTION', title: 'Tactical Change (Algérie)', subtitle: 'A. Mandi ↔ Y. Atal', score: '', type: 'sub' },
+    //   { minute: 60, tag: 'GOAL', title: 'I. Slimani', subtitle: 'Header from corner', score: '2 - 0', type: 'goal' },
+    //   { minute: 82, tag: 'GOAL', title: 'V. Osimhen', subtitle: 'Penalty kick', score: '2 - 1', type: 'card' },
+    // ];
   });
 
   readonly staffsByTeam = computed(() => {
