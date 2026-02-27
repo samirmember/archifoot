@@ -5,10 +5,11 @@ import { MatchScoresheetDetailsResponse, MatchLineupItem } from 'src/app/models/
 import { MatchResult } from 'src/app/services/result.service';
 import { MatchScoresheetService } from 'src/app/services/match-scoresheet.service';
 import { FlagComponent } from 'src/app/layouts/flag/flag.component';
+import { StaffCardComponent } from 'src/app/components/staff-card/staff-card.component';
 
 @Component({
   selector: 'app-senior-national-team-match-detail',
-  imports: [RouterLink, DatePipe, FlagComponent],
+  imports: [RouterLink, DatePipe, FlagComponent, StaffCardComponent],
   templateUrl: './senior-national-team-match-detail.component.html',
   styleUrl: './senior-national-team-match-detail.component.scss',
 })
@@ -135,13 +136,13 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
   readonly staffs = computed(() => {
     const coach = this.details()?.scoresheet?.coachName;
     return [
-      { role: 'Entraîneur', name: coach || 'Vladimir Petković', nation: 'Algérie', flag: '🇩🇿' },
-      { role: 'Entraîneur adverse', name: 'José Peseiro', nation: 'Portugal', flag: '🇵🇹' },
-      { role: 'entraineur_adv_assistant', name: 'Assistant adverse', nation: 'Nigeria', flag: '🇳🇬' },
-      { role: 'assistant1_dz', name: 'Madjid Bougherra', nation: 'Algérie', flag: '🇩🇿' },
-      { role: 'assistant2_dz', name: 'Nabil Neghiz', nation: 'Algérie', flag: '🇩🇿' },
-      { role: 'capitaine_dz', name: this.findCaptain(this.details()?.fixture?.teamA?.teamName) || 'Riyad Mahrez', nation: 'Algérie', flag: '🇩🇿' },
-      { role: 'capitaine_adv', name: this.findCaptain(this.details()?.fixture?.teamB?.teamName) || 'William Troost-Ekong', nation: 'Nigeria', flag: '🇳🇬' },
+      { role: 'Entraîneur', name: coach || 'Vladimir Petković', nation: 'Algérie', iso2: 'dz' },
+      { role: 'Entraîneur adverse', name: 'José Peseiro', nation: 'Portugal', iso2: 'pt' },
+      { role: 'Assistant adverse', name: 'Assistant adverse', nation: 'Nigeria', iso2: 'ng' },
+      { role: 'Assistant 1 (ALG)', name: 'Madjid Bougherra', nation: 'Algérie', iso2: 'dz' },
+      { role: 'Assistant 2 (ALG)', name: 'Nabil Neghiz', nation: 'Algérie', iso2: 'dz' },
+      { role: 'Capitaine (ALG)', name: this.findCaptain(this.details()?.fixture?.teamA?.teamName) || 'Riyad Mahrez', nation: 'Algérie', iso2: 'dz' },
+      { role: 'Capitaine (ADV)', name: this.findCaptain(this.details()?.fixture?.teamB?.teamName) || 'William Troost-Ekong', nation: 'Nigeria', iso2: 'ng' },
     ];
   });
 

@@ -100,14 +100,11 @@
           <h3 class="section-title mb-3"><i class="uil uil-users-alt"></i> Les entraîneurs</h3>
           <div class="staff-grid">
             @for (staff of staffs(); track staff.role + staff.name) {
-              <div class="staff-item">
-                <div>
-                  <p class="role">{{ staff.role }}</p>
-                  <h4>{{ staff.name }}</h4>
-                  <p class="nation">{{ staff.nation }}</p>
-                </div>
-                <span class="flag">{{ staff.flag }}</span>
-              </div>
+              <app-staff-card
+                [name]="staff.name"
+                [role]="staff.role + ' · ' + staff.nation"
+                [iso2]="staff.iso2"
+              />
             }
           </div>
         </div>

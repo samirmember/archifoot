@@ -213,38 +213,10 @@
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
 }
 
-.staff-item {
-  border: 1px solid #e7ecf6;
-  background: #fff;
-  border-radius: 1rem;
-  padding: 0.8rem 0.9rem;
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-
-  .role {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    color: #8892a4;
-    margin-bottom: 0.2rem;
-  }
-
-  h4 {
-    margin: 0;
-    font-size: 1.05rem;
-    color: #1f2d3d;
-  }
-
-  .nation {
-    margin: 0;
-    color: #687489;
-  }
-
-  .flag {
-    font-size: 1.6rem;
-    align-self: center;
-  }
+.staff-grid app-staff-card {
+  height: 100%;
 }
+
 
 .notes-card {
   border: none;
