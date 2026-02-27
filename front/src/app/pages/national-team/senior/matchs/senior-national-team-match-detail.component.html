@@ -1,99 +1,182 @@
-<section class="match-detail">
+<section class="match-page container py-4 py-lg-5">
   <a routerLink="/equipe-nationale/senior/matchs" class="back-link">← Retour à la liste des matchs</a>
 
+
   @if (isLoading()) {
-    <div class="state-card">Chargement de la fiche technique...</div>
-  } @else if (error()) {
-    <div class="state-card">{{ error() }}</div>
-  } @else if (details(); as detailsData) {
-    <div class="card p-4 mb-4">
-      <h2 class="h4 mb-2">{{ detailsData.fixture.teamA?.teamName }} {{ detailsData.fixture.teamA?.score }} -
-        {{ detailsData.fixture.teamB?.score }} {{ detailsData.fixture.teamB?.teamName }}</h2>
-      <p class="text-muted mb-1">{{ detailsData.fixture.matchDate | date: 'd MMMM y' }} · {{ detailsData.fixture.stadiumName }},
-        {{ detailsData.fixture.cityName }} ({{ detailsData.fixture.countryStadiumName }})</p>
-      <p class="text-muted mb-0">Saison: {{ detailsData.fixture.seasonName }} · Match #{{ detailsData.fixture.externalMatchNo }}</p>
-    </div>
-
-    <div class="card p-4 mb-4">
-      <h3 class="h5">Feuille de match</h3>
-      @if (detailsData.scoresheet) {
-        <ul class="mb-0">
-          <li>Coach: {{ detailsData.scoresheet.coachName || 'N/A' }}</li>
-          <li>Affluence: {{ detailsData.scoresheet.attendance ?? 'N/A' }}</li>
-          <li>Coup d'envoi: {{ detailsData.scoresheet.kickoffTime || 'N/A' }}</li>
-          <li>Mi-temps: {{ detailsData.scoresheet.halfTime || 'N/A' }}</li>
-          <li>Fin de match: {{ detailsData.scoresheet.fullTime || 'N/A' }}</li>
-        </ul>
-      } @else {
-        <p class="mb-0">Aucune entrée scoresheet pour ce match.</p>
-      }
-    </div>
-
-    <div class="card p-4 mb-4">
-      <h3 class="h5">Buteurs ({{ detailsData.goals.length }})</h3>
-      @if (detailsData.goals.length > 0) {
-        <ul class="mb-0">
-          @for (goal of detailsData.goals; track goal.id) {
-            <li>{{ goal.minute || '?' }}' - {{ goal.scorerName || goal.scorerText }} ({{ goal.teamName }})
-              @if (goal.goalType) {
-                <span class="text-muted">· {{ goal.goalType }}</span>
-              }
-            </li>
-          }
-        </ul>
-      } @else {
-        <p class="mb-0">Aucun but enregistré.</p>
-      }
-    </div>
-
-    <div class="card p-4 mb-4">
-      <h3 class="h5">Composition titulaire ({{ starters().length }})</h3>
-      <ul class="mb-0">
-        @for (lineup of starters(); track lineup.id) {
-          <li>#{{ lineup.shirtNumber ?? '?' }} {{ lineup.playerName || lineup.playerNameText }}
-            @if (lineup.isCaptain) {
-              <strong>(C)</strong>
-            }
-            <span class="text-muted"> - {{ lineup.positionName || 'Poste non défini' }}</span>
-          </li>
-        }
-      </ul>
-    </div>
-
-    <div class="card p-4 mb-4">
-      <h3 class="h5">Remplaçants ({{ substitutes().length }})</h3>
-      <ul class="mb-0">
-        @for (lineup of substitutes(); track lineup.id) {
-          <li>#{{ lineup.shirtNumber ?? '?' }} {{ lineup.playerName || lineup.playerNameText }}</li>
-        }
-      </ul>
-    </div>
-
-    <div class="card p-4 mb-4">
-      <h3 class="h5">Remplacements ({{ detailsData.substitutions.length }})</h3>
-      @if (detailsData.substitutions.length > 0) {
-        <ul class="mb-0">
-          @for (sub of detailsData.substitutions; track sub.id) {
-            <li>{{ sub.minute || '?' }}' - {{ sub.playerOutName || sub.playerOutText }} ⟶
-              {{ sub.playerInName || sub.playerInText }}</li>
-          }
-        </ul>
-      } @else {
-        <p class="mb-0">Aucun remplacement enregistré.</p>
-      }
-    </div>
-
-    <div class="card p-4">
-      <h3 class="h5">Officiels ({{ detailsData.officials.length }})</h3>
-      @if (detailsData.officials.length > 0) {
-        <ul class="mb-0">
-          @for (official of detailsData.officials; track official.id) {
-            <li>{{ official.role || 'Rôle non défini' }} - {{ official.personName || official.nameText }}</li>
-          }
-        </ul>
-      } @else {
-        <p class="mb-0">Aucun officiel enregistré.</p>
-      }
-    </div>
+    <div class="alert alert-info mb-4">Chargement de la fiche match...</div>
   }
+
+  @if (error()) {
+    <div class="alert alert-warning mb-4">{{ error() }}</div>
+  }
+
+  <article class="summary-card card shadow-sm mb-4">
+    <div class="card-body p-6 p-lg-5">
+      <div class="summary-head text-center">
+        <p class="date">{{ headerResult().date | date: 'd MMM y' }}</p>
+
+        <div class="summary-versus">
+          <div class="team-side team-side-a">
+            <app-flag
+              [position]="'A'"
+              [countryName]="headerResult().countryA"
+              [iso2]="iso2A()"
+              [category]="headerResult().categoryA"
+            />
+          </div>
+
+          <div class="score-pill">{{ headerResult().scoreA ?? 0 }} - {{ headerResult().scoreB ?? 0 }}</div>
+
+          <div class="team-side team-side-b">
+            <app-flag
+              [position]="'B'"
+              [countryName]="headerResult().countryB"
+              [iso2]="iso2B()"
+              [category]="headerResult().categoryB"
+            />
+          </div>
+        </div>
+
+        <p class="competition mb-1">{{ fallbackStage }} {{ fallbackEdition }}</p>
+        <p class="location mb-0"><i class="uil uil-map-marker"></i> {{ headerResult().stadium }}, {{ headerResult().city }}, {{ headerResult().countryStadiumName }}.</p>
+      </div>
+
+      @if (headerResult().notes) {
+        <div class="notes-banner mt-3">
+          <h6 class="mb-1">Notes</h6>
+          <p class="mb-0">{{ headerResult().notes }}</p>
+        </div>
+      }
+    </div>
+  </article>
+
+  <article class="card shadow-sm mb-4">
+    <div class="card-body p-6">
+      <h3 class="section-title mb-3">Arbitrage</h3>
+      <div class="officials-grid">
+        @for (official of officials(); track official.role + official.name) {
+          <div class="official-item">
+            <span>{{ official.role }}</span>
+            <strong>{{ official.name }}</strong>
+            @if (official.nationality) {
+              <small>{{ official.nationality }}</small>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </article>
+
+  <div class="row g-4 mb-4">
+    <div class="col-xl-5">
+      <article class="card shadow-sm h-100">
+        <div class="card-body p-6">
+          <h3 class="section-title mb-4"><i class="uil uil-football"></i> Buts</h3>
+          <div class="timeline">
+            @for (event of timelineEvents(); track event.minute + event.title) {
+              <div class="timeline-item" [class.goal]="event.type === 'goal'" [class.card-event]="event.type === 'card'">
+                <div class="dot"></div>
+                <div class="event-body">
+                  <div class="event-topline">
+                    <span class="badge-tag">{{ event.tag }}</span>
+                    <span class="minute">{{ event.minute }}'</span>
+                    @if (event.score) {
+                      <span class="running-score">{{ event.score }}</span>
+                    }
+                  </div>
+                  <p class="event-title mb-0">{{ event.title }}</p>
+                  <small>{{ event.subtitle }}</small>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="col-xl-7">
+      <article class="card shadow-sm mb-4">
+        <div class="card-body p-6">
+          <h3 class="section-title mb-3"><i class="uil uil-users-alt"></i> Les entraîneurs</h3>
+          <div class="staff-grid">
+            @for (staff of staffs(); track staff.role + staff.name) {
+              <div class="staff-item">
+                <div>
+                  <p class="role">{{ staff.role }}</p>
+                  <h4>{{ staff.name }}</h4>
+                  <p class="nation">{{ staff.nation }}</p>
+                </div>
+                <span class="flag">{{ staff.flag }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <article class="card shadow-sm mb-4">
+    <div class="card-body p-6">
+      <h3 class="section-title mb-4"><i class="uil uil-layer-group"></i> Compositions de départ</h3>
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="lineup-card">
+            <header>{{ lineupAlgeria().title }}</header>
+            <ul>
+              @for (player of lineupAlgeria().players; track player.name) {
+                <li>
+                  <span class="role" [class.captain]="player.captain">{{ player.role }}</span>
+                  <strong>{{ player.name }}</strong>
+                  <span class="number">{{ player.number }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="lineup-card">
+            <header>{{ lineupOpponent().title }}</header>
+            <ul>
+              @for (player of lineupOpponent().players; track player.name) {
+                <li>
+                  <span class="role">{{ player.role }}</span>
+                  <strong>{{ player.name }}</strong>
+                  <span class="number">{{ player.number }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <article class="card shadow-sm h-100">
+        <div class="card-body p-6">
+          <h3 class="section-title mb-3">Les changements (Algérie)</h3>
+          <ul class="simple-list">
+            @for (change of algeriaChanges(); track change) {
+              <li>{{ change }}</li>
+            }
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <div class="col-lg-6">
+      <article class="card shadow-sm h-100">
+        <div class="card-body p-6">
+          <h3 class="section-title mb-3">Changements de l'équipe adverse</h3>
+          <ul class="simple-list">
+            @for (change of opponentChanges(); track change) {
+              <li>{{ change }}</li>
+            }
+          </ul>
+        </div>
+      </article>
+    </div>
+  </div>
 </section>

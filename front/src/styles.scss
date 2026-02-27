@@ -5,3 +5,7 @@
   box-shadow: 0 0.25rem 0.75rem rgba(30, 34, 40, 0.02);
   border: unset;
 }
+
+.card {
+  border-radius: var(--p-menubar-border-radius);
+}
