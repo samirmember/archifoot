@@ -262,6 +262,16 @@
     color: #3f78e0;
     font-weight: 700;
     border-bottom: 1px solid #e6ebf4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    .team-flag {
+      border-radius: 0.25rem;
+      box-shadow: 0 2px 8px rgba(31, 45, 61, 0.18);
+      object-fit: cover;
+    }
   }
 
   ul {
@@ -280,6 +290,13 @@
 
     &:last-child {
       border-bottom: 0;
+    }
+
+    &.captain-row {
+      background: linear-gradient(90deg, #fff8e8 0%, #ffffff 30%);
+      border-left: 3px solid #f6c453;
+      border-radius: 0.55rem;
+      padding-left: 0.45rem;
     }
   }
 
@@ -301,6 +318,23 @@
   strong {
     font-size: 0.75rem;
     color: #1f2d3d;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    .captain-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #8a5a00;
+      background: #ffefc2;
+      border: 1px solid #ffd97b;
+      border-radius: 999px;
+      padding: 0.12rem 0.4rem;
+      line-height: 1;
+    }
   }
 
   .number {
@@ -318,6 +352,36 @@
     border-bottom: 1px dashed #e3eaf6;
     padding: 0.5rem 0;
     color: #3f4a5e;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+
+    .minute {
+      min-width: 2.5rem;
+      font-weight: 700;
+      color: #5a6780;
+    }
+
+    .change-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.28rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.22rem 0.5rem;
+
+      &.out {
+        color: #b3261e;
+        background: #ffe7e5;
+      }
+
+      &.in {
+        color: #1c7d3a;
+        background: #e3f8ea;
+      }
+    }
 
     &:last-child {
       border-bottom: 0;

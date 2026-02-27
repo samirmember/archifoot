@@ -132,12 +132,28 @@
       <div class="row g-4">
         <div class="col-lg-6">
           <div class="lineup-card">
-            <header>{{ lineupAlgeria().title }}</header>
+            <header>
+              <span>{{ lineupAlgeria().title }}</span>
+              @if (lineupAlgeria().iso2) {
+                <img
+                  class="team-flag"
+                  [src]="'https://flagcdn.com/w40/' + lineupAlgeria().iso2 + '.png'"
+                  [alt]="lineupAlgeria().title"
+                  width="24"
+                  height="16"
+                />
+              }
+            </header>
             <ul>
               @for (player of lineupAlgeria().players; track player.name) {
-                <li>
+                <li [class.captain-row]="player.captain">
                   <span class="role" [class.captain]="player.captain">{{ player.role }}</span>
-                  <strong>{{ player.name }}</strong>
+                  <strong>
+                    {{ player.name }}
+                    @if (player.captain) {
+                      <span class="captain-mark"><i class="uil uil-crown"></i> CAP</span>
+                    }
+                  </strong>
                   <span class="number">{{ player.number }}</span>
                 </li>
               }
@@ -147,12 +163,28 @@
 
         <div class="col-lg-6">
           <div class="lineup-card">
-            <header>{{ lineupOpponent().title }}</header>
+            <header>
+              <span>{{ lineupOpponent().title }}</span>
+              @if (lineupOpponent().iso2) {
+                <img
+                  class="team-flag"
+                  [src]="'https://flagcdn.com/w40/' + lineupOpponent().iso2 + '.png'"
+                  [alt]="lineupOpponent().title"
+                  width="24"
+                  height="16"
+                />
+              }
+            </header>
             <ul>
               @for (player of lineupOpponent().players; track player.name) {
-                <li>
-                  <span class="role">{{ player.role }}</span>
-                  <strong>{{ player.name }}</strong>
+                <li [class.captain-row]="player.captain">
+                  <span class="role" [class.captain]="player.captain">{{ player.role }}</span>
+                  <strong>
+                    {{ player.name }}
+                    @if (player.captain) {
+                      <span class="captain-mark"><i class="uil uil-crown"></i> CAP</span>
+                    }
+                  </strong>
                   <span class="number">{{ player.number }}</span>
                 </li>
               }
@@ -170,7 +202,11 @@
           <h3 class="section-title mb-3">{{ teamAChangesTitle() }}</h3>
           <ul class="simple-list">
             @for (change of teamAChanges(); track change) {
-              <li>{{ change }}</li>
+              <li>
+                <span class="minute">{{ change.minute }}'</span>
+                <span class="change-chip out"><i class="uil uil-arrow-circle-left"></i> {{ change.playerOut }}</span>
+                <span class="change-chip in"><i class="uil uil-arrow-circle-right"></i> {{ change.playerIn }}</span>
+              </li>
             }
           </ul>
         </div>
@@ -183,7 +219,11 @@
           <h3 class="section-title mb-3">{{ teamBChangesTitle() }}</h3>
           <ul class="simple-list">
             @for (change of teamBChanges(); track change) {
-              <li>{{ change }}</li>
+              <li>
+                <span class="minute">{{ change.minute }}'</span>
+                <span class="change-chip out"><i class="uil uil-arrow-circle-left"></i> {{ change.playerOut }}</span>
+                <span class="change-chip in"><i class="uil uil-arrow-circle-right"></i> {{ change.playerIn }}</span>
+              </li>
             }
           </ul>
         </div>
