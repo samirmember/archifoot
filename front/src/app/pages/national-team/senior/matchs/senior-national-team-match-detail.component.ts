@@ -90,7 +90,12 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
   readonly lineupAlgeria = computed(() => this.buildLineupForTeam(this.details()?.fixture?.teamA?.teamName));
   readonly lineupOpponent = computed(() => this.buildLineupForTeam(this.details()?.fixture?.teamB?.teamName));
 
-  readonly algeriaChanges = computed(() => {
+  readonly isTeamAAlgeria = computed(() => {
+    const teamA = this.details()?.fixture?.teamA;
+    return this.isAlgeriaTeam(teamA?.teamIso2, teamA?.teamName);
+  });
+
+  readonly teamAChanges = computed(() => {
     const teamName = this.details()?.fixture?.teamA?.teamName;
     const fromApi = (this.details()?.substitutions ?? [])
       .filter((sub) => sub.teamName === teamName)
@@ -101,7 +106,7 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
       : ["46' A. Mandi remplace Y. Atal", "67' S. Benrahma remplace H. Aouar", "75' A. Gouiri remplace B. Bounedjah"];
   });
 
-  readonly opponentChanges = computed(() => {
+  readonly teamBChanges = computed(() => {
     const teamName = this.details()?.fixture?.teamB?.teamName;
     const fromApi = (this.details()?.substitutions ?? [])
       .filter((sub) => sub.teamName === teamName)
@@ -111,6 +116,9 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
       ? fromApi
       : ["58' B. Onyeka remplace A. Iwobi", "70' M. Simon remplace A. Lookman", "84' C. Dessers remplace V. Osimhen"];
   });
+
+  readonly teamAChangesTitle = computed(() => this.isTeamAAlgeria() ? 'Les changements (Algérie)' : "Changements de l'équipe adverse");
+  readonly teamBChangesTitle = computed(() => this.isTeamAAlgeria() ? "Changements de l'équipe adverse" : 'Les changements (Algérie)');
 
   readonly timelineEvents = computed(() => {
     const goals = this.details()?.goals ?? [];
@@ -141,7 +149,7 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
     const teamAName = teamA?.teamName || 'Algérie';
     const teamBName = teamB?.teamName || 'Adversaire';
 
-    const isTeamAAlgeria = this.isAlgeriaTeam(teamA?.teamIso2, teamAName);
+    const isTeamAAlgeria = this.isTeamAAlgeria();
 
     const algeriaStaffs = [
       { role: 'Entraîneur', name: coach || 'Vladimir Petković', nation: 'Algérie', iso2: 'dz' },
