@@ -34,7 +34,8 @@ class PlayerCrudController extends AbstractCrudController
     {
         return $crud
             ->setEntityLabelInSingular('Joueur')
-            ->setEntityLabelInPlural('Joueurs');
+            ->setEntityLabelInPlural('Joueurs')
+            ->setSearchFields(['person.fullName']);
     }
 
     public function configureFields(string $pageName): iterable
