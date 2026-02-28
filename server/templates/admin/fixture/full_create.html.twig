@@ -1,0 +1,43 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Créer un match complet{% endblock %}
+
+{% block main %}
+    {{ form_start(form) }}
+    {{ form_errors(form) }}
+
+    <h3>Informations du match</h3>
+    <div class="row">{{ form_row(form.externalMatchNo) }}{{ form_row(form.matchDate) }}{{ form_row(form.played) }}{{ form_row(form.isOfficial) }}</div>
+    <div class="row">{{ form_row(form.season) }}{{ form_row(form.competitions) }}{{ form_row(form.editions) }}{{ form_row(form.stages) }}</div>
+    <div class="row">{{ form_row(form.matchday) }}{{ form_row(form.division) }}{{ form_row(form.category) }}</div>
+    <div class="row">{{ form_row(form.teamA) }}{{ form_row(form.scoreA) }}{{ form_row(form.teamB) }}{{ form_row(form.scoreB) }}</div>
+    <div class="row">{{ form_row(form.stadium) }}{{ form_row(form.city) }}{{ form_row(form.country) }}</div>
+    {{ form_row(form.notes) }}
+    {{ form_row(form.internalNotes) }}
+
+    <h3>Feuille de match</h3>
+    <div class="row">
+        {{ form_row(form.attendance) }}{{ form_row(form.fixedTime) }}{{ form_row(form.kickoffTime) }}{{ form_row(form.halfTime) }}
+        {{ form_row(form.secondHalfStart) }}{{ form_row(form.fullTime) }}{{ form_row(form.stoppageTime) }}
+    </div>
+    <div class="row">{{ form_row(form.reservations) }}{{ form_row(form.signedPlace) }}{{ form_row(form.signedOn) }}</div>
+
+    <h3>Compositions</h3>
+    {{ form_row(form.lineups) }}
+
+    <h3>Buts</h3>
+    {{ form_row(form.goals) }}
+
+    <h3>Remplacements</h3>
+    {{ form_row(form.substitutions) }}
+
+    <h3>Coachs</h3>
+    <div class="row">{{ form_row(form.headCoachA) }}{{ form_row(form.assistantCoachA1) }}{{ form_row(form.assistantCoachA2) }}</div>
+    <div class="row">{{ form_row(form.headCoachB) }}{{ form_row(form.assistantCoachB1) }}{{ form_row(form.assistantCoachB2) }}</div>
+
+    <h3>Officiels</h3>
+    <div class="row">{{ form_row(form.mainReferee) }}{{ form_row(form.assistantReferee1) }}{{ form_row(form.assistantReferee2) }}{{ form_row(form.fourthReferee) }}</div>
+
+    <button class="btn btn-primary">Sauvegarder le match complet</button>
+    {{ form_end(form) }}
+{% endblock %}
