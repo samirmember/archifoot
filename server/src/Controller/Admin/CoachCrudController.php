@@ -6,6 +6,7 @@ use App\Entity\City;
 use App\Entity\Coach;
 use App\Entity\Country;
 use App\Entity\Region;
+use App\Filter\PersonNationalityCountryFilter;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
@@ -20,7 +21,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -50,7 +50,7 @@ class CoachCrudController extends AbstractCrudController
     public function configureFilters(Filters $filters): Filters
     {
         return $filters
-            ->add(EntityFilter::new('person.nationalityCountry', 'Nationalité'));
+            ->add(PersonNationalityCountryFilter::new('nationality', 'Nationalité'));
     }
 
     public function configureFields(string $pageName): iterable
@@ -112,7 +112,7 @@ class CoachCrudController extends AbstractCrudController
         $queryBuilder = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
 
         $request = $this->requestStack->getCurrentRequest();
-        $nationalityFilterValue = $request?->query->all('filters')['person.nationalityCountry']['value'] ?? null;
+        $nationalityFilterValue = $request?->query->all('filters')['nationality']['value'] ?? null;
 
         if ($nationalityFilterValue === null || $nationalityFilterValue === '') {
             $queryBuilder
