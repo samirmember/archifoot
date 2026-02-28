@@ -1,0 +1,47 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Création complète d'un match EN{% endblock %}
+
+{% block main %}
+    <div class="content-panel">
+        <p>Ce formulaire regroupe les données du fichier d'import (match, feuille de match, buts, remplacements, officiels et staff).</p>
+
+        {{ form_start(form) }}
+        <h3>Informations générales</h3>
+        <div class="row">
+            <div class="col-6">{{ form_row(form.season) }}</div>
+            <div class="col-6">{{ form_row(form.competition) }}</div>
+            <div class="col-6">{{ form_row(form.edition) }}</div>
+            <div class="col-6">{{ form_row(form.stage) }}</div>
+            <div class="col-4">{{ form_row(form.teamA) }}</div>
+            <div class="col-2">{{ form_row(form.scoreA) }}</div>
+            <div class="col-4">{{ form_row(form.teamB) }}</div>
+            <div class="col-2">{{ form_row(form.scoreB) }}</div>
+            <div class="col-6">{{ form_row(form.matchDate) }}</div>
+            <div class="col-6">{{ form_row(form.stadium) }}</div>
+            <div class="col-6">{{ form_row(form.country) }}</div>
+            <div class="col-6">{{ form_row(form.cityName) }}</div>
+            <div class="col-6">{{ form_row(form.attendance) }}</div>
+            <div class="col-6">{{ form_row(form.isOfficial) }}</div>
+            <div class="col-12">{{ form_row(form.notes) }}</div>
+        </div>
+
+        <h3>Composition</h3>
+        {{ form_row(form.lineups) }}
+
+        <h3>Buts</h3>
+        {{ form_row(form.goals) }}
+
+        <h3>Remplacements</h3>
+        {{ form_row(form.substitutions) }}
+
+        <h3>Officiels (4 arbitres)</h3>
+        {{ form_row(form.officials) }}
+
+        <h3>Staff technique</h3>
+        {{ form_row(form.staff) }}
+
+        <button class="btn btn-primary">Enregistrer le match complet</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
