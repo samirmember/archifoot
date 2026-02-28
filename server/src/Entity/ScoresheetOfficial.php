@@ -68,6 +68,17 @@ class ScoresheetOfficial
         return $this;
     }
 
+
+    public function getPersonFullName(): ?string
+    {
+        return $this->person?->getFullName() ?? $this->nameText;
+    }
+
+    public function getPersonNationalityCountryName(): ?string
+    {
+        return $this->person?->getNationalityCountry()?->getName();
+    }
+
     public function getNameText(): ?string
     {
         return $this->nameText;

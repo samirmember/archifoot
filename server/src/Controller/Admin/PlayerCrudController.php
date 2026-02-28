@@ -7,21 +7,30 @@ use App\Entity\Country;
 use App\Entity\Player;
 use App\Entity\Region;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class PlayerCrudController extends AbstractCrudController
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%/public/uploads/person')]
         private readonly string $personPhotoUploadDir,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -38,6 +47,16 @@ class PlayerCrudController extends AbstractCrudController
             ->setSearchFields(['person.fullName']);
     }
 
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $filters
+            ->add(
+                EntityFilter::new('person.nationalityCountry', 'Nationalité')
+                    ->setFormTypeOption('value_type_options.choice_label', 'name')
+                    ->setFormTypeOption('value_type_options.attr', ['data-ea-widget' => 'ea-autocomplete'])
+            );
+    }
+
     public function configureFields(string $pageName): iterable
     {
         $photoField = ImageField::new('photoUrl', 'Photo')
@@ -49,6 +68,7 @@ class PlayerCrudController extends AbstractCrudController
         if ($pageName === Crud::PAGE_INDEX) {
             return [
                 TextField::new('personFullName', 'Nom complet'),
+                TextField::new('personNationalityCountryName', 'Nationalité'),
                 AssociationField::new('primaryPosition', 'Poste'),
                 $photoField,
             ];
@@ -88,6 +108,23 @@ class PlayerCrudController extends AbstractCrudController
             AssociationField::new('primaryPosition', 'Poste')->autocomplete(),
             $photoField,
         ];
+    }
+
+    public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
+    {
+        $queryBuilder = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
+
+        $request = $this->requestStack->getCurrentRequest();
+        $nationalityFilterValue = $request?->query->all('filters')['person.nationalityCountry']['value'] ?? null;
+
+        if ($nationalityFilterValue === null || $nationalityFilterValue === '') {
+            $queryBuilder
+                ->leftJoin('entity.person', 'personDefaultNationality')
+                ->andWhere('personDefaultNationality.nationalityCountry = :defaultNationality')
+                ->setParameter('defaultNationality', 1);
+        }
+
+        return $queryBuilder;
     }
 
     public function persistEntity($entityManager, $entityInstance): void
