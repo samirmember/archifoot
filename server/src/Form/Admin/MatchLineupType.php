@@ -48,7 +48,7 @@ class MatchLineupType extends AbstractType
             ->add('position', EntityType::class, [
                 'class' => Position::class,
                 'required' => false,
-                'choice_label' => 'name',
+                'choice_label' => 'label',
                 'label' => 'Poste',
             ])
             ->add('isCaptain', ChoiceType::class, [
