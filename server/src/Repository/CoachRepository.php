@@ -32,6 +32,11 @@ class CoachRepository extends ServiceEntityRepository
             ->leftJoin(Role::class, 'role', 'WITH', 'role.code = c.role')
             ->select('c.id AS id, person.fullName AS fullName, role.label AS roleName, person.photoUrl AS photoUrl, nationalityCountry.name AS nationality');
 
+        $qb
+            ->andWhere('(LOWER(nationalityCountry.name) IN (:algeriaNames) OR UPPER(nationalityCountry.iso3) = :algeriaIso3)')
+            ->setParameter('algeriaNames', self::ALGERIA_NAMES)
+            ->setParameter('algeriaIso3', self::ALGERIA_ISO3);
+
         if ($query !== '') {
             $qb
                 ->andWhere('LOWER(person.fullName) LIKE :query')
