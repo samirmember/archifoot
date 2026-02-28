@@ -65,7 +65,8 @@ class AdminDashboardController extends AbstractDashboardController
     {
         return Assets::new()
             ->addCssFile('admin/layout.css')
-            ->addJsFile('admin/location-toggle.js');
+            ->addJsFile('admin/location-toggle.js')
+            ->addJsFile('admin/min3-select-filter.js');
     }
 
     public function configureMenuItems(): iterable

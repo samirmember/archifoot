@@ -27,6 +27,7 @@ class MatchGoalType extends AbstractType
                     ->setMaxResults(200),
                 'choice_label' => static fn (Player $player) => $player->getPersonFullName() ?? ('#'.$player->getId()),
                 'label' => 'Buteur existant',
+                'attr' => ['data-live-min3' => '1'],
             ])
             ->add('scorerName', TextType::class, ['required' => false, 'label' => 'Nouveau buteur'])
             ->add('minute', TextType::class, ['required' => false])
