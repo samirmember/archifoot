@@ -5,6 +5,7 @@ namespace App\Form\Admin;
 use App\Entity\Country;
 use App\Entity\Person;
 use App\Form\Admin\Data\MatchPersonData;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -19,6 +20,10 @@ class MatchPersonType extends AbstractType
             ->add('person', EntityType::class, [
                 'class' => Person::class,
                 'required' => false,
+                'placeholder' => 'Sélectionner une personne (200 dernières)',
+                'query_builder' => static fn (EntityRepository $repository) => $repository->createQueryBuilder('p')
+                    ->orderBy('p.id', 'DESC')
+                    ->setMaxResults(200),
                 'choice_label' => 'fullName',
                 'label' => 'Personne existante',
             ])

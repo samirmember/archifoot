@@ -14,6 +14,7 @@ use App\Entity\Stadium;
 use App\Entity\Stage;
 use App\Entity\Team;
 use App\Form\Admin\Data\FixtureCompleteData;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -46,9 +47,23 @@ class FixtureCompleteType extends AbstractType
             ->add('isOfficial', CheckboxType::class, ['required' => false])
             ->add('notes', TextareaType::class, ['required' => false])
             ->add('internalNotes', TextareaType::class, ['required' => false])
-            ->add('teamA', EntityType::class, ['class' => Team::class, 'choice_label' => 'displayName'])
+            ->add('teamA', EntityType::class, [
+                'class' => Team::class,
+                'choice_label' => 'displayName',
+                'placeholder' => 'Choisir une équipe',
+                'query_builder' => static fn (EntityRepository $repository) => $repository->createQueryBuilder('t')
+                    ->orderBy('t.id', 'DESC')
+                    ->setMaxResults(200),
+            ])
             ->add('scoreA', IntegerType::class, ['required' => false])
-            ->add('teamB', EntityType::class, ['class' => Team::class, 'choice_label' => 'displayName'])
+            ->add('teamB', EntityType::class, [
+                'class' => Team::class,
+                'choice_label' => 'displayName',
+                'placeholder' => 'Choisir une équipe',
+                'query_builder' => static fn (EntityRepository $repository) => $repository->createQueryBuilder('t')
+                    ->orderBy('t.id', 'DESC')
+                    ->setMaxResults(200),
+            ])
             ->add('scoreB', IntegerType::class, ['required' => false])
             ->add('attendance', IntegerType::class, ['required' => false])
             ->add('fixedTime', TextType::class, ['required' => false])

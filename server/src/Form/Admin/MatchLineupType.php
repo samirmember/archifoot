@@ -5,6 +5,7 @@ namespace App\Form\Admin;
 use App\Entity\Player;
 use App\Entity\Position;
 use App\Form\Admin\Data\MatchLineupData;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -29,6 +30,10 @@ class MatchLineupType extends AbstractType
             ->add('player', EntityType::class, [
                 'class' => Player::class,
                 'required' => false,
+                'placeholder' => 'Sélectionner un joueur (200 derniers)',
+                'query_builder' => static fn (EntityRepository $repository) => $repository->createQueryBuilder('p')
+                    ->orderBy('p.id', 'DESC')
+                    ->setMaxResults(200),
                 'choice_label' => static fn (Player $player) => $player->getPersonFullName() ?? ('#'.$player->getId()),
                 'label' => 'Joueur existant',
             ])

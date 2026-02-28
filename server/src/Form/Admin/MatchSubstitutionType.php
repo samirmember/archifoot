@@ -4,6 +4,7 @@ namespace App\Form\Admin;
 
 use App\Entity\Player;
 use App\Form\Admin\Data\MatchSubstitutionData;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -20,6 +21,10 @@ class MatchSubstitutionType extends AbstractType
             ->add('playerOut', EntityType::class, [
                 'class' => Player::class,
                 'required' => false,
+                'placeholder' => 'Sélectionner un joueur (200 derniers)',
+                'query_builder' => static fn (EntityRepository $repository) => $repository->createQueryBuilder('p')
+                    ->orderBy('p.id', 'DESC')
+                    ->setMaxResults(200),
                 'choice_label' => static fn (Player $player) => $player->getPersonFullName() ?? ('#'.$player->getId()),
                 'label' => 'Sortant existant',
             ])
@@ -27,6 +32,10 @@ class MatchSubstitutionType extends AbstractType
             ->add('playerIn', EntityType::class, [
                 'class' => Player::class,
                 'required' => false,
+                'placeholder' => 'Sélectionner un joueur (200 derniers)',
+                'query_builder' => static fn (EntityRepository $repository) => $repository->createQueryBuilder('p')
+                    ->orderBy('p.id', 'DESC')
+                    ->setMaxResults(200),
                 'choice_label' => static fn (Player $player) => $player->getPersonFullName() ?? ('#'.$player->getId()),
                 'label' => 'Entrant existant',
             ])
