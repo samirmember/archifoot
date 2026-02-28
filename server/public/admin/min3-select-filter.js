@@ -1,4 +1,11 @@
 (function () {
+  const isFixtureFullCreatePage = () => {
+    const pathMatches = window.location.pathname.includes('/admin/custom/fixture/new-complete');
+    const routeName = new URLSearchParams(window.location.search).get('routeName');
+
+    return pathMatches || routeName === 'admin_fixture_full_new';
+  };
+
   const setupSelect = (select) => {
     if (select.dataset.min3Ready === '1') {
       return;
@@ -48,7 +55,7 @@
   };
 
   const init = () => {
-    if (!window.location.pathname.includes('/admin/custom/fixture/new-complete')) {
+    if (!isFixtureFullCreatePage()) {
       return;
     }
 
