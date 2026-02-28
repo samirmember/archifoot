@@ -24,7 +24,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class FixtureFullCreateController extends AbstractController
 {
-    #[Route('/admin/fixture/new-complete', name: 'admin_fixture_full_new')]
+    #[Route('/admin/custom/fixture/new-complete', name: 'admin_fixture_full_new')]
     public function __invoke(Request $request, EntityManagerInterface $entityManager): Response
     {
         $data = new FixtureCompleteData();
