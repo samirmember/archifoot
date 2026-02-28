@@ -59,4 +59,5 @@
 
   document.addEventListener('DOMContentLoaded', init);
   document.addEventListener('ea.collection.item-added', init);
+  init();
 })();
