@@ -155,6 +155,11 @@ class Coach
         return $this;
     }
 
+    public function getPersonNationalityCountryName(): ?string
+    {
+        return $this->person?->getNationalityCountry()?->getName();
+    }
+
     public function getNewBirthCityName(): ?string
     {
         return $this->newBirthCityName;
