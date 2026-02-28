@@ -25,4 +25,6 @@
 .senior-content {
   padding-top: 12px;
   border-top: 1px solid #eee;
+  padding-right: calc(var(--bs-gutter-x) * 0.5);
+  padding-left: calc(var(--bs-gutter-x) * 0.5);
 }
