@@ -34,7 +34,8 @@ class CoachCrudController extends AbstractCrudController
     {
         return $crud
             ->setEntityLabelInSingular('Entraîneur')
-            ->setEntityLabelInPlural('Entraîneurs');
+            ->setEntityLabelInPlural('Entraîneurs')
+            ->setSearchFields(['person.fullName']);
     }
 
     public function configureFields(string $pageName): iterable
