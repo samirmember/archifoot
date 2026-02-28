@@ -20,7 +20,6 @@ class MatchGoalType extends AbstractType
             ->add('scorer', EntityType::class, [
                 'class' => Player::class,
                 'required' => false,
-                'autocomplete' => true,
                 'choice_label' => static fn (Player $player) => $player->getPersonFullName() ?? ('#'.$player->getId()),
                 'label' => 'Buteur existant',
             ])

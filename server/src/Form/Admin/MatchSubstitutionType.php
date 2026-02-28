@@ -20,7 +20,6 @@ class MatchSubstitutionType extends AbstractType
             ->add('playerOut', EntityType::class, [
                 'class' => Player::class,
                 'required' => false,
-                'autocomplete' => true,
                 'choice_label' => static fn (Player $player) => $player->getPersonFullName() ?? ('#'.$player->getId()),
                 'label' => 'Sortant existant',
             ])
@@ -28,7 +27,6 @@ class MatchSubstitutionType extends AbstractType
             ->add('playerIn', EntityType::class, [
                 'class' => Player::class,
                 'required' => false,
-                'autocomplete' => true,
                 'choice_label' => static fn (Player $player) => $player->getPersonFullName() ?? ('#'.$player->getId()),
                 'label' => 'Entrant existant',
             ])

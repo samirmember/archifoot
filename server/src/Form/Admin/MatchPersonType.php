@@ -19,7 +19,6 @@ class MatchPersonType extends AbstractType
             ->add('person', EntityType::class, [
                 'class' => Person::class,
                 'required' => false,
-                'autocomplete' => true,
                 'choice_label' => 'fullName',
                 'label' => 'Personne existante',
             ])
@@ -31,7 +30,6 @@ class MatchPersonType extends AbstractType
                 'class' => Country::class,
                 'required' => false,
                 'choice_label' => 'name',
-                'autocomplete' => true,
                 'label' => 'Nationalité',
             ]);
     }

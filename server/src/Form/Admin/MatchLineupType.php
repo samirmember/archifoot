@@ -29,7 +29,6 @@ class MatchLineupType extends AbstractType
             ->add('player', EntityType::class, [
                 'class' => Player::class,
                 'required' => false,
-                'autocomplete' => true,
                 'choice_label' => static fn (Player $player) => $player->getPersonFullName() ?? ('#'.$player->getId()),
                 'label' => 'Joueur existant',
             ])
@@ -44,7 +43,6 @@ class MatchLineupType extends AbstractType
             ->add('position', EntityType::class, [
                 'class' => Position::class,
                 'required' => false,
-                'autocomplete' => true,
                 'choice_label' => 'name',
                 'label' => 'Poste',
             ])
