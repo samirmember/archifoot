@@ -15,8 +15,8 @@
       return window.__min3TomSelectLoadingPromise;
     }
 
-    const cssHref = 'https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css';
-    const jsSrc = 'https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js';
+    const cssHref = '/admin/vendor/tom-select.bootstrap5.min.css';
+    const jsSrc = '/admin/vendor/tom-select.complete.min.js';
 
     window.__min3TomSelectLoadingPromise = new Promise((resolve, reject) => {
       if (!document.querySelector(`link[href="${cssHref}"]`)) {
@@ -106,8 +106,8 @@
           .querySelectorAll('select[data-live-min3="1"]')
           .forEach(setupTomSelect);
       })
-      .catch(() => {
-        // Silent fallback: if remote assets can't load, keep native selects.
+      .catch((error) => {
+        console.error('[min3-select-filter] Unable to initialize TomSelect', error);
       });
   };
 
