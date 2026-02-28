@@ -6,52 +6,59 @@
     return pathMatches || routeName === 'admin_fixture_full_new';
   };
 
-  const setupSelect = (select) => {
+  const setupTomSelect = (select) => {
     if (select.dataset.min3Ready === '1') {
       return;
     }
+
+    if (typeof window.TomSelect === 'undefined') {
+      return;
+    }
+
     select.dataset.min3Ready = '1';
 
-    const options = Array.from(select.options).map((option) => ({
-      value: option.value,
-      text: option.text,
-      selected: option.selected,
-      disabled: option.disabled,
-    }));
+    new window.TomSelect(select, {
+      plugins: {
+        clear_button: { title: '' },
+        dropdown_input: {},
+        virtual_scroll: {},
+      },
+      create: false,
+      allowEmptyOption: true,
+      searchField: ['text'],
+      maxOptions: 200,
+      closeAfterSelect: true,
+      loadThrottle: 250,
+      score(search) {
+        const query = (search.query || '').trim().toLowerCase();
 
-    const wrapper = document.createElement('div');
-    wrapper.className = 'ea-min3-filter';
+        return function (item) {
+          if (!query) {
+            return 1;
+          }
 
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'form-control mb-2';
-    input.placeholder = 'Tapez au moins 3 lettres pour filtrer...';
+          if (query.length < 3) {
+            return 0;
+          }
 
-    select.parentNode.insertBefore(wrapper, select);
-    wrapper.appendChild(input);
-    wrapper.appendChild(select);
-
-    const renderOptions = (term) => {
-      const selectedValue = select.value;
-      const normalized = term.trim().toLowerCase();
-      const shouldFilter = normalized.length >= 3;
-
-      select.innerHTML = '';
-      const filtered = shouldFilter
-        ? options.filter((option) => option.text.toLowerCase().includes(normalized) || option.selected)
-        : options;
-
-      filtered.forEach((optionData) => {
-        const option = document.createElement('option');
-        option.value = optionData.value;
-        option.text = optionData.text;
-        option.disabled = optionData.disabled;
-        option.selected = optionData.value === selectedValue || optionData.selected;
-        select.appendChild(option);
-      });
-    };
-
-    input.addEventListener('input', () => renderOptions(input.value));
+          return String(item.text || '').toLowerCase().includes(query) ? 1 : 0;
+        };
+      },
+      render: {
+        no_results() {
+          return '<div class="no-results">Tapez au moins 3 lettres pour rechercher</div>';
+        },
+      },
+      onInitialize() {
+        this.wrapper.classList.add('form-select');
+      },
+      onType(str) {
+        const val = (str || '').trim();
+        if (val.length > 0 && val.length < 3) {
+          this.refreshOptions(false);
+        }
+      },
+    });
   };
 
   const init = () => {
@@ -61,7 +68,7 @@
 
     document
       .querySelectorAll('select[data-live-min3="1"]')
-      .forEach(setupSelect);
+      .forEach(setupTomSelect);
   };
 
   document.addEventListener('DOMContentLoaded', init);
