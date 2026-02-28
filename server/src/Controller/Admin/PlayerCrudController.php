@@ -50,11 +50,7 @@ class PlayerCrudController extends AbstractCrudController
     public function configureFilters(Filters $filters): Filters
     {
         return $filters
-            ->add(
-                EntityFilter::new('person.nationalityCountry', 'Nationalité')
-                    ->setFormTypeOption('value_type_options.choice_label', 'name')
-                    ->setFormTypeOption('value_type_options.attr', ['data-ea-widget' => 'ea-autocomplete'])
-            );
+            ->add(EntityFilter::new('person.nationalityCountry', 'Nationalité'));
     }
 
     public function configureFields(string $pageName): iterable
