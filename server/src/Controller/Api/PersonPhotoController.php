@@ -17,13 +17,15 @@ final class PersonPhotoController extends AbstractController
         private readonly string $coachesUploadDirectory,
         #[Autowire('%kernel.project_dir%/public/uploads/referees')]
         private readonly string $refereesUploadDirectory,
+        #[Autowire('%kernel.project_dir%/public/uploads/person')]
+        private readonly string $personsUploadDirectory,
     ) {
     }
 
     #[Route('/api/person-photo/{category}/{path}', name: 'api_person_photo', requirements: ['path' => '.+'], methods: ['GET'])]
     public function __invoke(string $category, string $path): BinaryFileResponse
     {
-        $uploadDirectory = $this->resolveUploadDirectory($category);
+        $uploadDirectory = $this->personsUploadDirectory;
         $sanitizedPath = ltrim($path, '/');
         $fullPath = $uploadDirectory . '/' . $sanitizedPath;
 
@@ -45,9 +47,9 @@ final class PersonPhotoController extends AbstractController
     private function resolveUploadDirectory(string $category): string
     {
         return match (strtolower(trim($category))) {
-            'player', 'players' => $this->playersUploadDirectory,
-            'coach', 'coaches' => $this->coachesUploadDirectory,
-            'referee', 'referees' => $this->refereesUploadDirectory,
+            'players', 'players' => $this->playersUploadDirectory,
+            'coaches', 'coaches' => $this->coachesUploadDirectory,
+            'referees', 'referees' => $this->refereesUploadDirectory,
             default => throw new NotFoundHttpException('Unknown photo category.'),
         };
     }

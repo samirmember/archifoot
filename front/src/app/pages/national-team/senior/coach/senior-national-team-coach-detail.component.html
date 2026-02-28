@@ -145,18 +145,6 @@
           </div>
         </article>
       </div>
-
-      <article class="panel placeholder-panel">
-        <h2>Stats avancées</h2>
-        <div class="placeholder-grid">
-          @for (item of coach()!.futureDataPlaceholders; track item.label) {
-            <div class="placeholder-item">
-              <span>{{ item.label }}</span>
-              <strong>{{ item.value || 'Donnée à connecter' }}</strong>
-            </div>
-          }
-        </div>
-      </article>
     }
   </div>
 </section>
