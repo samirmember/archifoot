@@ -6,12 +6,46 @@
     return pathMatches || routeName === 'admin_fixture_full_new';
   };
 
-  const setupTomSelect = (select) => {
-    if (select.dataset.min3Ready === '1') {
-      return;
+  const ensureTomSelectAssets = () => {
+    if (window.TomSelect) {
+      return Promise.resolve();
     }
 
-    if (typeof window.TomSelect === 'undefined') {
+    if (window.__min3TomSelectLoadingPromise) {
+      return window.__min3TomSelectLoadingPromise;
+    }
+
+    const cssHref = 'https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css';
+    const jsSrc = 'https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js';
+
+    window.__min3TomSelectLoadingPromise = new Promise((resolve, reject) => {
+      if (!document.querySelector(`link[href="${cssHref}"]`)) {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = cssHref;
+        document.head.appendChild(css);
+      }
+
+      const existingScript = document.querySelector(`script[src="${jsSrc}"]`);
+      if (existingScript) {
+        existingScript.addEventListener('load', () => resolve(), { once: true });
+        existingScript.addEventListener('error', () => reject(new Error('TomSelect script failed to load')), { once: true });
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = jsSrc;
+      script.defer = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('TomSelect script failed to load'));
+      document.head.appendChild(script);
+    });
+
+    return window.__min3TomSelectLoadingPromise;
+  };
+
+  const setupTomSelect = (select) => {
+    if (select.dataset.min3Ready === '1' || !window.TomSelect) {
       return;
     }
 
@@ -66,9 +100,15 @@
       return;
     }
 
-    document
-      .querySelectorAll('select[data-live-min3="1"]')
-      .forEach(setupTomSelect);
+    ensureTomSelectAssets()
+      .then(() => {
+        document
+          .querySelectorAll('select[data-live-min3="1"]')
+          .forEach(setupTomSelect);
+      })
+      .catch(() => {
+        // Silent fallback: if remote assets can't load, keep native selects.
+      });
   };
 
   document.addEventListener('DOMContentLoaded', init);
