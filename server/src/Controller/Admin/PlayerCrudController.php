@@ -112,8 +112,9 @@ class PlayerCrudController extends AbstractCrudController
 
         $request = $this->requestStack->getCurrentRequest();
         $nationalityFilterValue = $request?->query->all('filters')['nationality']['value'] ?? null;
+        $searchQuery = trim((string) ($request?->query->get('query') ?? ''));
 
-        if ($nationalityFilterValue === null || $nationalityFilterValue === '') {
+        if (($nationalityFilterValue === null || $nationalityFilterValue === '') && $searchQuery === '') {
             $queryBuilder
                 ->leftJoin('entity.person', 'personDefaultNationality')
                 ->andWhere('personDefaultNationality.nationalityCountry = :defaultNationality')
