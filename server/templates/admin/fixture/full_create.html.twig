@@ -1,4 +1,5 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
+{% form_theme form 'bootstrap_5_layout.html.twig' %}
 
 {% block content_title %}Créer un match complet{% endblock %}
 
@@ -12,7 +13,7 @@
             <p class="fixture-subtitle">Saisie guidée: match, feuille, officiels, compositions, buts et changements.</p>
         </section>
 
-        {{ form_start(form) }}
+        {{ form_start(form, { attr: { class: 'needs-validation' } }) }}
         {{ form_errors(form) }}
 
         <section class="fixture-card">
@@ -71,4 +72,27 @@
 
         {{ form_end(form) }}
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const formElement = document.querySelector('.fixture-page form');
+
+            if (!formElement) {
+                return;
+            }
+
+            formElement.querySelectorAll('input, textarea, select').forEach(function (field) {
+                if (field.matches('input[type="checkbox"], input[type="radio"], input[type="hidden"]')) {
+                    return;
+                }
+
+                if (field.tagName.toLowerCase() === 'select') {
+                    field.classList.add('form-select');
+                    return;
+                }
+
+                field.classList.add('form-control');
+            });
+        });
+    </script>
 {% endblock %}
