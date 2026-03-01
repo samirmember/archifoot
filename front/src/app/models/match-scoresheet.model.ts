@@ -79,11 +79,22 @@ export interface MatchGoal {
   scorerName: string | null;
 }
 
+export interface MatchStaffItem {
+  id: number;
+  roleCode: string | null;
+  role: string | null;
+  personName: string | null;
+  teamName: string | null;
+  teamIso2: string | null;
+  nationality: string | null;
+}
+
 export interface MatchScoresheetDetailsResponse {
   fixture: MatchScoresheetFixture;
   scoresheet: MatchScoresheet | null;
   lineups: MatchLineupItem[];
   substitutions: MatchSubstitution[];
   officials: MatchOfficial[];
+  staffs: MatchStaffItem[];
   goals: MatchGoal[];
 }

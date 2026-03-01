@@ -148,39 +148,57 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
   });
 
   readonly staffsByTeam = computed(() => {
-    const coach = this.details()?.scoresheet?.coachName;
-    const fixture = this.details()?.fixture;
+    const details = this.details();
+    const coach = details?.scoresheet?.coachName;
+    const fixture = details?.fixture;
     const teamA = fixture?.teamA;
     const teamB = fixture?.teamB;
     const teamAName = teamA?.teamName || 'Algérie';
     const teamBName = teamB?.teamName || 'Adversaire';
+    const fromApi = details?.staffs ?? [];
+
+    const buildStaffsForTeam = (teamName: string, defaultNation: string, defaultIso2: string, captainFallback: string) => {
+      const teamStaffs = fromApi.filter((staff) => staff.teamName === teamName);
+      const coachStaff = teamStaffs.find((staff) => staff.roleCode === 'HEAD_COACH');
+      const assistantStaffs = teamStaffs.filter((staff) => staff.roleCode === 'ASSISTANT_COACH');
+
+      const coachItem = {
+        role: 'Entraîneur',
+        name: coachStaff?.personName || (this.isAlgeriaTeam(null, teamName) ? coach : null) || 'N/A',
+        nation: coachStaff?.nationality || defaultNation,
+        iso2: (coachStaff?.teamIso2 ?? defaultIso2).toLowerCase(),
+      };
+
+      const assistantItems = assistantStaffs.map((staff, index) => ({
+        role: `Assistant ${index + 1}`,
+        name: staff.personName || 'N/A',
+        nation: staff.nationality || defaultNation,
+        iso2: (staff.teamIso2 ?? defaultIso2).toLowerCase(),
+      }));
+
+      return [
+        coachItem,
+        ...assistantItems,
+        {
+          role: 'Capitaine',
+          name: this.findCaptain(teamName) || captainFallback,
+          nation: defaultNation,
+          iso2: defaultIso2,
+        },
+      ];
+    };
 
     const isTeamAAlgeria = this.isTeamAAlgeria();
-
-    const algeriaStaffs = [
-      { role: 'Entraîneur', name: coach || 'Vladimir Petković', nation: 'Algérie', iso2: 'dz' },
-      { role: 'Assistant 1', name: 'Madjid Bougherra', nation: 'Algérie', iso2: 'dz' },
-      { role: 'Assistant 2', name: 'Nabil Neghiz', nation: 'Algérie', iso2: 'dz' },
-      {
-        role: 'Capitaine',
-        name: this.findCaptain(isTeamAAlgeria ? teamAName : teamBName) || 'Riyad Mahrez',
-        nation: 'Algérie',
-        iso2: 'dz',
-      },
-    ];
-
+    const algeriaName = isTeamAAlgeria ? teamAName : teamBName;
     const opponentName = isTeamAAlgeria ? teamBName : teamAName;
-    const opponentIso2 = ((isTeamAAlgeria ? teamB?.teamIso2 : teamA?.teamIso2) ?? '').toLowerCase() || 'ng';
-    const opponentStaffs = [
-      { role: 'Entraîneur', name: 'José Peseiro', nation: 'Portugal', iso2: 'pt' },
-      { role: 'Assistant', name: 'Assistant adverse', nation: opponentName, iso2: opponentIso2 },
-      {
-        role: 'Capitaine',
-        name: this.findCaptain(opponentName) || 'William Troost-Ekong',
-        nation: opponentName,
-        iso2: opponentIso2,
-      },
-    ];
+
+    const algeriaStaffs = buildStaffsForTeam(algeriaName, 'Algérie', 'dz', 'Riyad Mahrez');
+    const opponentStaffs = buildStaffsForTeam(
+      opponentName,
+      opponentName,
+      (((isTeamAAlgeria ? teamB?.teamIso2 : teamA?.teamIso2) ?? 'ng').toLowerCase()),
+      'William Troost-Ekong',
+    );
 
     return {
       teamA: {

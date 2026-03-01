@@ -93,11 +93,13 @@ class FixtureController extends AbstractController
                     sc.signed_on AS "signedOn",
                     sc.status AS "status",
                     (
-                        SELECT GROUP_CONCAT(ps.full_name ORDER BY ssf.id SEPARATOR ', ')
+                        SELECT ps.full_name
                         FROM scoresheet_staff ssf
                         INNER JOIN person ps ON ps.id = ssf.person_id
                         WHERE ssf.scoresheet_id = sc.id
-                          AND ssf.role IN ('HEAD_COACH', 'ASSISTANT_COACH')
+                          AND ssf.role = 'HEAD_COACH'
+                        ORDER BY ssf.id ASC
+                        LIMIT 1
                     ) AS "coachName"
                 FROM scoresheet sc
                 WHERE sc.fixture_id = :fixtureId
@@ -110,6 +112,7 @@ class FixtureController extends AbstractController
         $lineups = [];
         $substitutions = [];
         $officials = [];
+        $staffs = [];
 
         if ($scoresheetId !== null) {
             $lineups = $connection->fetchAllAssociative(
@@ -174,6 +177,29 @@ class FixtureController extends AbstractController
                 SQL,
                 ['scoresheetId' => $scoresheetId]
             );
+
+            $staffs = $connection->fetchAllAssociative(
+                <<<'SQL'
+                    SELECT
+                        ssf.id,
+                        ssf.role AS "roleCode",
+                        r.label AS "role",
+                        p.full_name AS "personName",
+                        t.display_name AS "teamName",
+                        co.iso2 AS "teamIso2",
+                        c.name AS "nationality"
+                    FROM scoresheet_staff ssf
+                    LEFT JOIN role r ON r.code = ssf.role
+                    LEFT JOIN person p ON p.id = ssf.person_id
+                    LEFT JOIN team t ON t.id = ssf.team_id
+                    LEFT JOIN national_team nt ON nt.id = t.national_team_id
+                    LEFT JOIN country co ON co.id = nt.country_id
+                    LEFT JOIN country c ON c.id = p.nationality_country_id
+                    WHERE ssf.scoresheet_id = :scoresheetId
+                    ORDER BY ssf.team_id ASC, ssf.id ASC
+                SQL,
+                ['scoresheetId' => $scoresheetId]
+            );
         }
 
         $goals = $connection->fetchAllAssociative(
@@ -205,6 +231,7 @@ class FixtureController extends AbstractController
             'lineups' => $lineups,
             'substitutions' => $substitutions,
             'officials' => $officials,
+            'staffs' => $staffs,
             'goals' => $goals,
         ]);
     }
