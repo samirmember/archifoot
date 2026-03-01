@@ -15,7 +15,6 @@
       plugins: {
         clear_button: { title: '' },
         dropdown_input: {},
-        virtual_scroll: {},
       },
       create: false,
       allowEmptyOption: true,
