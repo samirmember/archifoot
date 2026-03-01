@@ -21,10 +21,10 @@ class MatchGoalType extends AbstractType
             ->add('scorer', EntityType::class, [
                 'class' => Player::class,
                 'required' => false,
-                'placeholder' => 'Sélectionner un joueur (200 derniers)',
+                'placeholder' => 'Sélectionner un joueur',
                 'query_builder' => static fn (EntityRepository $repository) => $repository->createQueryBuilder('p')
                     ->orderBy('p.id', 'DESC')
-                    ->setMaxResults(200),
+                    ->setMaxResults(50),
                 'choice_label' => static fn (Player $player) => $player->getPersonFullName() ?? ('#'.$player->getId()),
                 'label' => 'Buteur existant',
                 'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'player'],
@@ -34,10 +34,9 @@ class MatchGoalType extends AbstractType
             ->add('goalType', ChoiceType::class, [
                 'required' => false,
                 'choices' => [
-                    'Jeu' => 'OPEN_PLAY',
-                    'Penalty' => 'PENALTY',
-                    'CSC' => 'OWN_GOAL',
-                    'CPA' => 'SET_PIECE',
+                    'Normal' => 'normal',
+                    'Penalty' => 'penalty',
+                    'Contre son camp' => 'own_goal',
                 ],
                 'label' => 'Type',
             ]);

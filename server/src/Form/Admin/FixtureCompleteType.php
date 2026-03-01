@@ -31,32 +31,34 @@ class FixtureCompleteType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('externalMatchNo', IntegerType::class, ['required' => false])
-            ->add('season', EntityType::class, ['class' => Season::class, 'choice_label' => 'name', 'required' => false])
-            ->add('competitions', EntityType::class, ['class' => Competition::class, 'choice_label' => 'name', 'multiple' => true, 'required' => false])
-            ->add('editions', EntityType::class, ['class' => Edition::class, 'choice_label' => 'name', 'multiple' => true, 'required' => false])
-            ->add('stages', EntityType::class, ['class' => Stage::class, 'choice_label' => 'name', 'multiple' => true, 'required' => false])
-            ->add('matchday', EntityType::class, ['class' => Matchday::class, 'choice_label' => 'name', 'required' => false, 'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'matchday']])
-            ->add('division', EntityType::class, ['class' => Division::class, 'choice_label' => 'name', 'required' => false, 'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'division']])
-            ->add('category', EntityType::class, ['class' => Category::class, 'choice_label' => 'name', 'required' => false, 'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'category']])
-            ->add('matchDate', DateType::class, ['widget' => 'single_text', 'required' => false])
-            ->add('stadium', EntityType::class, ['class' => Stadium::class, 'choice_label' => 'name', 'required' => false, 'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'stadium']])
-            ->add('city', EntityType::class, ['class' => City::class, 'choice_label' => 'name', 'required' => false, 'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'city']])
-            ->add('country', EntityType::class, ['class' => Country::class, 'choice_label' => 'name', 'required' => false, 'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'country']])
-            ->add('played', CheckboxType::class, ['required' => false])
-            ->add('isOfficial', CheckboxType::class, ['required' => false])
-            ->add('notes', TextareaType::class, ['required' => false])
-            ->add('internalNotes', TextareaType::class, ['required' => false])
+            ->add('externalMatchNo', IntegerType::class, ['required' => false, 'label' => 'Numéro de match'])
+            ->add('season', EntityType::class, ['class' => Season::class, 'choice_label' => 'name', 'required' => false, 'label' => 'Saison'])
+            ->add('competitions', EntityType::class, ['class' => Competition::class, 'choice_label' => 'name', 'multiple' => true, 'required' => false, 'label' => 'Compétitions'])
+            ->add('editions', EntityType::class, ['class' => Edition::class, 'choice_label' => 'name', 'multiple' => true, 'required' => false, 'label' => 'Éditions'])
+            ->add('stages', EntityType::class, ['class' => Stage::class, 'choice_label' => 'name', 'multiple' => true, 'required' => false, 'label' => 'Stades'])
+            ->add('matchday', EntityType::class, ['class' => Matchday::class, 'choice_label' => 'name', 'required' => false, 'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'matchday'], 'label' => 'Journée'])
+            ->add('division', EntityType::class, ['class' => Division::class, 'choice_label' => 'name', 'required' => false, 'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'division'], 'label' => 'Division'])
+            ->add('category', EntityType::class, ['class' => Category::class, 'choice_label' => 'name', 'required' => false, 'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'category'], 'label' => 'Catégorie'])
+            ->add('matchDate', DateType::class, ['widget' => 'single_text', 'required' => false, 'label' => 'Date'])
+            ->add('stadium', EntityType::class, ['class' => Stadium::class, 'choice_label' => 'name', 'required' => false, 'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'stadium'], 'label' => 'Stade'])
+            ->add('city', EntityType::class, ['class' => City::class, 'choice_label' => 'name', 'required' => false, 'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'city'], 'label' => 'Ville'])
+            ->add('country', EntityType::class, ['class' => Country::class, 'choice_label' => 'name', 'required' => false, 'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'country'], 'label' => 'Pays'])
+            ->add('played', CheckboxType::class, ['required' => false, 'label' => 'Match joué'])
+            ->add('isOfficial', CheckboxType::class, ['required' => false, 'label' => 'Match officiel'])
+            ->add('notes', TextareaType::class, ['required' => false, 'label' => 'Notes'])
+            ->add('internalNotes', TextareaType::class, ['required' => false, 'label' => 'Notes internes'])
             ->add('teamA', EntityType::class, [
                 'class' => Team::class,
+                'label' => 'Équipe A',
                 'choice_label' => 'displayName',
                 'placeholder' => 'Choisir une équipe',
                 'query_builder' => static fn (EntityRepository $repository) => $repository->createQueryBuilder('t')
                     ->orderBy('t.id', 'DESC')
                     ->setMaxResults(200),
             ])
-            ->add('scoreA', IntegerType::class, ['required' => false])
+            ->add('scoreA', IntegerType::class, ['required' => false, 'label' => 'Score A'])
             ->add('teamB', EntityType::class, [
+                'label' => 'Équipe B',
                 'class' => Team::class,
                 'choice_label' => 'displayName',
                 'placeholder' => 'Choisir une équipe',
@@ -64,17 +66,17 @@ class FixtureCompleteType extends AbstractType
                     ->orderBy('t.id', 'DESC')
                     ->setMaxResults(200),
             ])
-            ->add('scoreB', IntegerType::class, ['required' => false])
-            ->add('attendance', IntegerType::class, ['required' => false])
-            ->add('fixedTime', TextType::class, ['required' => false])
-            ->add('kickoffTime', TextType::class, ['required' => false])
-            ->add('halfTime', TextType::class, ['required' => false])
-            ->add('secondHalfStart', TextType::class, ['required' => false])
-            ->add('fullTime', TextType::class, ['required' => false])
-            ->add('stoppageTime', TextType::class, ['required' => false])
-            ->add('reservations', TextareaType::class, ['required' => false])
-            ->add('signedPlace', TextType::class, ['required' => false])
-            ->add('signedOn', DateType::class, ['widget' => 'single_text', 'required' => false])
+            ->add('scoreB', IntegerType::class, ['required' => false, 'label' => 'Score B'])
+            ->add('attendance', IntegerType::class, ['required' => false, 'label' => 'Nombre de spectateurs'])
+            ->add('fixedTime', TextType::class, ['required' => false, 'label' => 'Heure fixe'])
+            ->add('kickoffTime', TextType::class, ['required' => false, 'label' => 'Heure de départ'])
+            ->add('halfTime', TextType::class, ['required' => false, 'label' => 'Heure de mi-temps'])
+            ->add('secondHalfStart', TextType::class, ['required' => false, 'label' => 'Heure de début de la seconde moitié'])
+            ->add('fullTime', TextType::class, ['required' => false, 'label' => 'Heure de fin'])
+            ->add('stoppageTime', TextType::class, ['required' => false, 'label' => 'Heure de pause'])
+            ->add('reservations', TextareaType::class, ['required' => false, 'label' => 'Reservations'])
+            ->add('signedPlace', TextType::class, ['required' => false, 'label' => 'Signé sur place'])
+            ->add('signedOn', DateType::class, ['widget' => 'single_text', 'required' => false, 'label' => 'Signé le'])
             ->add('lineups', CollectionType::class, [
                 'entry_type' => MatchLineupType::class,
                 'allow_add' => true,
