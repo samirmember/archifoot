@@ -1,9 +1,9 @@
 export interface MatchScoresheetParticipant {
   role: string | null;
-  score: number | null;
-  teamId: number | null;
-  teamName: string | null;
-  teamIso2: string | null;
+  score: number;
+  teamId: number;
+  teamName: string;
+  teamIso2: string;
   categoryName: string | null;
 }
 
@@ -18,8 +18,8 @@ export interface MatchScoresheetFixture {
   cityName: string | null;
   stadiumName: string | null;
   countryStadiumName: string | null;
-  teamA: MatchScoresheetParticipant | null;
-  teamB: MatchScoresheetParticipant | null;
+  teamA: MatchScoresheetParticipant;
+  teamB: MatchScoresheetParticipant;
 }
 
 export interface MatchScoresheet {

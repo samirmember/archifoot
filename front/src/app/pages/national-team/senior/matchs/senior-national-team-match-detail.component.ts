@@ -1,11 +1,11 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { MatchScoresheetDetailsResponse, MatchLineupItem } from 'src/app/models/match-scoresheet.model';
+import { MatchScoresheetDetailsResponse, MatchLineupItem, MatchScoresheetParticipant } from 'src/app/models/match-scoresheet.model';
 import { MatchResult } from 'src/app/services/result.service';
 import { MatchScoresheetService } from 'src/app/services/match-scoresheet.service';
 import { FlagComponent } from 'src/app/layouts/flag/flag.component';
 import { StaffCardComponent } from 'src/app/components/staff-card/staff-card.component';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-senior-national-team-match-detail',
@@ -149,31 +149,32 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
 
   readonly staffsByTeam = computed(() => {
     const details = this.details();
+    if (!details) {
+      return null;
+    }
     const coach = details?.scoresheet?.coachName;
-    const fixture = details?.fixture;
-    const teamA = fixture?.teamA;
-    const teamB = fixture?.teamB;
-    const teamAName = teamA?.teamName || 'Algérie';
-    const teamBName = teamB?.teamName || 'Adversaire';
+    const fixture = details.fixture;
+    const teamA = fixture.teamA;
+    const teamB = fixture.teamB;
     const fromApi = details?.staffs ?? [];
 
-    const buildStaffsForTeam = (teamName: string, defaultNation: string, defaultIso2: string, captainFallback: string) => {
-      const teamStaffs = fromApi.filter((staff) => staff.teamName === teamName);
+    const buildStaffsForTeam = (team: MatchScoresheetParticipant) => {
+      const teamStaffs = fromApi.filter((staff) => staff.teamName === team.teamName);
       const coachStaff = teamStaffs.find((staff) => staff.roleCode === 'HEAD_COACH');
       const assistantStaffs = teamStaffs.filter((staff) => staff.roleCode === 'ASSISTANT_COACH');
 
       const coachItem = {
-        role: 'Entraîneur',
-        name: coachStaff?.personName || (this.isAlgeriaTeam(null, teamName) ? coach : null) || 'N/A',
-        nation: coachStaff?.nationality || defaultNation,
-        iso2: (coachStaff?.teamIso2 ?? defaultIso2).toLowerCase(),
+        role: 'Entraîneur principal',
+        name: coachStaff?.personName,
+        nation: coachStaff?.nationality,
+        iso2: (coachStaff?.teamIso2 ?? '').toLowerCase(),
       };
 
       const assistantItems = assistantStaffs.map((staff, index) => ({
         role: `Assistant ${index + 1}`,
-        name: staff.personName || 'N/A',
-        nation: staff.nationality || defaultNation,
-        iso2: (staff.teamIso2 ?? defaultIso2).toLowerCase(),
+        name: staff.personName,
+        nation: staff.nationality,
+        iso2: (staff.teamIso2 ?? '').toLowerCase(),
       }));
 
       return [
@@ -181,32 +182,27 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
         ...assistantItems,
         {
           role: 'Capitaine',
-          name: this.findCaptain(teamName) || captainFallback,
-          nation: defaultNation,
-          iso2: defaultIso2,
+          name: this.findCaptain(team.teamName),
+          nation: team.teamIso2,
+          iso2: team.teamIso2.toLowerCase(),
         },
       ];
     };
 
     const isTeamAAlgeria = this.isTeamAAlgeria();
-    const algeriaName = isTeamAAlgeria ? teamAName : teamBName;
-    const opponentName = isTeamAAlgeria ? teamBName : teamAName;
+    const algeriaTeam = isTeamAAlgeria ? teamA : teamB;
+    const opponentTeam = isTeamAAlgeria ? teamB : teamA;
 
-    const algeriaStaffs = buildStaffsForTeam(algeriaName, 'Algérie', 'dz', 'Riyad Mahrez');
-    const opponentStaffs = buildStaffsForTeam(
-      opponentName,
-      opponentName,
-      (((isTeamAAlgeria ? teamB?.teamIso2 : teamA?.teamIso2) ?? 'ng').toLowerCase()),
-      'William Troost-Ekong',
-    );
+    const algeriaStaffs = buildStaffsForTeam(algeriaTeam);
+    const opponentStaffs = buildStaffsForTeam(opponentTeam);
 
     return {
       teamA: {
-        name: teamAName,
+        name: teamA.teamName,
         staffs: isTeamAAlgeria ? algeriaStaffs : opponentStaffs,
       },
       teamB: {
-        name: teamBName,
+        name: teamB.teamName,
         staffs: isTeamAAlgeria ? opponentStaffs : algeriaStaffs,
       },
     };
