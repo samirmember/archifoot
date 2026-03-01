@@ -1,4 +1,6 @@
 (function () {
+  const minLength = 3;
+
   const setupTomSelect = (select) => {
     if (select.dataset.min3Ready === '1') {
       return;
@@ -8,6 +10,18 @@
       console.error('[min3-select-filter] TomSelect is not available on window.');
       return;
     }
+
+    const remoteType = select.dataset.remoteType;
+    if (!remoteType) {
+      return;
+    }
+
+    const initialOptions = Array.from(select.options)
+      .filter((option) => option.value !== '')
+      .map((option) => ({
+        value: option.value,
+        text: option.text,
+      }));
 
     select.dataset.min3Ready = '1';
 
@@ -19,26 +33,27 @@
       create: false,
       allowEmptyOption: true,
       searchField: ['text'],
-      maxOptions: 200,
+      maxOptions: 30,
       closeAfterSelect: true,
-      score(search) {
-        const query = (search.query || '').trim().toLowerCase();
+      options: initialOptions,
+      shouldLoad(query) {
+        return query.trim().length >= minLength;
+      },
+      load(query, callback) {
+        const trimmed = query.trim();
+        if (trimmed.length < minLength) {
+          callback();
+          return;
+        }
 
-        return function (item) {
-          if (!query) {
-            return 1;
-          }
-
-          if (query.length < 3) {
-            return 0;
-          }
-
-          return String(item.text || '').toLowerCase().includes(query) ? 1 : 0;
-        };
+        fetch(`/api/admin-search/${encodeURIComponent(remoteType)}?q=${encodeURIComponent(trimmed)}`)
+          .then((response) => response.ok ? response.json() : [])
+          .then((items) => callback(Array.isArray(items) ? items : []))
+          .catch(() => callback());
       },
       render: {
         no_results() {
-          return '<div class="no-results">Tapez au moins 3 lettres pour rechercher</div>';
+          return `<div class="no-results">Tapez au moins ${minLength} lettres pour rechercher</div>`;
         },
       },
     });

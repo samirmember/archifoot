@@ -36,7 +36,7 @@ class MatchLineupType extends AbstractType
                     ->setMaxResults(200),
                 'choice_label' => static fn (Player $player) => $player->getPersonFullName() ?? ('#'.$player->getId()),
                 'label' => 'Joueur existant',
-                'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete'],
+                'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete', 'data-remote-type' => 'player'],
             ])
             ->add('playerName', TextType::class, [
                 'required' => false,
