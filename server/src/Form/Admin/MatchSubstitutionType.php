@@ -27,7 +27,7 @@ class MatchSubstitutionType extends AbstractType
                     ->setMaxResults(200),
                 'choice_label' => static fn (Player $player) => $player->getPersonFullName() ?? ('#'.$player->getId()),
                 'label' => 'Sortant existant',
-                'attr' => ['data-live-min3' => '1'],
+                'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete'],
             ])
             ->add('playerOutName', TextType::class, ['required' => false, 'label' => 'Nouveau sortant'])
             ->add('playerIn', EntityType::class, [
@@ -39,7 +39,7 @@ class MatchSubstitutionType extends AbstractType
                     ->setMaxResults(200),
                 'choice_label' => static fn (Player $player) => $player->getPersonFullName() ?? ('#'.$player->getId()),
                 'label' => 'Entrant existant',
-                'attr' => ['data-live-min3' => '1'],
+                'attr' => ['data-live-min3' => '1', 'class' => 'js-min3-autocomplete'],
             ])
             ->add('playerInName', TextType::class, ['required' => false, 'label' => 'Nouveau entrant'])
             ->add('minute', TextType::class, ['required' => false]);
