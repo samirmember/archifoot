@@ -1,0 +1,104 @@
+.fixture-page {
+  --card-bg: #ffffff;
+  --card-border: #e6ebf3;
+  --soft-bg: #f4f7fc;
+  --title: #1f3556;
+  --muted: #70819a;
+  --accent: #2f6feb;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.fixture-hero,
+.fixture-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 2px 10px rgba(15, 34, 58, 0.04);
+  margin-bottom: 15px;
+}
+
+.fixture-hero {
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  text-align: center;
+}
+
+.fixture-title {
+  margin: 0;
+  color: var(--title);
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.fixture-subtitle {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.fixture-card h3 {
+  margin: 0 0 12px;
+  color: var(--title);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.fixture-grid-two {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 992px) {
+  .fixture-grid-two {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.fixture-col > .field-association,
+.fixture-col > .field-text,
+.fixture-col > .field-integer,
+.fixture-col > .field-choice,
+.fixture-col > .field-textarea,
+.fixture-col > .field-date,
+.fixture-col > .field-boolean,
+.fixture-col > .form-group,
+.fixture-card .form-group {
+  margin-bottom: 12px;
+}
+
+.fixture-card .row {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.fixture-card .row > * {
+  width: 100%;
+}
+
+.fixture-section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--accent);
+  background: #edf3ff;
+  border-radius: 999px;
+  padding: 4px 10px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.fixture-submit {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fixture-submit .btn {
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-weight: 700;
+}

@@ -1,0 +1,74 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Créer un match complet{% endblock %}
+
+{% block main %}
+    <link rel="stylesheet" href="{{ asset('admin/fixture-full-create.css') }}?v=1">
+
+    <div class="fixture-page">
+        <section class="fixture-hero">
+            <p class="fixture-section-label">Équipe nationale · Admin</p>
+            <h2 class="fixture-title">Nouvelle rencontre complète</h2>
+            <p class="fixture-subtitle">Saisie guidée: match, feuille, officiels, compositions, buts et changements.</p>
+        </section>
+
+        {{ form_start(form) }}
+        {{ form_errors(form) }}
+
+        <section class="fixture-card">
+            <h3>Informations du match</h3>
+            <div class="row">{{ form_row(form.externalMatchNo) }}{{ form_row(form.matchDate) }}{{ form_row(form.played) }}{{ form_row(form.isOfficial) }}</div>
+            <div class="row">{{ form_row(form.season) }}{{ form_row(form.competitions) }}{{ form_row(form.editions) }}{{ form_row(form.stages) }}</div>
+            <div class="row">{{ form_row(form.matchday) }}{{ form_row(form.division) }}{{ form_row(form.category) }}</div>
+            <div class="row">{{ form_row(form.teamA) }}{{ form_row(form.scoreA) }}{{ form_row(form.teamB) }}{{ form_row(form.scoreB) }}</div>
+            <div class="row">{{ form_row(form.stadium) }}{{ form_row(form.city) }}{{ form_row(form.country) }}</div>
+            {{ form_row(form.notes) }}
+            {{ form_row(form.internalNotes) }}
+        </section>
+
+        <section class="fixture-card">
+            <h3>Feuille de match</h3>
+            <div class="row">
+                {{ form_row(form.attendance) }}{{ form_row(form.fixedTime) }}{{ form_row(form.kickoffTime) }}{{ form_row(form.halfTime) }}
+                {{ form_row(form.secondHalfStart) }}{{ form_row(form.fullTime) }}{{ form_row(form.stoppageTime) }}
+            </div>
+            <div class="row">{{ form_row(form.reservations) }}{{ form_row(form.signedPlace) }}{{ form_row(form.signedOn) }}</div>
+        </section>
+
+        <section class="fixture-grid-two">
+            <article class="fixture-card fixture-col">
+                <h3>Buts</h3>
+                {{ form_row(form.goals) }}
+            </article>
+
+            <article class="fixture-card fixture-col">
+                <h3>Remplacements</h3>
+                {{ form_row(form.substitutions) }}
+            </article>
+        </section>
+
+        <section class="fixture-card">
+            <h3>Compositions</h3>
+            {{ form_row(form.lineups) }}
+        </section>
+
+        <section class="fixture-grid-two">
+            <article class="fixture-card fixture-col">
+                <h3>Entraîneurs</h3>
+                <div class="row">{{ form_row(form.headCoachA) }}{{ form_row(form.assistantCoachA1) }}{{ form_row(form.assistantCoachA2) }}</div>
+                <div class="row">{{ form_row(form.headCoachB) }}{{ form_row(form.assistantCoachB1) }}{{ form_row(form.assistantCoachB2) }}</div>
+            </article>
+
+            <article class="fixture-card fixture-col">
+                <h3>Arbitrage & officiels</h3>
+                <div class="row">{{ form_row(form.mainReferee) }}{{ form_row(form.assistantReferee1) }}{{ form_row(form.assistantReferee2) }}{{ form_row(form.fourthReferee) }}</div>
+            </article>
+        </section>
+
+        <div class="fixture-submit">
+            <button class="btn btn-primary">Sauvegarder le match complet</button>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
