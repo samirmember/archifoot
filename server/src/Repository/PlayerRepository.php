@@ -60,6 +60,7 @@ class PlayerRepository extends ServiceEntityRepository
                 'DISTINCT p.id AS id',
                 'person.fullName AS fullName',
                 'person.photoUrl AS photoUrl',
+                'person.featurePhotoUrl AS featurePhotoUrl',
                 'person.birthDate AS birthDate',
                 'birthCity.name AS birthCityName',
                 'birthRegion.name AS birthRegionName',
@@ -104,6 +105,7 @@ class PlayerRepository extends ServiceEntityRepository
             'slug' => $slug,
             'fullName' => $matchedPlayer['fullName'],
             'photoUrl' => $matchedPlayer['photoUrl'],
+            'featurePhotoUrl' => $matchedPlayer['featurePhotoUrl'],
             'profile' => [
                 'birthDate' => $this->dateFormatter->short($matchedPlayer['birthDate']),
                 'birthCity' => $matchedPlayer['birthCityName'],

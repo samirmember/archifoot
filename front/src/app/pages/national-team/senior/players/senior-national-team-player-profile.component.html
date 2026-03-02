@@ -23,51 +23,43 @@
             @if (profile()!.profile.primaryPositionLabel) {
               <article>
                 <label>Poste principal</label>
-                <span>{{
-                  asBadgeLabel(
-                    profile()!.profile.primaryPositionLabel +
-                      '(' +
-                      profile()!.profile.primaryPositionCode +
-                      ')'
-                  )
-                }}</span>
+                <span>{{ asBadgeLabel(profile()!.profile.primaryPositionLabel + '(' + profile()!.profile.primaryPositionCode + ')') }}</span>
               </article>
             }
             @if (profile()!.profile.birthDate) {
               <article>
                 <label>Date de naissance</label>
-                <span>{{
-                  asBadgeLabel(profile()!.profile.birthDate, 'Date de naissance inconnue')
-                }}</span>
+                <span>{{ asBadgeLabel(profile()!.profile.birthDate, 'Date de naissance inconnue') }}</span>
               </article>
             }
             @if (profile()!.profile.birthCity) {
-            <article>
-              <label>Lieu de naissance</label>
-              <span>
-                {{ asBadgeLabel(profile()!.profile.birthCity, 'Lieu de naissance inconnu') }}
-                @if (profile()?.profile?.birthRegion) {
-                  {{ ', ' + profile()?.profile?.birthRegion }}
-                }
-              </span>
-            </article>
+              <article>
+                <label>Lieu de naissance</label>
+                <span>
+                  {{ asBadgeLabel(profile()!.profile.birthCity, 'Lieu de naissance inconnu') }}
+                  @if (profile()?.profile?.birthRegion) {
+                    {{ ', ' + profile()?.profile?.birthRegion }}
+                  }
+                </span>
+              </article>
             }
             @if (profile()!.profile.birthCountry) {
-            <article>
-              <label>Pays de naissance</label>
-              <span>{{ asBadgeLabel(profile()?.profile?.birthCountry) }}</span>
-            </article>
+              <article>
+                <label>Pays de naissance</label>
+                <span>{{ asBadgeLabel(profile()?.profile?.birthCountry) }}</span>
+              </article>
             }
             @if (profile()!.profile.nationalityCountry) {
-            <article>
-              <label>Nationalité</label>
-              <span>{{ asBadgeLabel(profile()!.profile.nationalityCountry) }}</span>
-            </article>
+              <article>
+                <label>Nationalité</label>
+                <span>{{ asBadgeLabel(profile()!.profile.nationalityCountry) }}</span>
+              </article>
             }
           </div>
         </div>
       </article>
-      <section class="stats-grid">
+
+      <section class="stats-grid" [class.has-feature-photo]="!!profile()!.featurePhotoUrl">
         <article class="card-like stat-card">
           <h2>Statistiques</h2>
           <div class="big-stats">
@@ -88,25 +80,51 @@
               <span>Duels gagnés</span>
             </div>
           </div>
+
+          @if (profile()!.featurePhotoUrl) {
+            <article class="leadership-under-stats">
+              <h2>Leadership</h2>
+              <div class="big-stats compact">
+                <div>
+                  <strong>{{ profile()!.stats.goals }}</strong>
+                  <span>Buts</span>
+                </div>
+                <div>
+                  <strong>{{ profile()!.stats.captaincies }}</strong>
+                  <span>Matchs capitaine</span>
+                </div>
+                <div>
+                  <strong>{{ profile()!.stats.lastCapDate }}</strong>
+                  <span>Dernière sélection</span>
+                </div>
+              </div>
+            </article>
+          }
         </article>
 
-        <article class="card-like stat-card">
-          <h2>Leadership</h2>
-          <div class="big-stats compact">
-            <div>
-              <strong>{{ profile()!.stats.goals }}</strong>
-              <span>Buts</span>
+        @if (profile()!.featurePhotoUrl) {
+          <article class="card-like feature-photo-card">
+            <img [src]="profile()!.featurePhotoUrl!" [alt]="'Photo de couverture ' + profile()!.fullName" loading="lazy" />
+          </article>
+        } @else {
+          <article class="card-like stat-card">
+            <h2>Leadership</h2>
+            <div class="big-stats compact">
+              <div>
+                <strong>{{ profile()!.stats.goals }}</strong>
+                <span>Buts</span>
+              </div>
+              <div>
+                <strong>{{ profile()!.stats.captaincies }}</strong>
+                <span>Matchs capitaine</span>
+              </div>
+              <div>
+                <strong>{{ profile()!.stats.lastCapDate }}</strong>
+                <span>Dernière sélection</span>
+              </div>
             </div>
-            <div>
-              <strong>{{ profile()!.stats.captaincies }}</strong>
-              <span>Matchs capitaine</span>
-            </div>
-            <div>
-              <strong>{{ profile()!.stats.lastCapDate }}</strong>
-              <span>Dernière sélection</span>
-            </div>
-          </div>
-        </article>
+          </article>
+        }
       </section>
 
       <section class="card-like section-block">

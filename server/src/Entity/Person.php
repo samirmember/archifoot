@@ -38,6 +38,9 @@ class Person
     #[ORM\Column(name: 'photo_url', length: 150, nullable: true)]
     private ?string $photoUrl = null;
 
+    #[ORM\Column(name: 'feature_photo_url', length: 150, nullable: true)]
+    private ?string $featurePhotoUrl = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -123,6 +126,18 @@ class Person
     public function setPhotoUrl(?string $photoUrl): static
     {
         $this->photoUrl = $photoUrl;
+
+        return $this;
+    }
+
+    public function getFeaturePhotoUrl(): ?string
+    {
+        return $this->featurePhotoUrl;
+    }
+
+    public function setFeaturePhotoUrl(?string $featurePhotoUrl): static
+    {
+        $this->featurePhotoUrl = $featurePhotoUrl;
 
         return $this;
     }

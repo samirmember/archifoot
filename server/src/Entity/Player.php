@@ -178,6 +178,19 @@ class Player
         return $this;
     }
 
+    public function getFeaturePhotoUrl(): ?string
+    {
+        return $this->person?->getFeaturePhotoUrl();
+    }
+
+    public function setFeaturePhotoUrl(?string $featurePhotoUrl): static
+    {
+        $this->ensurePersonExists();
+        $this->person?->setFeaturePhotoUrl($featurePhotoUrl);
+
+        return $this;
+    }
+
 
     private function ensurePersonExists(): void
     {

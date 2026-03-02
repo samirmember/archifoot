@@ -55,9 +55,15 @@ class PlayerCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        $photoField = ImageField::new('photoUrl', 'Photo')
+        $photoField = ImageField::new('photoUrl', "Photo d'identité")
             ->setBasePath('/uploads/person')
             ->setUploadDir('public/uploads/person')
+            ->setUploadedFileNamePattern('[uuid].[extension]')
+            ->setRequired(false);
+
+        $featurePhotoField = ImageField::new('featurePhotoUrl', 'Photo de couverture')
+            ->setBasePath('/uploads/person/feature')
+            ->setUploadDir('public/uploads/person/feature')
             ->setUploadedFileNamePattern('[uuid].[extension]')
             ->setRequired(false);
 
@@ -67,6 +73,7 @@ class PlayerCrudController extends AbstractCrudController
                 TextField::new('personNationalityCountryName', 'Nationalité'),
                 AssociationField::new('primaryPosition', 'Poste'),
                 $photoField,
+                $featurePhotoField,
             ];
         }
 
@@ -103,6 +110,7 @@ class PlayerCrudController extends AbstractCrudController
                 ->setFormTypeOption('required', false),
             AssociationField::new('primaryPosition', 'Poste')->autocomplete(),
             $photoField,
+            $featurePhotoField,
         ];
     }
 

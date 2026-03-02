@@ -15,6 +15,7 @@ export interface SeniorPlayerDetail {
   slug: string;
   fullName: string;
   photoUrl: string | null;
+  featurePhotoUrl: string | null;
   profile: {
     birthDate: string | null;
     birthCity: string | null;
@@ -166,6 +167,7 @@ export class PlayerService {
         map((profile) => ({
           ...profile,
           photoUrl: this.toPlayerPhotoUrl(profile.photoUrl),
+          featurePhotoUrl: this.toPlayerPhotoUrl(profile.featurePhotoUrl),
           stats: {
             ...profile.stats,
             duelsWon: profile.stats.duelsWon ?? this.extractDuelsWon(profile.futureDataPlaceholders),
