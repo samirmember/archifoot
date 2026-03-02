@@ -414,6 +414,7 @@ CREATE TABLE `person` (
   `birth_country_id` INT NULL COMMENT 'FK country',
   `nationality_country_id` INT NULL COMMENT 'FK country',
   `photo_url` VARCHAR(150) DEFAULT NULL COMMENT 'Photo URL',
+  `feature_photo_url` VARCHAR(150) DEFAULT NULL COMMENT 'Photo de couverture',
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_person_birth_city_id` FOREIGN KEY (`birth_city_id`) REFERENCES `city`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT `fk_person_birth_region_id` FOREIGN KEY (`birth_region_id`) REFERENCES `region`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
