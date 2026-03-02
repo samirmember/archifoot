@@ -7,6 +7,7 @@ use App\Entity\Country;
 use App\Entity\Player;
 use App\Entity\Region;
 use App\Filter\PersonNationalityCountryFilter;
+use App\Service\ImageUploadOptimizer;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
@@ -22,15 +23,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class PlayerCrudController extends AbstractCrudController
 {
     public function __construct(
-        #[Autowire('%kernel.project_dir%/public/uploads/person')]
-        private readonly string $personPhotoUploadDir,
         private readonly RequestStack $requestStack,
+        private readonly ImageUploadOptimizer $imageUploadOptimizer,
     ) {
     }
 
@@ -140,7 +139,7 @@ class PlayerCrudController extends AbstractCrudController
         }
 
         $this->applyDynamicLocationEntries($entityInstance, $entityManager);
-        $this->optimizeProfilePhoto($entityInstance);
+        $this->optimizeUploadedPhotos($entityInstance);
         parent::persistEntity($entityManager, $entityInstance);
     }
 
@@ -152,7 +151,7 @@ class PlayerCrudController extends AbstractCrudController
         }
 
         $this->applyDynamicLocationEntries($entityInstance, $entityManager);
-        $this->optimizeProfilePhoto($entityInstance);
+        $this->optimizeUploadedPhotos($entityInstance);
         parent::updateEntity($entityManager, $entityInstance);
     }
 
@@ -186,73 +185,9 @@ class PlayerCrudController extends AbstractCrudController
         }
     }
 
-    private function optimizeProfilePhoto(Player $player): void
+    private function optimizeUploadedPhotos(Player $player): void
     {
-        $photoUrl = $player->getPhotoUrl();
-        if ($photoUrl === null || $photoUrl === '') {
-            return;
-        }
-
-        $relativePath = ltrim($photoUrl, '/');
-        $fullPath = dirname($this->personPhotoUploadDir) . '/' . $relativePath;
-
-        if (!is_file($fullPath) || !function_exists('getimagesize')) {
-            return;
-        }
-
-        $imageInfo = @getimagesize($fullPath);
-        if ($imageInfo === false) {
-            return;
-        }
-
-        [$width, $height, $type] = $imageInfo;
-        if ($width < 1 || $height < 1) {
-            return;
-        }
-
-        $source = match ($type) {
-            IMAGETYPE_JPEG => @imagecreatefromjpeg($fullPath),
-            IMAGETYPE_PNG => @imagecreatefrompng($fullPath),
-            IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($fullPath) : false,
-            default => false,
-        };
-
-        if ($source === false) {
-            return;
-        }
-
-        $cropSize = min($width, $height);
-        $srcX = (int) floor(($width - $cropSize) / 2);
-        $srcY = (int) floor(($height - $cropSize) / 2);
-
-        $targetSize = min(512, $cropSize);
-        $target = imagecreatetruecolor($targetSize, $targetSize);
-
-        imagealphablending($target, false);
-        imagesavealpha($target, true);
-
-        imagecopyresampled(
-            $target,
-            $source,
-            0,
-            0,
-            $srcX,
-            $srcY,
-            $targetSize,
-            $targetSize,
-            $cropSize,
-            $cropSize,
-        );
-
-        if ($type === IMAGETYPE_PNG) {
-            imagepng($target, $fullPath, 7);
-        } elseif ($type === IMAGETYPE_WEBP && function_exists('imagewebp')) {
-            imagewebp($target, $fullPath, 82);
-        } else {
-            imagejpeg($target, $fullPath, 82);
-        }
-
-        imagedestroy($source);
-        imagedestroy($target);
+        $player->setPhotoUrl($this->imageUploadOptimizer->optimizePublicUploadPath($player->getPhotoUrl()));
+        $player->setFeaturePhotoUrl($this->imageUploadOptimizer->optimizePublicUploadPath($player->getFeaturePhotoUrl()));
     }
 }
