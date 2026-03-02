@@ -58,6 +58,7 @@ class PlayerRepository extends ServiceEntityRepository
         $players = $this->createAlgeriaSeniorPlayersQueryBuilder()
             ->select(
                 'DISTINCT p.id AS id',
+                'person.id AS personId',
                 'person.fullName AS fullName',
                 'person.photoUrl AS photoUrl',
                 'person.featurePhotoUrl AS featurePhotoUrl',
@@ -94,7 +95,9 @@ class PlayerRepository extends ServiceEntityRepository
         }
 
         $playerId = (int) $matchedPlayer['id'];
+        $personId = (int) $matchedPlayer['personId'];
         $appearances = $this->fetchPlayerAppearances($playerId);
+        $galleryPhotos = $this->fetchPlayerGalleryPhotos($personId);
         $nationalStats = $this->fetchNationalStats($playerId);
         $lineupStats = $this->fetchLineupStats($playerId);
         $disciplineStats = $this->fetchDisciplineStats($playerId);
@@ -106,6 +109,7 @@ class PlayerRepository extends ServiceEntityRepository
             'fullName' => $matchedPlayer['fullName'],
             'photoUrl' => $matchedPlayer['photoUrl'],
             'featurePhotoUrl' => $matchedPlayer['featurePhotoUrl'],
+            'galleryPhotos' => $galleryPhotos,
             'profile' => [
                 'birthDate' => $this->dateFormatter->short($matchedPlayer['birthDate']),
                 'birthCity' => $matchedPlayer['birthCityName'],
@@ -127,6 +131,24 @@ class PlayerRepository extends ServiceEntityRepository
             ],
             'appearances' => $appearances,
         ];
+    }
+
+    /** @return array<int, array{id:int,imageUrl:string,caption:?string,sortOrder:int}> */
+    private function fetchPlayerGalleryPhotos(int $personId): array
+    {
+        return $this->getEntityManager()->getConnection()->fetchAllAssociative(
+            <<<'SQL'
+                SELECT
+                    pp.id,
+                    pp.image_url AS imageUrl,
+                    pp.caption,
+                    pp.sort_order AS sortOrder
+                FROM person_photo pp
+                WHERE pp.person_id = :personId
+                ORDER BY pp.sort_order ASC, pp.id ASC
+            SQL,
+            ['personId' => $personId]
+        );
     }
 
     private function createAlgeriaSeniorPlayersQueryBuilder()

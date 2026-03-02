@@ -127,6 +127,32 @@
         }
       </section>
 
+      @if (hasGalleryPhotos()) {
+        <section class="card-like section-block photo-gallery-section">
+          <div class="gallery-heading">
+            <h2>Galerie photos</h2>
+            <p>{{ profile()!.galleryPhotos.length }} photo(s) du joueur</p>
+          </div>
+
+          <div class="player-gallery-grid">
+            @for (photo of profile()!.galleryPhotos; track photo.id) {
+              <a
+                class="gallery-item"
+                [href]="photo.imageUrl"
+                [attr.data-gallery]="'player-' + profile()!.id"
+                [attr.data-glightbox]="'title: ' + (photo.caption || profile()!.fullName)"
+                data-player-gallery
+              >
+                <img [src]="photo.imageUrl" [alt]="photo.caption || ('Photo de ' + profile()!.fullName)" loading="lazy" />
+                @if (photo.caption) {
+                  <span>{{ photo.caption }}</span>
+                }
+              </a>
+            }
+          </div>
+        </section>
+      }
+
       <section class="card-like section-block">
         <h2>Rencontres disputées</h2>
         @if (!profile()!.appearances.length) {

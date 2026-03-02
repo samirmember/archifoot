@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -40,6 +42,16 @@ class Person
 
     #[ORM\Column(name: 'feature_photo_url', length: 150, nullable: true)]
     private ?string $featurePhotoUrl = null;
+
+    /** @var Collection<int, PersonPhoto> */
+    #[ORM\OneToMany(mappedBy: 'person', targetEntity: PersonPhoto::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['sortOrder' => 'ASC', 'id' => 'ASC'])]
+    private Collection $photos;
+
+    public function __construct()
+    {
+        $this->photos = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -138,6 +150,31 @@ class Person
     public function setFeaturePhotoUrl(?string $featurePhotoUrl): static
     {
         $this->featurePhotoUrl = $featurePhotoUrl;
+
+        return $this;
+    }
+
+    /** @return Collection<int, PersonPhoto> */
+    public function getPhotos(): Collection
+    {
+        return $this->photos;
+    }
+
+    public function addPhoto(PersonPhoto $photo): static
+    {
+        if (!$this->photos->contains($photo)) {
+            $this->photos->add($photo);
+            $photo->setPerson($this);
+        }
+
+        return $this;
+    }
+
+    public function removePhoto(PersonPhoto $photo): static
+    {
+        if ($this->photos->removeElement($photo) && $photo->getPerson() === $this) {
+            $photo->setPerson(null);
+        }
 
         return $this;
     }
