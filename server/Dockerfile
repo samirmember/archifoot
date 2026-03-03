@@ -1,11 +1,7 @@
-############################################
-# Builder: PHP 8.4 + extensions + Composer #
-############################################
 FROM php:8.4-cli AS builder
-
 WORKDIR /app
 
-# Dépendances système + extensions PHP nécessaires (dont gd)
+# Dépendances + extensions (gd, intl, zip, pdo_mysql)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         git unzip \
@@ -21,21 +17,25 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Installer Composer
+# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Installer les dépendances PHP (maintenant gd est dispo => OK)
+# 1) Installer vendor SANS scripts (bin/console pas encore copié)
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-############################
-# Runtime: PHP 8.4         #
-############################
+# 2) Copier le code
+COPY . /app
+
+# (Optionnel) ré-optimiser l’autoloader après copie
+RUN composer dump-autoload -o --no-interaction
+
+
 FROM php:8.4-cli
-
 WORKDIR /app
 
-# Même set d'extensions en runtime (sinon l'app plantera à l'exécution)
+# Extensions runtime (mêmes qu’en builder)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libicu-dev \
@@ -49,7 +49,6 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Code + vendor
 COPY . /app
 COPY --from=builder /app/vendor /app/vendor
 
