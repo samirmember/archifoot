@@ -83,7 +83,7 @@ export class SeniorNationalTeamPlayerProfileComponent {
     queueMicrotask(() => {
       this.lightbox?.destroy();
       this.lightbox = GLightbox({
-        selector: '[data-player-gallery]',
+        selector: '[data-player-media]',
       });
     });
   }
