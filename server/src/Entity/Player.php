@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use App\Repository\PlayerRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -174,6 +176,43 @@ class Player
     {
         $this->ensurePersonExists();
         $this->person?->setPhotoUrl($photoUrl);
+
+        return $this;
+    }
+
+    public function getFeaturePhotoUrl(): ?string
+    {
+        return $this->person?->getFeaturePhotoUrl();
+    }
+
+    public function setFeaturePhotoUrl(?string $featurePhotoUrl): static
+    {
+        $this->ensurePersonExists();
+        $this->person?->setFeaturePhotoUrl($featurePhotoUrl);
+
+        return $this;
+    }
+
+    /** @return Collection<int, PersonPhoto> */
+    public function getPersonPhotos(): Collection
+    {
+        return $this->person?->getPhotos() ?? new ArrayCollection();
+    }
+
+    /** @param Collection<int, PersonPhoto>|array<int, PersonPhoto> $personPhotos */
+    public function setPersonPhotos(Collection|array $personPhotos): static
+    {
+        $this->ensurePersonExists();
+
+        foreach ($this->person?->getPhotos()->toArray() ?? [] as $existingPhoto) {
+            $this->person?->removePhoto($existingPhoto);
+        }
+
+        foreach ($personPhotos as $photo) {
+            if ($photo instanceof PersonPhoto) {
+                $this->person?->addPhoto($photo);
+            }
+        }
 
         return $this;
     }

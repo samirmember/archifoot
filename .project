@@ -1,12 +1,15 @@
 # Composer
 docker compose exec -ti server composer require phpoffice/phpspreadsheet
 docker compose exec -ti server php -d memory_limit=-1 bin/console app:import:en:matches-scoresheets var/import/en_matches.xlsx "Matches de l'EN "
-docker compose exec -ti server php -d memory_limit=-1 bin/console app:import:en:matches-scoresheets en_matches_selhani.xlsx "Matches de l'EN "
+docker compose exec -ti server php -d memory_limit=-1 bin/console app:import:en:matches-scoresheets en_matches_selhani_v2.xlsx "Matches de l'EN "
 docker compose exec -ti server php -d memory_limit=-1 bin/console app:import:en:matches-scoresheets en_matches_one_line.xlsx "Matches de l'EN "
 docker compose exec -ti server php bin/console app:fixture:update-outcomes-algeria
 docker compose exec -ti server php bin/console app:fixture:list-score-goal-mismatches
 
 docker compose exec -ti server bin/console cache:clear
+
+cd server && docker compose exec -ti server php bin/console debug:router admin --env=dev
+
 
 docker compose exec -ti server php bin/console make:user
 docker compose exec -ti server bin/console make:migration

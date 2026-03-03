@@ -15,6 +15,13 @@ export interface SeniorPlayerDetail {
   slug: string;
   fullName: string;
   photoUrl: string | null;
+  featurePhotoUrl: string | null;
+  galleryPhotos: Array<{
+    id: number;
+    imageUrl: string;
+    caption: string | null;
+    sortOrder: number;
+  }>;
   profile: {
     birthDate: string | null;
     birthCity: string | null;
@@ -166,6 +173,11 @@ export class PlayerService {
         map((profile) => ({
           ...profile,
           photoUrl: this.toPlayerPhotoUrl(profile.photoUrl),
+          featurePhotoUrl: this.toPlayerPhotoUrl(profile.featurePhotoUrl, 'feature'),
+          galleryPhotos: (profile.galleryPhotos ?? []).map((photo) => ({
+            ...photo,
+            imageUrl: this.toPlayerPhotoUrl(photo.imageUrl, 'gallery') ?? photo.imageUrl,
+          })),
           stats: {
             ...profile.stats,
             duelsWon: profile.stats.duelsWon ?? this.extractDuelsWon(profile.futureDataPlaceholders),
@@ -191,7 +203,7 @@ export class PlayerService {
     return Number.isFinite(parsedValue) ? parsedValue : null;
   }
 
-  private toPlayerPhotoUrl(photoUrl: string | null): string | null {
+  private toPlayerPhotoUrl(photoUrl: string | null, subfolder: string = ''): string | null {
     if (!photoUrl) {
       return null;
     }
@@ -212,7 +224,7 @@ export class PlayerService {
       .map((segment) => encodeURIComponent(segment))
       .join('/');
 
-    return `${this.apiOrigin}/api/person-photo/players/${encodedPath}`;
+    return `${this.apiOrigin}/api/person-photo/players/${subfolder ? subfolder + '/' : ''}${encodedPath}`;
   }
 
   public toSlug(value: string): string {

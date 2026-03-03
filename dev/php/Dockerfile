@@ -28,3 +28,10 @@ RUN { \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
+
+# Upload limits
+RUN { \
+  echo "upload_max_filesize=5M"; \
+  echo "post_max_size=5M"; \
+  echo "max_file_uploads=5"; \
+} > /usr/local/etc/php/conf.d/99-uploads.ini
