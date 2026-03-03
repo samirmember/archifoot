@@ -13,6 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 // use App\Entity\City;
 // use App\Entity\Club;
 use App\Entity\Coach;
+use App\Entity\PersonPhoto;
 // use App\Entity\Competition;
 // use App\Entity\Country;
 // use App\Entity\Division;
@@ -93,6 +94,7 @@ class AdminDashboardController extends AbstractDashboardController
     //     yield MenuItem::linkToCrud('Personnes', 'fas fa-user', Person::class)->setController(PersonCrudController::class);
     //     yield MenuItem::linkToCrud('Historique clubs', 'fas fa-history', PersonClubHistory::class)->setController(PersonClubHistoryCrudController::class);
         yield MenuItem::linkToCrud('Joueurs', 'fas fa-running', Player::class)->setController(PlayerCrudController::class);
+        yield MenuItem::linkToCrud('Photos joueur', 'fas fa-images', PersonPhoto::class)->setController(PersonPhotoCrudController::class);
         yield MenuItem::linkToCrud('Coachs', 'fas fa-chalkboard-teacher', Coach::class);
     //     yield MenuItem::linkToCrud('Stats sélections', 'fas fa-chart-line', PlayerNationalStats::class)->setController(PlayerNationalStatsCrudController::class);
         yield MenuItem::linkToCrud('Postes', 'fas fa-map-pin', Position::class)->setController(PositionCrudController::class);

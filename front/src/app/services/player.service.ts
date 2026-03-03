@@ -16,6 +16,12 @@ export interface SeniorPlayerDetail {
   fullName: string;
   photoUrl: string | null;
   featurePhotoUrl: string | null;
+  galleryPhotos: Array<{
+    id: number;
+    imageUrl: string;
+    caption: string | null;
+    sortOrder: number;
+  }>;
   profile: {
     birthDate: string | null;
     birthCity: string | null;
@@ -168,6 +174,10 @@ export class PlayerService {
           ...profile,
           photoUrl: this.toPlayerPhotoUrl(profile.photoUrl),
           featurePhotoUrl: this.toPlayerPhotoUrl(profile.featurePhotoUrl, 'feature'),
+          galleryPhotos: (profile.galleryPhotos ?? []).map((photo) => ({
+            ...photo,
+            imageUrl: this.toPlayerPhotoUrl(photo.imageUrl, 'gallery') ?? photo.imageUrl,
+          })),
           stats: {
             ...profile.stats,
             duelsWon: profile.stats.duelsWon ?? this.extractDuelsWon(profile.futureDataPlaceholders),

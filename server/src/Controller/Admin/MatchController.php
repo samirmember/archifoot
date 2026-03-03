@@ -22,9 +22,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-class FixtureFullCreateController extends AbstractController
+class MatchController extends AbstractController
 {
-    #[Route('/admin/custom/fixture/new-complete', name: 'admin_fixture_full_new')]
+    #[Route('/admin/match/new-complete', name: 'admin_fixture_full_new')]
     public function __invoke(Request $request, EntityManagerInterface $entityManager): Response
     {
         $data = new FixtureCompleteData();
