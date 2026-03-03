@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ResultComponent } from 'src/app/components/result/result.component';
@@ -17,7 +17,7 @@ import {
   templateUrl: './senior-national-team-player-profile.component.html',
   styleUrl: './senior-national-team-player-profile.component.scss',
 })
-export class SeniorNationalTeamPlayerProfileComponent {
+export class SeniorNationalTeamPlayerProfileComponent implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly playerService = inject(PlayerService);
   private lightbox: any;
@@ -54,11 +54,7 @@ export class SeniorNationalTeamPlayerProfileComponent {
     });
   }
 
-  ngOnDestroy(): void {
-    this.lightbox?.destroy();
-  }
-
-  getPlayerInitials(fullName: string): string {
+ getPlayerInitials(fullName: string): string {
     return fullName
       .split(' ')
       .filter(Boolean)
@@ -80,11 +76,14 @@ export class SeniorNationalTeamPlayerProfileComponent {
   }
 
   private initLightbox(): void {
-    queueMicrotask(() => {
-      this.lightbox?.destroy();
+    setTimeout(() => {
       this.lightbox = GLightbox({
-        selector: '[data-player-media]',
+        selector: '[data-glightbox]',
       });
-    });
+    }, 100);
+  }
+
+  ngOnDestroy(): void {
+    this.lightbox?.destroy();
   }
 }

@@ -104,15 +104,23 @@
 
         @if (profile()!.featurePhotoUrl) {
           <article class="card-like feature-photo-card">
-            <a
-              class="feature-photo-link"
-              [href]="profile()!.featurePhotoUrl!"
-              [attr.data-gallery]="'player-' + profile()!.id"
-              [attr.data-glightbox]="'title: Photo de couverture - ' + profile()!.fullName"
-              data-player-media
-            >
-              <img [src]="profile()!.featurePhotoUrl!" [alt]="'Photo de couverture ' + profile()!.fullName" loading="lazy" />
-            </a>
+            <figure class="hover-scale rounded cursor-dark">
+              <a
+                [href]="profile()!.featurePhotoUrl!"
+                data-glightbox
+                data-gallery="cover-photo"
+                class="feature-photo-link"
+                [attr.data-gallery]="'player-' + profile()!.id"
+                [attr.data-glightbox]="'title: Photo de couverture - ' + profile()!.fullName"
+              >
+                <img
+                  [src]="profile()!.featurePhotoUrl!"
+                  [srcset]="profile()!.featurePhotoUrl! + ' 2x'"
+                  [alt]="'Photo de couverture ' + profile()!.fullName"
+                  loading="lazy"
+                />
+              </a>
+            </figure>
           </article>
         } @else {
           <article class="card-like stat-card">
@@ -144,18 +152,26 @@
 
           <div class="player-gallery-grid">
             @for (photo of profile()!.galleryPhotos; track photo.id) {
+            <figure class="hover-scale rounded cursor-dark">
               <a
+                data-glightbox
+                data-gallery="cover-photo"
                 class="gallery-item"
                 [href]="photo.imageUrl"
                 [attr.data-gallery]="'player-' + profile()!.id"
                 [attr.data-glightbox]="'title: ' + (photo.caption || profile()!.fullName)"
-                data-player-media
               >
-                <img [src]="photo.imageUrl" [alt]="photo.caption || ('Photo de ' + profile()!.fullName)" loading="lazy" />
+                <img
+                  [src]="photo.imageUrl"
+                  [srcset]="photo.imageUrl + ' 2x'"
+                  [alt]="photo.caption || ('Photo de ' + profile()!.fullName)"
+                  loading="lazy"
+                />
                 @if (photo.caption) {
-                  <span>{{ photo.caption }}</span>
+                  <span class="photo-legend">{{ photo.caption }}</span>
                 }
               </a>
+            </figure>
             }
           </div>
         </section>
