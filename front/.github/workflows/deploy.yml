@@ -29,6 +29,10 @@ jobs:
           npx ng build --configuration production \
           --base-href "https://samirmember.github.io/archifoot/"
 
+      - name: Add SPA fallback
+        run: |
+          cp dist/front/browser/index.html dist/front/browser/404.html
+
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
