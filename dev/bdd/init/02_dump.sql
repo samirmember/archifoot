@@ -1395,7 +1395,7 @@ CREATE TABLE `user` (
   `password` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNIQ_IDENTIFIER_EMAIL` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1503,7 +1503,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
 /*!50001 SET character_set_client      = utf8mb4 */;
 /*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_nt_alg_coaches` AS select distinct `p`.`id` AS `person_id`,`p`.`full_name` AS `full_name`,`r`.`code` AS `role_code` from (((`person_assignment` `pa` join `v_team_nt_alg` `alg` on(`alg`.`team_id` = `pa`.`team_id`)) join `role` `r` on(`r`.`id` = `pa`.`role_id`)) join `person` `p` on(`p`.`id` = `pa`.`person_id`)) where `r`.`code` in ('HEAD_COACH','ASSISTANT_COACH') */;
@@ -1521,7 +1521,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
 /*!50001 SET character_set_client      = utf8mb4 */;
 /*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_nt_alg_players` AS select distinct `p`.`id` AS `person_id`,`p`.`full_name` AS `full_name` from (((`person_assignment` `pa` join `v_team_nt_alg` `alg` on(`alg`.`team_id` = `pa`.`team_id`)) join `role` `r` on(`r`.`id` = `pa`.`role_id`)) join `person` `p` on(`p`.`id` = `pa`.`person_id`)) where `r`.`code` = 'PLAYER' */;
@@ -1539,7 +1539,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
 /*!50001 SET character_set_client      = utf8mb4 */;
 /*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_player_current_club` AS select `pa`.`person_id` AS `player_id`,`pa`.`team_id` AS `team_id`,`t`.`display_name` AS `club_name`,`pa`.`from_date` AS `from_date` from ((`person_assignment` `pa` join `team` `t` on(`t`.`id` = `pa`.`team_id`)) join `role` `r` on(`r`.`id` = `pa`.`role_id`)) where `r`.`code` = 'PLAYER' and `t`.`team_type` = 'CLUB' and (`pa`.`from_date` is null or `pa`.`from_date` <= curdate()) and (`pa`.`to_date` is null or `pa`.`to_date` >= curdate()) */;
@@ -1557,7 +1557,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
 /*!50001 SET character_set_client      = utf8mb4 */;
 /*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_player_current_national` AS select `pa`.`person_id` AS `player_id`,`pa`.`team_id` AS `team_id`,`t`.`display_name` AS `national_team_name`,`pa`.`from_date` AS `from_date` from ((`person_assignment` `pa` join `team` `t` on(`t`.`id` = `pa`.`team_id`)) join `role` `r` on(`r`.`id` = `pa`.`role_id`)) where `r`.`code` = 'PLAYER' and `t`.`team_type` = 'NATIONAL' and (`pa`.`from_date` is null or `pa`.`from_date` <= curdate()) and (`pa`.`to_date` is null or `pa`.`to_date` >= curdate()) */;
@@ -1575,7 +1575,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
 /*!50001 SET character_set_client      = utf8mb4 */;
 /*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_player_current_team` AS select `pa`.`person_id` AS `player_id`,`t`.`team_type` AS `team_type`,`pa`.`team_id` AS `team_id`,`t`.`display_name` AS `team_name`,`pa`.`from_date` AS `from_date` from ((`person_assignment` `pa` join `team` `t` on(`t`.`id` = `pa`.`team_id`)) join `role` `r` on(`r`.`id` = `pa`.`role_id`)) where `r`.`code` = 'PLAYER' and (`pa`.`from_date` is null or `pa`.`from_date` <= curdate()) and (`pa`.`to_date` is null or `pa`.`to_date` >= curdate()) */;
@@ -1593,7 +1593,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
 /*!50001 SET character_set_client      = utf8mb4 */;
 /*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_team_nt_alg` AS select `t`.`id` AS `team_id` from (`team` `t` join `national_team` `nt` on(`nt`.`id` = `t`.`national_team_id`)) where `t`.`team_type` = 'NATIONAL' and `nt`.`country_id` = 1 */;

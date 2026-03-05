@@ -23,3 +23,12 @@ docker compose build --no-cache server
 
 #Dump the db
 mysqldump -h 127.0.0.1 -P 3307 -u archifoot -parchifoot archifoot > bdd/init/02_dump.sql
+
+
+# Upload db:
+Replace "utf8mb4_uca1400_ai_ci" by "utf8mb4_unicode_ci" dans 02_dump.sql
+mysql -h yamanote.proxy.rlwy.net -u root -pmrqivmRplNBMFTGwXlfUVvtaIiroEJqk --port 38465 --protocol=TCP railway < bdd/empty-db.sql
+mysql -h yamanote.proxy.rlwy.net -u root -pmrqivmRplNBMFTGwXlfUVvtaIiroEJqk --port 38465 --protocol=TCP railway < bdd/init/02_dump.sql
+
+
+
