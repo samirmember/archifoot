@@ -1,4 +1,0 @@
-framework:
-    default_locale: fr
-    profiler:
-        only_exceptions: false
