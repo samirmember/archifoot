@@ -52,7 +52,11 @@ RUN apt-get update \
 COPY . /app
 COPY --from=builder /app/vendor /app/vendor
 
+# Installer les assets (API Platform, etc.) dans /public
+RUN php bin/console assets:install --no-interaction || true
+RUN php bin/console cache:clear --env=prod --no-debug || true
+
 ENV APP_ENV=prod
 ENV PORT=8080
 
-CMD ["sh", "-c", "php -d variables_order=EGPCS -S 0.0.0.0:${PORT} -t public"]
+CMD ["sh", "-c", "php bin/console doctrine:migrations:migrate --no-interaction || true; php -d variables_order=EGPCS -S 0.0.0.0:${PORT} -t public"]
