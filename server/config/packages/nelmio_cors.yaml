@@ -1,16 +1,25 @@
 nelmio_cors:
-    defaults:
-        origin_regex: true
-        allow_origin: ["%env(CORS_ALLOW_ORIGIN)%"]
-        allow_methods: ["GET", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]
-        allow_headers: ["Content-Type", "Authorization", "Accept", "X-Api-Key"]
-        expose_headers: ["Link"]
-        max_age: 3600
-    paths:
-        '^/api/':
-        allow_origin:
-            - 'https://samirmember.github.io'
-            - 'http://localhost:4200'
-        allow_headers: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-KEY']
-        allow_methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
-        max_age: 3600
+  defaults:
+    origin_regex: true
+    allow_origin: ["%env(CORS_ALLOW_ORIGIN)%"]
+    allow_methods: ["GET", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]
+    allow_headers: ["Content-Type", "Authorization", "Accept", "X-Api-Key", "X-Requested-With"]
+    expose_headers: ["Link"]
+    max_age: 3600
+
+  paths:
+    '^/api/':
+      origin_regex: true
+      allow_origin:
+        - '%env(CORS_ALLOW_ORIGIN)%'
+        - 'https://samirmember.github.io'
+        - 'http://localhost:4200'
+      allow_headers:
+        - 'Content-Type'
+        - 'Authorization'
+        - 'Accept'
+        - 'X-Api-Key'
+        - 'X-Requested-With'
+      allow_methods: ["GET", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]
+      expose_headers: ["Link"]
+      max_age: 3600
