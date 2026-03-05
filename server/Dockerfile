@@ -59,4 +59,5 @@ RUN php bin/console cache:clear --env=prod --no-debug || true
 ENV APP_ENV=prod
 ENV PORT=8080
 
+
 CMD ["sh", "-c", "php bin/console doctrine:migrations:migrate --no-interaction || true; php -d variables_order=EGPCS -S 0.0.0.0:${PORT} -t public"]
