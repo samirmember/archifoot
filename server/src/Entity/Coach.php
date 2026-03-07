@@ -30,6 +30,10 @@ class Coach
     private ?string $role = null;
 
 
+    #[ORM\Column(name: 'external_number', length: 50, nullable: true)]
+    private ?string $externalNumber = null;
+
+
     public function getId(): ?int
     {
         return $this->id;
@@ -55,6 +59,19 @@ class Coach
     public function setRole(?string $role): static
     {
         $this->role = $role;
+
+        return $this;
+    }
+
+
+    public function getExternalNumber(): ?string
+    {
+        return $this->externalNumber;
+    }
+
+    public function setExternalNumber(?string $externalNumber): static
+    {
+        $this->externalNumber = $externalNumber;
 
         return $this;
     }

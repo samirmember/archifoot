@@ -43,6 +43,9 @@ class Person
     #[ORM\Column(name: 'feature_photo_url', length: 150, nullable: true)]
     private ?string $featurePhotoUrl = null;
 
+    #[ORM\Column(name: 'external_number', length: 50, nullable: true)]
+    private ?string $externalNumber = null;
+
     /** @var Collection<int, PersonPhoto> */
     #[ORM\OneToMany(mappedBy: 'person', targetEntity: PersonPhoto::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[ORM\OrderBy(['sortOrder' => 'ASC', 'id' => 'ASC'])]
@@ -150,6 +153,18 @@ class Person
     public function setFeaturePhotoUrl(?string $featurePhotoUrl): static
     {
         $this->featurePhotoUrl = $featurePhotoUrl;
+
+        return $this;
+    }
+
+    public function getExternalNumber(): ?string
+    {
+        return $this->externalNumber;
+    }
+
+    public function setExternalNumber(?string $externalNumber): static
+    {
+        $this->externalNumber = $externalNumber;
 
         return $this;
     }

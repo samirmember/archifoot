@@ -8,4 +8,6 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
-/public/uploads/
+/public/uploads/**/*
+!/public/uploads/**/
+!/public/uploads/**/*.webp

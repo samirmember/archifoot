@@ -26,6 +26,10 @@ class Player
     #[ORM\JoinColumn(name: 'primary_position_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Position $primaryPosition = null;
 
+
+    #[ORM\Column(name: 'external_number', length: 50, nullable: true)]
+    private ?string $externalNumber = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -51,6 +55,19 @@ class Player
     public function setPrimaryPosition(?Position $primaryPosition): static
     {
         $this->primaryPosition = $primaryPosition;
+
+        return $this;
+    }
+
+
+    public function getExternalNumber(): ?string
+    {
+        return $this->externalNumber;
+    }
+
+    public function setExternalNumber(?string $externalNumber): static
+    {
+        $this->externalNumber = $externalNumber;
 
         return $this;
     }
