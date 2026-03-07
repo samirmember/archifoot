@@ -37,3 +37,5 @@ cd ~/archifoot/dev/front
 npm ci
 npx ng build --configuration production --base-href "https://samirmember.github.io/archifoot/"
 npx angular-cli-ghpages --dir=dist/front/browser
+
+==> npm run deploy:gh
