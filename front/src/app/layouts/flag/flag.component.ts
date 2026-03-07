@@ -5,12 +5,17 @@ import { Component, computed, input } from '@angular/core';
   imports: [],
   templateUrl: './flag.component.html',
   styleUrl: './flag.component.scss',
+  host: {
+    '[class.flag-sm]': "size() === 'small'",
+    '[class.flag-nm]': "size() === 'normal'",
+  },
 })
 export class FlagComponent {
   countryName = input.required<string>();
   iso2 = input.required<string>();
   position = input.required<'A' | 'B'>();
   category = input.required<string>();
+  size = input<'normal' | 'small'>('normal');
   readonly flagUrls = computed<string[]>(() => {
     const iso2 = this.iso2().toLowerCase() ?? '';
     if (iso2 === 'su') {

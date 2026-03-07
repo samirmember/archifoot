@@ -51,37 +51,7 @@
   }
 }
 
-// ============================
-// Result Cards
-// ============================
-.result-card {
-  border: none;
-  transition: all 0.3s ease;
 
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12) !important;
-  }
-
-  .match-score {
-    padding-top: 0.5rem;
-  }
-
-  .team {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .team-flag {
-    font-size: 2rem;
-    line-height: 1;
-  }
-
-  .score-box {
-    padding: 0 1rem;
-    flex-shrink: 0;
-  }
-}
 
 // ============================
 // Explore Cards

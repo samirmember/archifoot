@@ -9,7 +9,7 @@
 >
   <!-- @Todo: rajouter la bulle (notes) -->
   <div class="card-body p-5">
-    <span class="row justify-content-between">
+    <div class="row justify-content-between align-items-center">
       <div class="w-100 text-center date">
         {{ result().date | date: 'd MMM y' }}
       </div>
@@ -18,7 +18,8 @@
         [countryName]="result().countryA"
         [iso2]="iso2A()"
         [category]="result().categoryA"
-        [classList]="`col d-flex bd-highlight flex-row-reverse`"
+        [class]="'col d-flex bd-highlight flex-row-reverse align-items-center justify-content-start'"
+        [size]="size()"
       />
       <div class="col align-items-center text-center">
         <span class="badge badge-lg bg-primary rounded-pill result-score"
@@ -30,7 +31,8 @@
         [countryName]="result().countryB"
         [iso2]="iso2B()"
         [category]="result().categoryB"
-        [classList]="`col d-flex bd-highlight`"
+        [class]="'col d-flex bd-highlight align-items-center justify-content-start'"
+        [size]="size()"
       />
       <div class="mt-2 text-center small text-muted">
         <div class="w-100">{{ result().competitionLabel }}</div>
@@ -60,7 +62,7 @@
           </ng-template>
         }
       </div>
-    </span>
+    </div>
   </div>
   <!-- /.card-body -->
 </div>

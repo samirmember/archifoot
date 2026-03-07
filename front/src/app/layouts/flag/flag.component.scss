@@ -1,11 +1,45 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .country-name {
-  margin: 6px 20px;
+  margin: 0;
+  line-height: 1.2;
+  font-size: 1rem;
+  font-weight: 500;
+
+  &.mt--5 {
+    margin-top: -5px;
+  }
 }
-.country-flag img {
-  box-shadow:
-    0 0 0 0.05rem rgba(8, 60, 130, 0.06),
-    0rem 0rem 1.25rem rgba(30, 34, 40, 0.04);
+
+.country-flag {
+  display: flex;
+  img {
+    width: 60px;
+    height: 40px;
+    object-fit: cover;
+    box-shadow:
+      0 0 0 0.05rem rgba(8, 60, 130, 0.06),
+      0rem 0rem 1.25rem rgba(30, 34, 40, 0.04);
+  }
 }
-.mt--5 {
-  margin-top: -5px;
+
+// Small version
+:host.flag-sm {
+  gap: 8px;
+
+  .country-name {
+    font-size: 0.9rem;
+    &.mt--5 {
+      margin-top: -2px;
+    }
+  }
+
+  .country-flag img {
+    width: 40px;
+    height: 26px;
+  }
 }

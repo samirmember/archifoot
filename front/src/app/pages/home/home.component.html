@@ -38,80 +38,11 @@
     </div>
 
     <div class="row gy-4">
-      <!-- Match result card 1 -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card shadow-lg result-card">
-          <div class="card-body p-5">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span class="badge bg-primary rounded-pill px-3 py-1">Qualifications CAN</span>
-              <span class="text-muted fs-sm">15 Nov 2025</span>
-            </div>
-            <div class="d-flex justify-content-between align-items-center match-score">
-              <div class="team text-center">
-                <div class="team-flag mb-2">🇩🇿</div>
-                <span class="fw-bold">Algérie</span>
-              </div>
-              <div class="score-box">
-                <span class="display-5 fw-bold">3 - 1</span>
-              </div>
-              <div class="team text-center">
-                <div class="team-flag mb-2">🇱🇷</div>
-                <span class="fw-bold">Libéria</span>
-              </div>
-            </div>
-          </div>
+      @for (result of latestResults(); track result.fixtureId ?? $index) {
+        <div class="col-md-6 col-lg-4">
+          <app-result [result]="result" size="small" />
         </div>
-      </div>
-
-      <!-- Match result card 2 -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card shadow-lg result-card">
-          <div class="card-body p-5">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span class="badge bg-primary rounded-pill px-3 py-1">Qualifications CAN</span>
-              <span class="text-muted fs-sm">11 Nov 2025</span>
-            </div>
-            <div class="d-flex justify-content-between align-items-center match-score">
-              <div class="team text-center">
-                <div class="team-flag mb-2">🇹🇬</div>
-                <span class="fw-bold">Togo</span>
-              </div>
-              <div class="score-box">
-                <span class="display-5 fw-bold">0 - 1</span>
-              </div>
-              <div class="team text-center">
-                <div class="team-flag mb-2">🇩🇿</div>
-                <span class="fw-bold">Algérie</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Match result card 3 -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card shadow-lg result-card">
-          <div class="card-body p-5">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span class="badge bg-primary rounded-pill px-3 py-1">Amical</span>
-              <span class="text-muted fs-sm">10 Oct 2025</span>
-            </div>
-            <div class="d-flex justify-content-between align-items-center match-score">
-              <div class="team text-center">
-                <div class="team-flag mb-2">🇩🇿</div>
-                <span class="fw-bold">Algérie</span>
-              </div>
-              <div class="score-box">
-                <span class="display-5 fw-bold">2 - 2</span>
-              </div>
-              <div class="team text-center">
-                <div class="team-flag mb-2">🇬🇳</div>
-                <span class="fw-bold">Guinée</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      }
     </div>
   </div>
 </section>

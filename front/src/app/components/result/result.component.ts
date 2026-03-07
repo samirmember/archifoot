@@ -10,9 +10,13 @@ import { TooltipModule } from 'primeng/tooltip';
   imports: [FlagComponent, DatePipe, TooltipModule, RouterLink],
   templateUrl: './result.component.html',
   styleUrl: './result.component.scss',
+  host: {
+    '[class.result-sm]': "size() === 'small'",
+  },
 })
 export class ResultComponent {
   result = input.required<MatchResult>();
+  size = input<'normal' | 'small'>('normal');
   readonly iso2A = computed(() => this.result().countryCodeA?.toLowerCase() ?? '');
   readonly iso2B = computed(() => this.result().countryCodeB?.toLowerCase() ?? '');
 }
