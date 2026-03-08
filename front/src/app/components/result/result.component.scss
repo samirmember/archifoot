@@ -1,13 +1,16 @@
 .result-container {
   position: relative;
   cursor: pointer;
+
   .date {
     font-size: 13px;
     margin-bottom: 10px;
   }
+
   .result-score {
     font-size: 20px;
   }
+
   .note-tooltip {
     position: absolute;
     top: 12px;
@@ -15,11 +18,19 @@
     background: transparent;
     cursor: pointer;
     font-size: 20px;
+
     .p-tooltip-arrow {
       border-left-color: #111827 !important; /* si position left */
     }
   }
 }
+
+:host.result-sm {
+  .result-score {
+    font-size: 14px !important;
+  }
+}
+
 .tooltip-container,
 .tooltip-container h3 {
   color: white;
