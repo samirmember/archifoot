@@ -9,7 +9,7 @@
         <img src="assets/img/logo.png" srcset="assets/img/logo@x2.png 2x" alt="" />
       </a>
     </div>
-    <div class="navbar-collapse offcanvas offcanvas-nav offcanvas-start">
+    <div class="navbar-collapse offcanvas offcanvas-nav offcanvas-start" [class.show]="isMobileMenuOpen" tabindex="-1" [attr.aria-hidden]="!isMobileMenuOpen" (click)="onOffcanvasClick($event)">
       <div class="offcanvas-header d-lg-none">
         <a routerLink="/"
           ><img src="assets/img/logo.png" srcset="assets/img/logo@x2.png 2x" alt=""
@@ -17,7 +17,7 @@
         <button
           type="button"
           class="btn-close btn-close-white"
-          data-bs-dismiss="offcanvas"
+          (click)="closeMobileMenu()"
           aria-label="Close"
         ></button>
       </div>
@@ -270,7 +270,7 @@
           <a routerLink="/contact" class="btn btn-sm btn-primary rounded-pill">Contact</a>
         </li>
         <li class="nav-item d-lg-none">
-          <button class="hamburger offcanvas-nav-btn"><span></span></button>
+          <button class="hamburger offcanvas-nav-btn" type="button" (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen" aria-label="Ouvrir le menu"><span></span></button>
         </li>
       </ul>
       <!-- /.navbar-nav -->
@@ -279,5 +279,8 @@
   </div>
   <!-- /.container -->
 </nav>
+@if (isMobileMenuOpen) {
+  <div class="offcanvas-backdrop fade show d-lg-none" (click)="closeMobileMenu()"></div>
+}
 <!-- /.navbar -->
 <!-- </header> -->
