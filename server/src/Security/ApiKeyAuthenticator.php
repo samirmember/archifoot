@@ -31,7 +31,9 @@ final class ApiKeyAuthenticator extends AbstractAuthenticator
 
     public function authenticate(Request $request): SelfValidatingPassport
     {
-        if ($this->appEnv === 'dev') {
+        $path = $request->getPathInfo();
+
+        if ($this->appEnv === 'dev' || str_starts_with($path, '/api/person-photo/')) {
             return new SelfValidatingPassport(
                 new UserBadge('api-client', static fn () => new ApiKeyUser())
             );
