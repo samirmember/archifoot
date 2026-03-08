@@ -18,20 +18,9 @@ final class Version20260210143000 extends AbstractMigration
     {
         $positions = [
             ['GK', 'Gardien de but'],
-            ['RB', 'Arrière droit'],
-            ['LB', 'Arrière gauche'],
-            ['CB', 'Défenseur central'],
-            ['RWB', 'Piston droit'],
-            ['LWB', 'Piston gauche'],
-            ['CDM', 'Milieu défensif'],
-            ['CM', 'Milieu central'],
-            ['CAM', 'Milieu offensif'],
-            ['RM', 'Milieu droit'],
-            ['LM', 'Milieu gauche'],
-            ['RW', 'Ailier droit'],
-            ['LW', 'Ailier gauche'],
-            ['CF', 'Attaquant de soutien'],
-            ['ST', 'Avant-centre'],
+            ['DEF', 'Défenseur'],
+            ['MID', 'Milieu de terrain'],
+            ['ATT', 'Attaquant'],
         ];
 
         foreach ($positions as [$code, $label]) {
@@ -46,7 +35,7 @@ final class Version20260210143000 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        $codes = ['GK', 'RB', 'LB', 'CB', 'RWB', 'LWB', 'CDM', 'CM', 'CAM', 'RM', 'LM', 'RW', 'LW', 'CF', 'ST'];
+        $codes = ['GK', 'DEF', 'MID', 'ATT'];
 
         foreach ($codes as $code) {
             $this->addSql('DELETE FROM position WHERE code = :code', ['code' => $code]);
