@@ -7,6 +7,7 @@ on:
     # Only rebuild the front when its sources change
     paths:
       - 'front/**'
+      - '.github/workflows/deploy-front.yml'
 
 permissions:
   contents: write
@@ -40,7 +41,11 @@ jobs:
       # the Angular CLI that subsequent flags belong to the build command.
       - name: Build Angular frontend
         run: |
-          npm run build -- --configuration production
+          npm run build -- --configuration production --base-href /archifoot/
+
+      # GitHub Pages serves 404.html for unknown paths; for SPAs we mirror index.html.
+      - name: Add SPA fallback page
+        run: cp dist/front/browser/index.html dist/front/browser/404.html
 
       # Deploy the contents of the build output directory to the `gh-pages`
       # branch.  The output path inside the `dist` folder is usually set in
@@ -51,6 +56,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # Path to the directory containing the compiled static files
-          publish_dir: ./front/dist
+          publish_dir: ./front/dist/front/browser
           # Publish to the `gh-pages` branch
           publish_branch: gh-pages
