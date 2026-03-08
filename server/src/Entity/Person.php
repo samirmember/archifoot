@@ -46,6 +46,9 @@ class Person
     #[ORM\Column(name: 'external_number', length: 50, nullable: true)]
     private ?string $externalNumber = null;
 
+    #[ORM\Column(name: 'death_date', type: 'date', nullable: true)]
+    private ?\DateTimeInterface $deathDate = null;
+
     /** @var Collection<int, PersonPhoto> */
     #[ORM\OneToMany(mappedBy: 'person', targetEntity: PersonPhoto::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[ORM\OrderBy(['sortOrder' => 'ASC', 'id' => 'ASC'])]
@@ -165,6 +168,18 @@ class Person
     public function setExternalNumber(?string $externalNumber): static
     {
         $this->externalNumber = $externalNumber;
+
+        return $this;
+    }
+
+    public function getDeathDate(): ?\DateTimeInterface
+    {
+        return $this->deathDate;
+    }
+
+    public function setDeathDate(?\DateTimeInterface $deathDate): static
+    {
+        $this->deathDate = $deathDate;
 
         return $this;
     }

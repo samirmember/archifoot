@@ -30,6 +30,16 @@ class Player
     #[ORM\Column(name: 'external_number', length: 50, nullable: true)]
     private ?string $externalNumber = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $selections = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $goals = null;
+
+    /** @var array<int, string>|null */
+    #[ORM\Column(name: 'main_clubs', type: 'json', nullable: true)]
+    private ?array $mainClubs = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -68,6 +78,44 @@ class Player
     public function setExternalNumber(?string $externalNumber): static
     {
         $this->externalNumber = $externalNumber;
+
+        return $this;
+    }
+
+    public function getSelections(): ?int
+    {
+        return $this->selections;
+    }
+
+    public function setSelections(?int $selections): static
+    {
+        $this->selections = $selections;
+
+        return $this;
+    }
+
+    public function getGoals(): ?int
+    {
+        return $this->goals;
+    }
+
+    public function setGoals(?int $goals): static
+    {
+        $this->goals = $goals;
+
+        return $this;
+    }
+
+    /** @return array<int, string>|null */
+    public function getMainClubs(): ?array
+    {
+        return $this->mainClubs;
+    }
+
+    /** @param array<int, string>|null $mainClubs */
+    public function setMainClubs(?array $mainClubs): static
+    {
+        $this->mainClubs = $mainClubs;
 
         return $this;
     }
