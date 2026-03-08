@@ -1,11 +1,4 @@
 <div class="staff-card">
-  <div class="avatar">
-    @if (photoUrl()) {
-      <img [src]="photoUrl()" [alt]="name()">
-    } @else {
-      <i class="uil uil-users-alt"></i>
-    }
-  </div>
   <div class="info">
     <span class="name">{{ name() }}</span>
     <span class="role">{{ role() }}</span>

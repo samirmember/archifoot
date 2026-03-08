@@ -117,7 +117,7 @@
                   @if (staff.name) {
                   <app-staff-card
                     [name]="staff.name"
-                    [role]="staff.role + ' · ' + staff.nation"
+                    [role]="staff.role"
                     [iso2]="staff.iso2"
                   />
                   }
@@ -131,7 +131,7 @@
                   @if (staff.name) {
                   <app-staff-card
                     [name]="staff.name"
-                    [role]="staff.role + ' · ' + staff.nation"
+                    [role]="staff.role"
                     [iso2]="staff.iso2"
                   />
                   }
@@ -168,14 +168,14 @@
             <ul>
               @for (player of lineupAlgeria().players; track player.name) {
                 <li [class.captain-row]="player.captain">
-                  <span class="role" [class.captain]="player.captain">{{ player.role }}</span>
+                  <span class="role" [class.captain]="player.captain"></span>
                   <strong>
                     {{ player.name }}
                     @if (player.captain) {
                       <span class="captain-mark"><i class="uil uil-crown"></i> CAP</span>
                     }
                   </strong>
-                  <span class="number">{{ player.number }}</span>
+                  <!-- <span class="number">{{ player.number }}</span> -->
                 </li>
               }
             </ul>
@@ -199,14 +199,14 @@
             <ul>
               @for (player of lineupOpponent().players; track player.name) {
                 <li [class.captain-row]="player.captain">
-                  <span class="role" [class.captain]="player.captain">{{ player.role }}</span>
+                  <span class="role" [class.captain]="player.captain"></span>
                   <strong>
                     {{ player.name }}
                     @if (player.captain) {
                       <span class="captain-mark"><i class="uil uil-crown"></i> CAP</span>
                     }
                   </strong>
-                  <span class="number">{{ player.number }}</span>
+                  <!-- <span class="number">{{ player.number }}</span> -->
                 </li>
               }
             </ul>

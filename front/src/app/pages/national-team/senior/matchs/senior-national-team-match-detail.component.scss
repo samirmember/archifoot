@@ -282,11 +282,11 @@
 
   li {
     display: grid;
-    grid-template-columns: 2.2rem 1fr auto;
+    grid-template-columns: 0.5rem 1fr auto;
     gap: 0.6rem;
     align-items: center;
     border-bottom: 1px solid #f0f3f9;
-    padding: 0.62rem 0;
+    padding: 0.5rem 0;
 
     &:last-child {
       border-bottom: 0;
@@ -307,7 +307,8 @@
     font-size: 0.75rem;
     font-weight: 700;
     text-align: center;
-    padding: 0.35rem 0.25rem;
+    padding: 0.15rem 0.25rem;
+    width: 10px;
 
     &.captain {
       color: #3f78e0;
