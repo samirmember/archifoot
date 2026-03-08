@@ -28,3 +28,14 @@
 .nav-link.active {
   opacity: 1;
 }
+
+@media (max-width: 991.98px) {
+  .offcanvas-nav {
+    z-index: 1029;
+    pointer-events: auto;
+  }
+
+  .offcanvas-backdrop {
+    z-index: 1019;
+  }
+}
