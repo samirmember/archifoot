@@ -16,13 +16,13 @@ final class Version20260308150000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE player ADD selections INT DEFAULT NULL, ADD goals INT DEFAULT NULL, ADD main_clubs JSON DEFAULT NULL');
+        $this->addSql('ALTER TABLE player ADD selections INT DEFAULT NULL, ADD goals INT DEFAULT NULL, ADD main_clubs JSON DEFAULT NULL, ADD career VARCHAR(100) DEFAULT NULL');
         $this->addSql('ALTER TABLE person ADD death_date DATE DEFAULT NULL');
     }
 
     public function down(Schema $schema): void
     {
         $this->addSql('ALTER TABLE person DROP death_date');
-        $this->addSql('ALTER TABLE player DROP selections, DROP goals, DROP main_clubs');
+        $this->addSql('ALTER TABLE player DROP selections, DROP goals, DROP main_clubs, DROP career');
     }
 }

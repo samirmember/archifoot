@@ -124,6 +124,8 @@ class ImportPlayerInfosUpdateCommand extends Command
                 $positionLabel = $this->toNullableString($this->getByHeader($headers, $row, ['poste']));
                 $deathDateRaw = $this->toNullableString($this->getByHeader($headers, $row, ['date du dece', 'date de dece', 'date de deces', 'date du décé']));
                 $mainClubsRaw = $this->toNullableString($this->getByHeader($headers, $row, ['principaux clubs']));
+                $careerRaw = $this->toNullableString($this->getByHeader($headers, $row, ['années']));
+                
 
                 $birthDate = $this->parseSpreadsheetDate($this->getByHeader($headers, $row, ['date de naissance']));
                 if ($birthDate === null && $this->toNullableString($this->getByHeader($headers, $row, ['date de naissance'])) !== null) {
@@ -136,6 +138,7 @@ class ImportPlayerInfosUpdateCommand extends Command
                 }
 
                 $mainClubs = $this->parseMainClubs($mainClubsRaw);
+                $career = $this->parseCareer($careerRaw);
                 $positionId = $this->resolvePositionId($positionLabel);
                 if ($positionLabel !== null && $positionId === null) {
                     $stats['unknown_position']++;
@@ -160,6 +163,7 @@ class ImportPlayerInfosUpdateCommand extends Command
                     'selections' => $selections,
                     'goals' => $goals,
                     'main_clubs' => $mainClubs === null ? null : json_encode($mainClubs, JSON_UNESCAPED_UNICODE),
+                    'career' => $career,
                 ];
 
                 if ($externalNumber !== null) {
@@ -603,5 +607,16 @@ class ImportPlayerInfosUpdateCommand extends Command
         $this->createdCities++;
 
         return $cityId;
+    }
+
+    private function parseCareer(string $careerRaw): ?string
+    {
+        if ($careerRaw === '') {
+            return null;
+        }
+
+        $career = str_replace(',', '.', $careerRaw);
+
+        return $career;
     }
 }

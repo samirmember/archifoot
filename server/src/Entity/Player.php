@@ -40,6 +40,9 @@ class Player
     #[ORM\Column(name: 'main_clubs', type: 'json', nullable: true)]
     private ?array $mainClubs = null;
 
+    #[ORM\Column(name: 'career', type: 'string', nullable: true)]
+    private ?string $career = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -116,6 +119,18 @@ class Player
     public function setMainClubs(?array $mainClubs): static
     {
         $this->mainClubs = $mainClubs;
+
+        return $this;
+    }
+
+    public function getCareer(): ?string
+    {
+        return $this->career;
+    }
+
+    public function setCareer(?string $career): static
+    {
+        $this->career = $career;
 
         return $this;
     }
