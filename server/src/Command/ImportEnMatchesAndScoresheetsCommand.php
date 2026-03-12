@@ -1164,6 +1164,9 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
         if (!$fullName) {
             return null;
         }
+        $fullName = trim($fullName);
+        $fullName = str_replace('  ', ' ', $fullName);
+        $fullName = str_replace('   ', ' ', $fullName);
         $personId = $this->db->fetchOne(
             "SELECT id FROM person WHERE full_name = :n",
             ['n' => $fullName]

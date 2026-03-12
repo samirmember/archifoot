@@ -128,7 +128,7 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
     const goals = this.details()?.goals ?? [];
     if (goals.length > 0) {
       return goals.map((goal) => ({
-        minute: Number(goal.minute ?? 0),
+        minute: goal.minute,
         tag: 'GOAL',
         title: goal.scorerName || goal.scorerText || 'But',
         subtitle: goal.teamName || goal.goalType || 'Action de jeu',

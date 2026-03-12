@@ -166,7 +166,7 @@
               }
             </header>
             <ul>
-              @for (player of lineupAlgeria().players; track player.name) {
+              @for (player of lineupAlgeria().players.slice(0, 11); track player.name) {
                 <li [class.captain-row]="player.captain">
                   <span class="role" [class.captain]="player.captain"></span>
                   <strong>
@@ -197,7 +197,7 @@
               }
             </header>
             <ul>
-              @for (player of lineupOpponent().players; track player.name) {
+              @for (player of lineupOpponent().players.slice(0, 11); track player.name) {
                 <li [class.captain-row]="player.captain">
                   <span class="role" [class.captain]="player.captain"></span>
                   <strong>
@@ -225,7 +225,7 @@
           <ul class="simple-list">
             @for (change of teamAChanges(); track change) {
               <li>
-                <span class="minute">{{ change.minute }}</span>
+                <!-- <span class="minute">{{ change.minute }}</span> -->
                 <span class="change-chip out"><i class="uil uil-arrow-circle-left"></i> {{ change.playerOut }}</span>
                 <span class="change-chip in"><i class="uil uil-arrow-circle-right"></i> {{ change.playerIn }}</span>
               </li>
@@ -243,7 +243,7 @@
           <ul class="simple-list">
             @for (change of teamBChanges(); track change) {
               <li>
-                <span class="minute">{{ change.minute }}</span>
+                <!-- <span class="minute">{{ change.minute }}</span> -->
                 <span class="change-chip out"><i class="uil uil-arrow-circle-left"></i> {{ change.playerOut }}</span>
                 <span class="change-chip in"><i class="uil uil-arrow-circle-right"></i> {{ change.playerIn }}</span>
               </li>
