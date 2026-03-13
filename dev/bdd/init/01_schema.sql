@@ -407,12 +407,14 @@ INSERT INTO `team` (id, team_type, club_id, national_team_id, display_name) VALU
 DROP TABLE IF EXISTS `person`;
 CREATE TABLE `person` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
+  `external_number` VARCHAR(50) DEFAULT NULL COMMENT 'External number',
   `full_name` VARCHAR(200) NULL COMMENT 'Name',
   `birth_date` DATE NULL COMMENT 'Birth date',
   `birth_city_id` INT NULL COMMENT 'FK city',
   `birth_region_id` INT NULL COMMENT 'FK region',
   `birth_country_id` INT NULL COMMENT 'FK country',
   `nationality_country_id` INT NULL COMMENT 'FK country',
+  `death_date` DATE DEFAULT NULL COMMENT 'Death date',
   `photo_url` VARCHAR(150) DEFAULT NULL COMMENT 'Photo URL',
   `feature_photo_url` VARCHAR(150) DEFAULT NULL COMMENT 'Photo de couverture',
   PRIMARY KEY (`id`),
@@ -430,11 +432,21 @@ CREATE TABLE `position` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+INSERT INTO `position` (id, code, label) VALUES (1, 'GK', 'Gardien de but');
+INSERT INTO `position` (id, code, label) VALUES (2, 'DF', 'Défenseur');
+INSERT INTO `position` (id, code, label) VALUES (3, 'MF', 'Milieu de terrain');
+INSERT INTO `position` (id, code, label) VALUES (4, 'FW', 'Attaquant');
+
 DROP TABLE IF EXISTS `player`;
 CREATE TABLE `player` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
+  `external_number` VARCHAR(50) DEFAULT NULL COMMENT 'External number',
   `person_id` INT NULL COMMENT 'FK person',
   `primary_position_id` INT NULL COMMENT 'FK position',
+  `selections` INT DEFAULT NULL COMMENT 'Number of selections',
+  `goals` INT DEFAULT NULL COMMENT 'Number of goals',
+  `main_clubs` JSON DEFAULT NULL COMMENT 'Main clubs',
+  `career` VARCHAR(100) DEFAULT NULL COMMENT 'Career',
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_player_person_id` FOREIGN KEY (`person_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT `fk_player_primary_position_id` FOREIGN KEY (`primary_position_id`) REFERENCES `position`(`id`) ON UPDATE CASCADE ON DELETE SET NULL
@@ -443,6 +455,7 @@ CREATE TABLE `player` (
 DROP TABLE IF EXISTS `coach`;
 CREATE TABLE `coach` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '#',
+  `external_number` VARCHAR(50) DEFAULT NULL COMMENT 'External number',
   `person_id` INT NULL COMMENT 'FK person',
   `role` VARCHAR(50) NULL COMMENT 'Head/Assistant/Trainer',
   PRIMARY KEY (`id`),
@@ -669,7 +682,7 @@ CREATE TABLE `match_goal` (
   `scorer_id` INT NULL COMMENT 'FK player',
   `scorer_text` VARCHAR(200) NULL COMMENT 'Fallback',
   `minute` VARCHAR(8) NULL COMMENT 'Minute',
-  `goal_type` VARCHAR(20) NULL COMMENT 'normal/penalty/own_goal',
+  `goal_type` VARCHAR(20) NULL COMMENT 'normal/penalty/own_goal/unknown',
   PRIMARY KEY (`id`),
   KEY `ix_match_goal_scorer_id` (`scorer_id`),
   KEY `ix_match_goal_fixture_id` (`fixture_id`),
@@ -850,6 +863,17 @@ CREATE TABLE `person_assignment` (
     ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS `person_photo`;
+CREATE TABLE `person_photo` (
+  id INT AUTO_INCREMENT NOT NULL,
+  person_id INT NOT NULL,
+  image_url VARCHAR(150) NOT NULL,
+  caption VARCHAR(150) DEFAULT NULL,
+  sort_order INT DEFAULT 0 NOT NULL,
+  INDEX IDX_BC9D1BE217BBB47 (person_id),
+  PRIMARY KEY(id),
+  CONSTRAINT FK_BC9D1BE217BBB47 FOREIGN KEY (person_id) REFERENCES person (id) ON DELETE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB;
 
 
 # Liaison joueur - clubs ou équipe nationale

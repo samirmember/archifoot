@@ -26,6 +26,8 @@ docker compose build --no-cache server
 #Dump the db
 mysqldump -h 127.0.0.1 -P 3307 -u archifoot -parchifoot archifoot > bdd/init/02_dump.sql
 
+mysql -h 127.0.0.1 -P 3307 -u root
+
 
 # Upload db:
 mysqldump -h 127.0.0.1 -P 3307 -u archifoot -parchifoot archifoot > bdd/init/02_dump.sql
