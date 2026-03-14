@@ -11,6 +11,11 @@ import {
   StatPlaceholder,
 } from '../../../../services/player.service';
 
+interface SelectionPeriodStat {
+  label: string;
+  value: string;
+}
+
 @Component({
   selector: 'app-senior-national-team-player-profile',
   imports: [CommonModule, RouterLink, ResultComponent],
@@ -29,6 +34,53 @@ export class SeniorNationalTeamPlayerProfileComponent implements OnDestroy {
   });
 
   readonly pageTitle = computed(() => this.profile()?.fullName ?? 'Fiche joueur');
+  readonly selectionPeriodStats = computed<SelectionPeriodStat[]>(() => {
+    const profile = this.profile();
+    if (!profile) {
+      return [];
+    }
+
+    const years = profile.appearances
+      .map((appearance) => this.extractYear(appearance.date))
+      .filter((year): year is number => year !== null);
+
+    if (years.length === 0) {
+      const fallbackYear = this.extractYear(profile.stats.lastCapDate);
+      if (fallbackYear === null) {
+        return [];
+      }
+
+      return [
+        {
+          label: 'Période en sélection',
+          value: String(fallbackYear),
+        },
+      ];
+    }
+
+    const firstYear = Math.min(...years);
+    const lastYear = Math.max(...years);
+
+    if (firstYear === lastYear) {
+      return [
+        {
+          label: 'Période en sélection',
+          value: String(firstYear),
+        },
+      ];
+    }
+
+    return [
+      {
+        label: 'Premier match',
+        value: String(firstYear),
+      },
+      {
+        label: 'Dernier match',
+        value: String(lastYear),
+      },
+    ];
+  });
 
   constructor() {
     effect((onCleanup) => {
@@ -73,6 +125,20 @@ export class SeniorNationalTeamPlayerProfileComponent implements OnDestroy {
 
   hasGalleryPhotos(): boolean {
     return (this.profile()?.galleryPhotos?.length ?? 0) > 0;
+  }
+
+  private extractYear(value: string | null | undefined): number | null {
+    if (!value) {
+      return null;
+    }
+
+    const match = value.match(/\b(\d{4})\b/);
+    if (!match) {
+      return null;
+    }
+
+    const year = Number(match[1]);
+    return Number.isInteger(year) ? year : null;
   }
 
   private initLightbox(): void {

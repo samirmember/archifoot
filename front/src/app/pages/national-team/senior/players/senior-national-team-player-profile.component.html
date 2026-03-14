@@ -93,10 +93,12 @@
                   <strong>{{ profile()!.stats.captaincies }}</strong>
                   <span>Matchs capitaine</span>
                 </div>
-                <div>
-                  <strong>{{ profile()!.stats.lastCapDate }}</strong>
-                  <span>Dernière sélection</span>
-                </div>
+                @for (selectionStat of selectionPeriodStats(); track selectionStat.label) {
+                  <div>
+                    <strong>{{ selectionStat.value }}</strong>
+                    <span>{{ selectionStat.label }}</span>
+                  </div>
+                }
               </div>
             </article>
           }
@@ -134,10 +136,12 @@
                 <strong>{{ profile()!.stats.captaincies }}</strong>
                 <span>Matchs capitaine</span>
               </div>
-              <div>
-                <strong>{{ profile()!.stats.lastCapDate }}</strong>
-                <span>Dernière sélection</span>
-              </div>
+              @for (selectionStat of selectionPeriodStats(); track selectionStat.label) {
+                <div>
+                  <strong>{{ selectionStat.value }}</strong>
+                  <span>{{ selectionStat.label }}</span>
+                </div>
+              }
             </div>
           </article>
         }
