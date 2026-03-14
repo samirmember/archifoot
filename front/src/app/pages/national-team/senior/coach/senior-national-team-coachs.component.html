@@ -51,7 +51,7 @@
             [routerLink]="['/equipe-nationale/senior/entraineurs', getCoachSlug(coach.fullName)]"
           >
             <article class="coach-card">
-              <div class="coach-avatar">
+              <div class="coach-avatar" [class.with-photo]="coach.photoUrl">
                 @if (coach.photoUrl) {
                   <img [src]="coach.photoUrl" [alt]="coach.fullName" loading="lazy" />
                 } @else {

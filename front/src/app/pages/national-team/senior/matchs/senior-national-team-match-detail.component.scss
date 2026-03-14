@@ -199,6 +199,9 @@
     font-size: 0.9rem;
     color: #1f2d3d;
     font-weight: 700;
+    &.text-muted {
+      font-size: 88%;
+    }
   }
 
   small {

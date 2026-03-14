@@ -80,6 +80,9 @@
   .coach-avatar {
     height: 220px;
     background: linear-gradient(150deg, #0f2a62, #2e5eb7);
+    &.with-photo {
+      background: linear-gradient(150deg, #ffffff, #ebebeb);
+    }
 
     img,
     .avatar-placeholder {

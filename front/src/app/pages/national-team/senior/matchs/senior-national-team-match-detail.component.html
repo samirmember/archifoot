@@ -89,12 +89,12 @@
                 <div class="event-body">
                   <div class="event-topline">
                     <span class="badge-tag">{{ event.tag }}</span>
-                    <span class="minute">{{ event.minute }}'</span>
+                    <span class="minute">{{ event.minute }}</span>
                     @if (event.score) {
                       <span class="running-score">{{ event.score }}</span>
                     }
                   </div>
-                  <p class="event-title mb-0">{{ event.title }}</p>
+                  <p class="event-title mb-0" [class.text-muted]="event.title === 'Non enregistré'">{{ event.title }}</p>
                   <small>{{ event.subtitle }}</small>
                 </div>
               </div>
