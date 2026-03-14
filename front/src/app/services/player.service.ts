@@ -43,7 +43,16 @@ export interface SeniorPlayerDetail {
     countryName: string | null;
     nationalTeamName: string | null;
   }>;
-  appearances: MatchResult[];
+  appearanceOptions: {
+    years: number[];
+    competitions: Array<{
+      id: number;
+      name: string;
+    }>;
+  };
+  appearancesMeta: {
+    total: number;
+  };
   nationalStats: {
     totals: {
       caps: number;
@@ -69,7 +78,8 @@ export interface SeniorPlayerDetail {
     yellowCards: number;
     redCards: number;
     duelsWon: number | null;
-    lastCapDate: string;
+    firstCapDate: string | null;
+    lastCapDate: string | null;
   };
   timeline: {
     memberships: SeniorPlayerDetail['memberships'];
@@ -83,6 +93,16 @@ export interface SeniorPlayerDetail {
 
 interface SeniorPlayerDetailApiResponse {
   data: SeniorPlayerDetail;
+}
+
+export interface SeniorPlayerAppearancesResponse {
+  items: MatchResult[];
+  meta: {
+    page: number;
+    itemsPerPage: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export interface SeniorPlayersResponse {
@@ -184,6 +204,22 @@ export class PlayerService {
           },
         })),
       );
+  }
+
+  public getSeniorNationalTeamPlayerAppearances(
+    slug: string,
+    filters: {
+      page?: number;
+      itemsPerPage?: number;
+      seasonName?: string;
+      teamIso3?: string;
+      competitionId?: number;
+    } = {},
+  ): Observable<SeniorPlayerAppearancesResponse> {
+    return this.apiClient.get<SeniorPlayerAppearancesResponse>(
+      `senior-national-team/players/${encodeURIComponent(slug)}/appearances`,
+      filters,
+    );
   }
 
   private extractDuelsWon(placeholders: StatPlaceholder[] | undefined): number | null {
