@@ -86,6 +86,27 @@ class UpdateFixtureOutcomeForAlgeriaCommand extends Command
                     $opponentOutcome = self::OUTCOME_DRAW;
                 }
 
+                // Handling special cases 
+                if (in_array($fixtureId, [
+                    258,273,335,422,602
+                ])) {
+                    switch ($fixtureId) {
+                        case 258:
+                            // @Todo: Attente de réponse de Selhani
+                        case 273:
+                            $algeriaOutcome = self::OUTCOME_LOSER;
+                            $opponentOutcome = self::OUTCOME_WINNER;
+                        case 335:
+                            // @Todo: Attente de réponse de Selhani
+                        case 422:
+                            // @Todo: Attente de réponse de Selhani
+                        case 602:
+                            $algeriaOutcome = self::OUTCOME_WINNER;
+                            $opponentOutcome = self::OUTCOME_LOSER;
+                    }
+
+                }
+
                 $updatedRows += $this->db->executeStatement(
                     'UPDATE fixture_participant SET outcome = :outcome WHERE id = :id',
                     ['outcome' => $algeriaOutcome, 'id' => (int) $algeria['id']]
