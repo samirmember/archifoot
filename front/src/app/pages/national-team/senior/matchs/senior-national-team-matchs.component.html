@@ -1,4 +1,4 @@
-<section class="wrapper bg-light">
+<section class="wrapper bg-light senior-matchs-page">
   <div class="container py-14 py-md-16">
     <div class="row text-center">
       <div class="col-xl-10 mx-auto">
@@ -59,6 +59,98 @@
             </div>
           </div>
         </form>
+
+        @let activeFilters = getActiveFilterLabels();
+        <section class="match-insights" [class.is-loading]="isSummaryLoading()">
+          <div class="insights-shell">
+            <div class="insights-hero">
+              <div class="hero-copy">
+                <p class="eyebrow">Bilan dynamique</p>
+                <h3>Vue d'ensemble des rencontres</h3>
+                <p class="hero-text">{{ getSummaryDescription() }}</p>
+
+                <div class="active-filters">
+                  @if (activeFilters.length > 0) {
+                    @for (label of activeFilters; track label) {
+                      <span class="filter-chip">{{ label }}</span>
+                    }
+                  } @else {
+                    <span class="filter-chip neutral">Toutes les rencontres</span>
+                  }
+                </div>
+              </div>
+
+              <div class="hero-stat">
+                <span class="hero-stat__value">{{ summary().totalMatches }}</span>
+                <span class="hero-stat__label">matchs analyses</span>
+              </div>
+            </div>
+
+            <div class="record-strip">
+              <article class="record-pill win">
+                <strong>{{ summary().wins }}</strong>
+                <span>Victoires</span>
+              </article>
+              <article class="record-pill draw">
+                <strong>{{ summary().draws }}</strong>
+                <span>Nuls</span>
+              </article>
+              <article class="record-pill loss">
+                <strong>{{ summary().losses }}</strong>
+                <span>Defaites</span>
+              </article>
+              <article class="record-pill rate">
+                <strong>{{ summary().winRate }}%</strong>
+                <span>Taux de victoire</span>
+              </article>
+            </div>
+
+            <div class="insights-grid">
+              <article class="insight-card accent-attack">
+                <span class="insight-card__eyebrow">Attaque</span>
+                <strong>{{ summary().goalsFor }}</strong>
+                <p>Buts marques</p>
+              </article>
+
+              <article class="insight-card accent-defense">
+                <span class="insight-card__eyebrow">Defense</span>
+                <strong>{{ summary().goalsAgainst }}</strong>
+                <p>Buts encaisses</p>
+              </article>
+
+              <article class="insight-card accent-balance">
+                <span class="insight-card__eyebrow">Balance</span>
+                <strong>{{ getSignedValue(summary().goalDifference) }}</strong>
+                <p>Diff. de buts</p>
+              </article>
+
+              <article class="insight-card accent-opponents">
+                <span class="insight-card__eyebrow">Opposition</span>
+                <strong>{{ summary().uniqueOpponents }}</strong>
+                <p>Adversaires distincts</p>
+              </article>
+
+              <article class="insight-card accent-hosts">
+                <span class="insight-card__eyebrow">Terrains</span>
+                <strong>{{ summary().uniqueHostCountries }}</strong>
+                <p>Pays hotes</p>
+              </article>
+
+              <article class="insight-card accent-clean-sheets">
+                <span class="insight-card__eyebrow">Solidite</span>
+                <strong>{{ summary().cleanSheets }}</strong>
+                <p>Cages inviolees</p>
+              </article>
+
+              <article class="insight-card accent-official">
+                <span class="insight-card__eyebrow">Contexte</span>
+                <strong>{{ summary().officialMatches }}</strong>
+                <p>Matchs officiels ({{ summary().officialRate }}%)</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
         @if (isLoading() && results().length === 0) {
           <app-results-skeleton [count]="3" />
         } @else {
