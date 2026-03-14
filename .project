@@ -44,3 +44,12 @@ npx ng build --configuration production --base-href "https://samirmember.github.
 npx angular-cli-ghpages --dir=dist/front/browser
 
 ==> npm run deploy:gh
+
+# After empty DB:
+docker compose exec -ti server php bin/console app:create-admin samirmember@gmail.com "samir"
+docker compose exec -ti server php -d memory_limit=-1 bin/console app:import:en:matches-scoresheets en_matches_selhani_v3.xlsx "Matches de l'EN "
+docker compose exec -ti server php bin/console app:fixture:update-outcomes-algeria
+docker compose exec -ti server php -d memory_limit=-1 bin/console app:import:external-numbers coach ext_num_coach.xlsx
+docker compose exec -ti server php -d memory_limit=-1 bin/console app:import:player-infos-update players.xlsx
+docker compose exec -ti server bin/console cache:clear
+mysqldump -h 127.0.0.1 -P 3307 -u archifoot -parchifoot archifoot > bdd/init/02_dump.sql

@@ -185,23 +185,23 @@ class ImportPlayerInfosUpdateCommand extends Command
             return Command::FAILURE;
         }
 
-        $output->writeln('<info>Import termine.</info>');
+        $output->writeln('<info>Import terminé.</info>');
         $output->writeln(sprintf('Lignes lues: %d', $stats['rows']));
-        $output->writeln(sprintf('Joueurs mis a jour: %d', $stats['updated']));
+        $output->writeln(sprintf('Joueurs mis à jour: %d', $stats['updated']));
         $output->writeln(sprintf('Joueurs introuvables: %d', $stats['missing']));
-        $output->writeln(sprintf('Lignes ignorees: %d', $stats['ignored']));
+        $output->writeln(sprintf('Lignes ignorées: %d', $stats['ignored']));
         $output->writeln(sprintf('Dates de naissance invalides: %d', $stats['invalid_birth_date']));
-        $output->writeln(sprintf('Dates de deces invalides: %d', $stats['invalid_death_date']));
-        $output->writeln(sprintf('Postes non resolus: %d', $stats['unknown_position']));
+        $output->writeln(sprintf('Dates de décès invalides: %d', $stats['invalid_death_date']));
+        $output->writeln(sprintf('Postes non résolus: %d', $stats['unknown_position']));
         $output->writeln(sprintf('Wilaya reconnue comme pays: %d', $stats['country_wilaya_detected']));
-        $output->writeln(sprintf('Wilaya rattachee a l Algerie: %d', $stats['algeria_wilaya_detected']));
-        $output->writeln(sprintf('Pays crees: %d', $this->createdCountries));
-        $output->writeln(sprintf('Regions creees: %d', $this->createdRegions));
-        $output->writeln(sprintf('Villes creees: %d', $this->createdCities));
+        $output->writeln(sprintf('Wilaya rattachée à l\'Algérie: %d', $stats['algeria_wilaya_detected']));
+        $output->writeln(sprintf('Pays créés: %d', $this->createdCountries));
+        $output->writeln(sprintf('Régions créées: %d', $this->createdRegions));
+        $output->writeln(sprintf('Villes créées: %d', $this->createdCities));
 
         if ($notFoundPlayers !== []) {
             $output->writeln('');
-            $output->writeln('<comment>Joueurs introuvables (ignores):</comment>');
+            $output->writeln('<comment>Joueurs introuvables (ignorés):</comment>');
             foreach ($notFoundPlayers as $line) {
                 $output->writeln(' - ' . $line);
             }

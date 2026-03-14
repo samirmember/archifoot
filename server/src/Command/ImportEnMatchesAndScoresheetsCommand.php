@@ -188,6 +188,8 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
                 // === Referees (arbitre1..3) ===
                 $this->importReferees($scoresheetId, $matchDate, $row);
 
+                $this->importAdvGoals($fixtureId, $algeriaTeamId, $otherTeamId, $matchDate, $row);
+
                 $inserted++;
             }
 
@@ -583,16 +585,39 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
             [$player, $minute, $type] = $this->parseButValue($val);
             if (!$player && !$minute) continue;
 
-            $this->ensureGoalRecord($fixtureId, $player, $matchDate, $minute, $type);
+            $this->ensureGoalRecord($fixtureId, $algeriaTeamId, $player, $matchDate, $minute, $type);
         }
     }
 
-    private function ensureGoalRecord(int $fixtureId, string $playerName, string $matchDate, ?string $minute, string $type): ?int
+    private function importAdvGoals(int $fixtureId, ?int $algeriaTeamId, ?int $otherTeamId, string $matchDate,array $row): void
+    {
+        $butsCol = [
+            'DD', 'DE', 'DF', 'DG', 'DH', 'DI',
+            'DJ', 'DK', 'DL'
+        ];
+        foreach ($butsCol as $colKey) {
+            $val = $this->toStr($row[$colKey] ?? null);
+            if (!$val) continue;
+
+            if ($val === 'Non enregistré') {
+                $this->ensureUnknownGoalRecord($fixtureId, $val, $otherTeamId);
+            } else {
+                [$player, $minute, $type] = $this->parseButValue($val);
+                if (!$player && !$minute) continue;
+
+                $this->ensureGoalRecord($fixtureId, $otherTeamId, $player, $matchDate, $minute, $type);
+            }
+        }
+    }
+
+    private function ensureGoalRecord(int $fixtureId, ?int $teamId, string $playerName, string $matchDate, ?string $minute, string $type): ?int
     {
         if (!$playerName) {
             return null;
         }
-        $playerId = $this->ensurePlayerPerson($playerName);
+
+        $countryId = $teamId ? $this->getCountryByTeamId($teamId) : null;
+        $playerId = $this->ensurePlayerPerson($playerName, $countryId);
         $personId = $this->getPersonIdByPlayerId($playerId);
 
         // On enregistre pas l'historique pour les joueurs adverses (own goal).
@@ -601,7 +626,7 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
         }
         $playerData = [
             'fixture_id' => $fixtureId,
-            'team_id' => 1,
+            'team_id' => $teamId,
             'scorer_id' => $playerId,
             'minute' => $minute,
             'goal_type' => $type
@@ -611,6 +636,26 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
             AND team_id = :team_id
             AND scorer_id = :scorer_id
             AND minute = :minute
+            AND goal_type = :goal_type",
+            $playerData
+        );
+        if ($id) return (int)$id;
+        
+        $playerData['scorer_text'] = $playerName;
+        $this->db->insert('match_goal', $playerData);
+        return (int)$this->db->lastInsertId();
+    }
+
+    private function ensureUnknownGoalRecord(int $fixtureId, string $playerName, ?int $teamId): ?int
+    {
+        $playerData = [
+            'fixture_id' => $fixtureId,
+            'team_id' => $teamId,
+            'goal_type' => 'unknown'
+        ];
+        $id = $this->db->fetchOne("SELECT id FROM match_goal 
+            WHERE fixture_id = :fixture_id
+            AND team_id = :team_id
             AND goal_type = :goal_type",
             $playerData
         );
@@ -663,30 +708,43 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
     }
 
     /**
-     * Parse une valeur de remplaçant:
+     * Parse une valeur de remplaçant :
      * - "Belbekri"
      * - "Belbekri 62'"
      * - "Belbekri62'"
      * - "Belbekri 90+2’"
+     * - "Abdellaoui  Ayoub 83"
+     * - "Abdellaoui Ayoub 83"  // espace insécable
      *
      * @return array{0:string, 1:?string} [player, minute|null]
      */
     private function parseSubstitutionValue(string $value): array
     {
+        // 1) Trim + normalisation des espaces (y compris insécables)
         $value = trim($value);
+        $value = preg_replace('/[\h\x{00A0}]+/u', ' ', $value); // 1 seul espace partout
 
         if ($value === '') {
             dd('Remplaçant vide');
         }
 
-        // Cas 1: "Nom ... 23'" ou "Nom...23'" ou "Nom 90+2’"
-        // Groupe 1: nom joueur (tout avant la minute)
-        // Groupe 2: minute (ex: 23, 90+2)
-        // ['’]    : supporte les deux types d'apostrophes
-        $withMinute = "/^(.+?)\s*(\d+(?:\+\d+)?)['’]\s*$/u";
+        /**
+         * Cas avec minute en fin de chaîne :
+         * - "Belbekri 62'"
+         * - "Belbekri62'"
+         * - "Belbekri 90+2’"
+         * - "Abdellaoui Ayoub 83"
+         * - "AbdellaouiAyoub83" (si jamais)
+         *
+         * Groupe 1 = nom
+         * Groupe 2 = minute (23, 90+2, etc.)
+         * Apostrophe finale optionnelle
+         */
+        $withMinute = "/^(.+?)\s*(\d+(?:\+\d+)?)\s*['’]?$/u";
 
         if (preg_match($withMinute, $value, $m)) {
             $player = trim($m[1]);
+            $player = preg_replace('/[\h\x{00A0}]+/u', ' ', $player); // sécurité
             $minute = $m[2];
 
             if ($player === '') {
@@ -696,8 +754,7 @@ class ImportEnMatchesAndScoresheetsCommand extends Command
             return [$player, $minute];
         }
 
-        // Cas 2: juste le nom (aucune minute)
-        // On accepte tout texte non-vide
+        // Cas sans minute
         return [$value, null];
     }
 
