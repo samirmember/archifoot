@@ -7,7 +7,12 @@ import { Country } from '../../../../models/country.model';
 import { NumberService } from '../../../../../shared/number.service';
 import { CountryInputComponent } from 'src/app/layouts/input/country-input.component';
 import { CompetitionService } from 'src/app/services/competition.service';
-import { MatchResult, ResultFilters, ResultService } from 'src/app/services/result.service';
+import {
+  MatchResult,
+  MatchResultsSummary,
+  ResultFilters,
+  ResultService,
+} from 'src/app/services/result.service';
 import { ResultsListComponent } from 'src/app/components/results-list/results-list.component';
 import { ResultsSkeletonComponent } from 'src/app/components/results-skeleton/results-skeleton.component';
 
@@ -26,9 +31,9 @@ import { ResultsSkeletonComponent } from 'src/app/components/results-skeleton/re
 export class SeniorNationalTeamMatchsComponent {
   private static readonly PAGE_SIZE = 20;
 
-  private numberService = inject(NumberService);
-  private competitionService = inject(CompetitionService);
-  private resultService = inject(ResultService);
+  private readonly numberService = inject(NumberService);
+  private readonly competitionService = inject(CompetitionService);
+  private readonly resultService = inject(ResultService);
 
   selectedCountry: Country | null = null;
   selectedYear: number | null = null;
@@ -37,9 +42,14 @@ export class SeniorNationalTeamMatchsComponent {
   private readonly filters$ = new BehaviorSubject<ResultFilters>({});
   private readonly currentPage = signal(1);
 
+  readonly summaryPanelId = 'match-summary-panel';
   readonly results = signal<MatchResult[]>([]);
   readonly isLoading = signal(false);
   readonly hasMoreResults = signal(true);
+  readonly summary = signal<MatchResultsSummary>(this.emptySummary());
+  readonly isSummaryLoading = signal(false);
+  readonly isSummaryExpanded = signal(false);
+  readonly hasUserToggledSummary = signal(false);
 
   years = this.numberService.generateAllYears();
   competitions = toSignal(
@@ -76,11 +86,26 @@ export class SeniorNationalTeamMatchsComponent {
 
       onCleanup(() => subscription.unsubscribe());
     });
+
+    effect((onCleanup) => {
+      const filters = this.currentFilters();
+
+      this.isSummaryLoading.set(true);
+
+      const subscription = this.resultService
+        .getResultsSummary(filters)
+        .pipe(catchError(() => of(this.emptySummary())))
+        .subscribe((summary) => {
+          this.summary.set(summary);
+          this.isSummaryLoading.set(false);
+        });
+
+      onCleanup(() => subscription.unsubscribe());
+    });
   }
 
   onCountryChange(country: Country | null): void {
     this.selectedCountry = country;
-    console.log(country);
     this.refreshResults();
   }
 
@@ -92,6 +117,47 @@ export class SeniorNationalTeamMatchsComponent {
   onCompetitionChange(competitionId: number | null): void {
     this.selectedCompetitionId = competitionId;
     this.refreshResults();
+  }
+
+  getActiveFilterLabels(): string[] {
+    const labels: string[] = [];
+
+    const competitionName = this.getSelectedCompetitionName();
+    if (competitionName) {
+      labels.push(competitionName);
+    }
+
+    if (this.selectedYear !== null) {
+      labels.push(String(this.selectedYear));
+    }
+
+    if (this.selectedCountry?.name?.trim()) {
+      labels.push(this.selectedCountry.name.trim());
+    }
+
+    return labels;
+  }
+
+  getSearchContextLabel(): string {
+    const labels = this.getActiveFilterLabels();
+    return labels.length > 0 ? labels.join(' • ') : 'Toutes les rencontres';
+  }
+
+  getSignedValue(value: number): string {
+    return value > 0 ? `+${value}` : `${value}`;
+  }
+
+  getOfficialContextNote(): string {
+    if (this.summary().totalMatches === 0) {
+      return 'Aucune rencontre ne correspond aux filtres actuels.';
+    }
+
+    return "Part des matchs officiels dans l'echantillon actuellement affiche.";
+  }
+
+  toggleSummaryAccordion(): void {
+    this.hasUserToggledSummary.set(true);
+    this.isSummaryExpanded.update((isExpanded) => !isExpanded);
   }
 
   private refreshResults(): void {
@@ -120,4 +186,34 @@ export class SeniorNationalTeamMatchsComponent {
 
     this.currentPage.update((page) => page + 1);
   }
+
+  private getSelectedCompetitionName(): string | null {
+    return (
+      this.competitions()
+        .find((competition) => competition.id === this.selectedCompetitionId)
+        ?.name?.trim() ?? null
+    );
+  }
+
+  private emptySummary(): MatchResultsSummary {
+    return {
+      totalMatches: 0,
+      wins: 0,
+      draws: 0,
+      losses: 0,
+      winRate: 0,
+      goalsFor: 0,
+      goalsAgainst: 0,
+      goalDifference: 0,
+      cleanSheets: 0,
+      uniqueOpponents: 0,
+      uniqueHostCountries: 0,
+      officialMatches: 0,
+      officialRate: 0,
+    };
+  }
 }
+
+
+
+

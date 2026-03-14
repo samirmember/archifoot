@@ -45,10 +45,28 @@ export interface FixturesStats {
   trophyWins: number;
 }
 
+export interface MatchResultsSummary {
+  totalMatches: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  winRate: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  cleanSheets: number;
+  uniqueOpponents: number;
+  uniqueHostCountries: number;
+  officialMatches: number;
+  officialRate: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class ResultService {
+  private static readonly SUMMARY_PAGE_SIZE = 2000;
+
   constructor(private readonly apiClient: ApiClientService) {}
 
   public getResults(filters?: ResultFilters): Observable<MatchResult[]> {
@@ -172,5 +190,138 @@ export class ResultService {
 
   public buildFixturesStats(): Observable<FixturesStats> {
     return this.apiClient.get<FixturesStats>('senior-national-team/matchs/totals');
+  }
+
+  public getResultsSummary(filters?: ResultFilters): Observable<MatchResultsSummary> {
+    return this.getResults({
+      ...filters,
+      page: 1,
+      itemsPerPage: ResultService.SUMMARY_PAGE_SIZE,
+    }).pipe(map((results) => this.buildResultsSummary(results)));
+  }
+
+  private buildResultsSummary(results: MatchResult[]): MatchResultsSummary {
+    let wins = 0;
+    let draws = 0;
+    let losses = 0;
+    let goalsFor = 0;
+    let goalsAgainst = 0;
+    let cleanSheets = 0;
+    let officialMatches = 0;
+
+    const opponentKeys = new Set<string>();
+    const hostCountryKeys = new Set<string>();
+
+    for (const result of results) {
+      const perspective = this.getAlgeriaPerspective(result);
+
+      if (result.isOfficial) {
+        officialMatches++;
+      }
+
+      if (result.countryStadiumName?.trim()) {
+        hostCountryKeys.add(this.toStatKey(result.countryStadiumName));
+      }
+
+      if (perspective.opponentName?.trim()) {
+        opponentKeys.add(this.toStatKey(perspective.opponentName));
+      }
+
+      if (perspective.scoreFor === null || perspective.scoreAgainst === null) {
+        continue;
+      }
+
+      goalsFor += perspective.scoreFor;
+      goalsAgainst += perspective.scoreAgainst;
+
+      if (perspective.scoreAgainst === 0) {
+        cleanSheets++;
+      }
+
+      if (perspective.scoreFor > perspective.scoreAgainst) {
+        wins++;
+      } else if (perspective.scoreFor === perspective.scoreAgainst) {
+        draws++;
+      } else {
+        losses++;
+      }
+    }
+
+    const totalMatches = results.length;
+
+    return {
+      totalMatches,
+      wins,
+      draws,
+      losses,
+      winRate: this.toPercentage(wins, totalMatches),
+      goalsFor,
+      goalsAgainst,
+      goalDifference: goalsFor - goalsAgainst,
+      cleanSheets,
+      uniqueOpponents: opponentKeys.size,
+      uniqueHostCountries: hostCountryKeys.size,
+      officialMatches,
+      officialRate: this.toPercentage(officialMatches, totalMatches),
+    };
+  }
+
+  private getAlgeriaPerspective(result: MatchResult): {
+    scoreFor: number | null;
+    scoreAgainst: number | null;
+    opponentName: string | null;
+  } {
+    const algeriaSide = this.detectAlgeriaSide(result);
+
+    if (algeriaSide === 'B') {
+      return {
+        scoreFor: result.scoreB,
+        scoreAgainst: result.scoreA,
+        opponentName: result.countryA,
+      };
+    }
+
+    return {
+      scoreFor: result.scoreA,
+      scoreAgainst: result.scoreB,
+      opponentName: result.countryB,
+    };
+  }
+
+  private detectAlgeriaSide(result: MatchResult): 'A' | 'B' {
+    const teamAIsAlgeria = this.isAlgeriaTeam(result.countryA, result.countryCodeA);
+    const teamBIsAlgeria = this.isAlgeriaTeam(result.countryB, result.countryCodeB);
+
+    if (teamAIsAlgeria && !teamBIsAlgeria) {
+      return 'A';
+    }
+
+    if (teamBIsAlgeria && !teamAIsAlgeria) {
+      return 'B';
+    }
+
+    return 'A';
+  }
+
+  private isAlgeriaTeam(name: string | null | undefined, iso2: string | null | undefined): boolean {
+    const normalizedIso2 = iso2?.trim().toLowerCase();
+    if (normalizedIso2 === 'dz') {
+      return true;
+    }
+
+    const normalizedName = this.toStatKey(name);
+    return normalizedName === 'algérie' || normalizedName === 'algerie' || normalizedName === 'algeria';
+  }
+
+  private toStatKey(value: string | null | undefined): string {
+    return value?.trim().toLocaleLowerCase() ?? '';
+  }
+
+  private toPercentage(value: number, total: number): number {
+    if (total <= 0) {
+      return 0;
+    }
+
+    return Math.round((value / total) * 100);
   }
 }
