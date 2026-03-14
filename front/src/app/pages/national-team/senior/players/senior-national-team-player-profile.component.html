@@ -32,15 +32,10 @@
                 <span>{{ asBadgeLabel(profile()!.profile.birthDate, 'Date de naissance inconnue') }}</span>
               </article>
             }
-            @if (profile()!.profile.birthCity) {
+            @if (birthPlace()) {
               <article>
                 <label>Lieu de naissance</label>
-                <span>
-                  {{ asBadgeLabel(profile()!.profile.birthCity, 'Lieu de naissance inconnu') }}
-                  @if (profile()?.profile?.birthRegion) {
-                    {{ ', ' + profile()?.profile?.birthRegion }}
-                  }
-                </span>
+                <span>{{ asBadgeLabel(birthPlace(), 'Lieu de naissance inconnu') }}</span>
               </article>
             }
             @if (profile()!.profile.birthCountry) {

@@ -63,6 +63,7 @@ export class SeniorNationalTeamPlayerProfileComponent implements OnDestroy {
   readonly competitions = computed<ApiFixtureStageCompetition[]>(
     () => this.profile()?.appearanceOptions.competitions ?? [],
   );
+  readonly birthPlace = computed(() => this.buildBirthPlace(this.profile()?.profile));
   readonly shouldShowAppearanceFilters = computed(() => this.totalAppearances() > 10);
   readonly hasActiveAppearanceFilters = computed(
     () =>
@@ -233,6 +234,41 @@ export class SeniorNationalTeamPlayerProfileComponent implements OnDestroy {
 
     const year = Number(match[1]);
     return Number.isInteger(year) ? year : null;
+  }
+
+  private buildBirthPlace(profile: SeniorPlayerDetail['profile'] | null | undefined): string | null {
+    if (!profile) {
+      return null;
+    }
+
+    const localParts = this.uniqueLocationParts([profile.birthCity, profile.birthRegion]);
+    if (localParts.length === 0) {
+      return null;
+    }
+
+    return localParts.join(', ');
+  }
+
+  private uniqueLocationParts(values: Array<string | null | undefined>): string[] {
+    const seen = new Set<string>();
+    const uniqueValues: string[] = [];
+
+    for (const value of values) {
+      const trimmedValue = value?.trim();
+      if (!trimmedValue) {
+        continue;
+      }
+
+      const normalizedValue = trimmedValue.toLocaleLowerCase();
+      if (seen.has(normalizedValue)) {
+        continue;
+      }
+
+      seen.add(normalizedValue);
+      uniqueValues.push(trimmedValue);
+    }
+
+    return uniqueValues;
   }
 
   private initLightbox(): void {
