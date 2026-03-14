@@ -60,95 +60,194 @@
           </div>
         </form>
 
-        @let activeFilters = getActiveFilterLabels();
+        @let activeFilterLabels = getActiveFilterLabels();
         <section class="match-insights" [class.is-loading]="isSummaryLoading()">
-          <div class="insights-shell">
-            <div class="insights-hero">
-              <div class="hero-copy">
-                <p class="eyebrow">Bilan dynamique</p>
-                <h3>Vue d'ensemble des rencontres</h3>
-                <p class="hero-text">{{ getSummaryDescription() }}</p>
+          <article class="summary-accordion card-like">
+            <button
+              type="button"
+              class="summary-accordion__toggle"
+              style="flex-wrap: wrap; align-items: flex-start; row-gap: 0.7rem;"
+              (click)="toggleSummaryAccordion()"
+              [attr.aria-expanded]="isSummaryExpanded()"
+              [attr.aria-controls]="summaryPanelId"
+            >
+              <span class="summary-accordion__header-main" style="display:flex;order:1;flex:1 1 420px;flex-wrap:wrap;align-items:center;gap:1rem;min-width:0;">
+                <span class="summary-accordion__metric">
+                  <span class="summary-accordion__metric-icon">
+                    <i class="uil uil-chart-bar"></i>
+                  </span>
+                  <span class="summary-accordion__metric-text">Nombre de matchs :</span>
+                  <strong>{{ summary().totalMatches }}</strong>
+                </span>
 
-                <div class="active-filters">
-                  @if (activeFilters.length > 0) {
-                    @for (label of activeFilters; track label) {
-                      <span class="filter-chip">{{ label }}</span>
-                    }
-                  } @else {
-                    <span class="filter-chip neutral">Toutes les rencontres</span>
+                <span class="summary-accordion__metric summary-accordion__metric--secondary">
+                  <span class="summary-accordion__metric-icon">
+                    <i class="uil uil-trophy"></i>
+                  </span>
+                  <span class="summary-accordion__metric-text">Taux de victoire :</span>
+                  <strong>{{ summary().winRate }}%</strong>
+                </span>
+              </span>
+
+              <span class="summary-accordion__context-preview" style="display:flex;order:2;flex:0 1 auto;flex-wrap:wrap;justify-content:flex-end;gap:.45rem;min-width:0;margin-left:auto;">
+                @if (activeFilterLabels.length > 0) {
+                  @for (label of activeFilterLabels; track label) {
+                    <span
+                      class="summary-accordion__badge"
+                      style="display:inline-flex;align-items:center;min-height:28px;padding:.2rem .7rem;border:1px solid #dbe5f0;border-radius:999px;background:#f7f9fc;color:#385375;font-size:.78rem;font-weight:700;line-height:1.1;"
+                    >
+                      {{ label }}
+                    </span>
                   }
+                } @else {
+                  <span
+                    class="summary-accordion__badge summary-accordion__badge--default"
+                    style="display:inline-flex;align-items:center;min-height:28px;padding:.2rem .7rem;border:1px solid #dbe5f0;border-radius:999px;background:#f7f9fc;color:#5d7392;font-size:.78rem;font-weight:700;line-height:1.1;"
+                  >
+                    Toutes les rencontres
+                  </span>
+                }
+              </span>
+
+              <span class="summary-accordion__chevron" style="order:3;margin-left:0;flex:0 0 auto;align-self:center;" [class.is-open]="isSummaryExpanded()" aria-hidden="true">
+                <i class="uil uil-angle-up"></i>
+              </span>
+            </button>
+
+            <div class="summary-accordion__divider" [class.is-open]="isSummaryExpanded()"></div>
+
+            <div
+              [id]="summaryPanelId"
+              class="summary-accordion__content"
+              [class.is-open]="isSummaryExpanded()"
+              [attr.aria-hidden]="!isSummaryExpanded()"
+            >
+              <div class="summary-accordion__content-inner">
+                <div class="summary-dashboard__top">
+                  <article class="summary-stat-card summary-stat-card--wins">
+                    <span class="summary-stat-card__eyebrow">Victoires</span>
+                    <div class="summary-stat-card__value-row">
+                      <strong>{{ summary().wins }}</strong>
+                      <span>Gagnés</span>
+                    </div>
+                  </article>
+
+                  <article class="summary-stat-card summary-stat-card--draws">
+                    <span class="summary-stat-card__eyebrow">Nuls</span>
+                    <div class="summary-stat-card__value-row">
+                      <strong>{{ summary().draws }}</strong>
+                      <span>Partagés</span>
+                    </div>
+                  </article>
+
+                  <article class="summary-stat-card summary-stat-card--losses">
+                    <span class="summary-stat-card__eyebrow">Défaites</span>
+                    <div class="summary-stat-card__value-row">
+                      <strong>{{ summary().losses }}</strong>
+                      <span>Perdus</span>
+                    </div>
+                  </article>
+
+                  <article class="summary-stat-card summary-stat-card--ratio">
+                    <span class="summary-stat-card__eyebrow">Ratio global</span>
+                    <div class="summary-stat-card__value-row">
+                      <strong>{{ summary().winRate }}%</strong>
+                      <span>Succès</span>
+                    </div>
+                  </article>
+                </div>
+
+                <div class="summary-dashboard__bottom">
+                  <div class="summary-metric-grid">
+                    <article class="metric-card">
+                      <span class="metric-card__icon metric-card__icon--goals-for">
+                        <i class="uil uil-flag-alt"></i>
+                      </span>
+                      <div class="metric-card__body">
+                        <strong>{{ summary().goalsFor }}</strong>
+                        <span>Buts marqués</span>
+                      </div>
+                    </article>
+
+                    <article class="metric-card">
+                      <span class="metric-card__icon metric-card__icon--opponents">
+                        <i class="uil uil-users-alt"></i>
+                      </span>
+                      <div class="metric-card__body">
+                        <strong>{{ summary().uniqueOpponents }}</strong>
+                        <span>Adversaires distincts</span>
+                      </div>
+                    </article>
+
+                    <article class="metric-card">
+                      <span class="metric-card__icon metric-card__icon--goals-against">
+                        <i class="uil uil-times-circle"></i>
+                      </span>
+                      <div class="metric-card__body">
+                        <strong>{{ summary().goalsAgainst }}</strong>
+                        <span>Buts encaissés</span>
+                      </div>
+                    </article>
+
+                    <article class="metric-card">
+                      <span class="metric-card__icon metric-card__icon--hosts">
+                        <i class="uil uil-globe"></i>
+                      </span>
+                      <div class="metric-card__body">
+                        <strong>{{ summary().uniqueHostCountries }}</strong>
+                        <span>Pays hôtes</span>
+                      </div>
+                    </article>
+
+                    <article class="metric-card metric-card--feature metric-card--goal-diff">
+                      <span class="metric-card__icon metric-card__icon--feature">
+                        <i class="uil uil-balance-scale"></i>
+                      </span>
+                      <div class="metric-card__body">
+                        <strong>{{ getSignedValue(summary().goalDifference) }}</strong>
+                        <span>Diff. de buts</span>
+                      </div>
+                    </article>
+
+                    <article class="metric-card metric-card--feature metric-card--clean-sheets">
+                      <span class="metric-card__icon metric-card__icon--feature metric-card__icon--clean-sheets">
+                        <i class="uil uil-shield-check"></i>
+                      </span>
+                      <div class="metric-card__body">
+                        <strong>{{ summary().cleanSheets }}</strong>
+                        <span>Cages inviolées</span>
+                      </div>
+                    </article>
+                  </div>
+
+                  <aside class="context-card">
+                    <div class="context-card__header">
+                      <span>Contexte</span>
+                      <i class="uil uil-info-circle"></i>
+                    </div>
+
+                    <p class="context-card__scope">{{ getSearchContextLabel() }}</p>
+
+                    <div class="context-card__metric-row">
+                      <span>Matchs officiels</span>
+                      <strong>{{ summary().officialRate }}%</strong>
+                    </div>
+
+                    <div class="context-card__progress">
+                      <span class="context-card__progress-bar" [style.width.%]="summary().officialRate"></span>
+                    </div>
+
+                    <p class="context-card__note">{{ getOfficialContextNote() }}</p>
+
+                    <button type="button" class="context-card__button" disabled aria-disabled="true">
+                      <i class="uil uil-file-download-alt"></i>
+                      Rapport complet (PDF)
+                    </button>
+                  </aside>
                 </div>
               </div>
-
-              <div class="hero-stat">
-                <span class="hero-stat__value">{{ summary().totalMatches }}</span>
-                <span class="hero-stat__label">matchs analyses</span>
-              </div>
             </div>
-
-            <div class="record-strip">
-              <article class="record-pill win">
-                <strong>{{ summary().wins }}</strong>
-                <span>Victoires</span>
-              </article>
-              <article class="record-pill draw">
-                <strong>{{ summary().draws }}</strong>
-                <span>Nuls</span>
-              </article>
-              <article class="record-pill loss">
-                <strong>{{ summary().losses }}</strong>
-                <span>Defaites</span>
-              </article>
-              <article class="record-pill rate">
-                <strong>{{ summary().winRate }}%</strong>
-                <span>Taux de victoire</span>
-              </article>
-            </div>
-
-            <div class="insights-grid">
-              <article class="insight-card accent-attack">
-                <span class="insight-card__eyebrow">Attaque</span>
-                <strong>{{ summary().goalsFor }}</strong>
-                <p>Buts marques</p>
-              </article>
-
-              <article class="insight-card accent-defense">
-                <span class="insight-card__eyebrow">Defense</span>
-                <strong>{{ summary().goalsAgainst }}</strong>
-                <p>Buts encaisses</p>
-              </article>
-
-              <article class="insight-card accent-balance">
-                <span class="insight-card__eyebrow">Balance</span>
-                <strong>{{ getSignedValue(summary().goalDifference) }}</strong>
-                <p>Diff. de buts</p>
-              </article>
-
-              <article class="insight-card accent-opponents">
-                <span class="insight-card__eyebrow">Opposition</span>
-                <strong>{{ summary().uniqueOpponents }}</strong>
-                <p>Adversaires distincts</p>
-              </article>
-
-              <article class="insight-card accent-hosts">
-                <span class="insight-card__eyebrow">Terrains</span>
-                <strong>{{ summary().uniqueHostCountries }}</strong>
-                <p>Pays hotes</p>
-              </article>
-
-              <article class="insight-card accent-clean-sheets">
-                <span class="insight-card__eyebrow">Solidite</span>
-                <strong>{{ summary().cleanSheets }}</strong>
-                <p>Cages inviolees</p>
-              </article>
-
-              <article class="insight-card accent-official">
-                <span class="insight-card__eyebrow">Contexte</span>
-                <strong>{{ summary().officialMatches }}</strong>
-                <p>Matchs officiels ({{ summary().officialRate }}%)</p>
-              </article>
-            </div>
-          </div>
+          </article>
         </section>
 
         @if (isLoading() && results().length === 0) {
@@ -179,3 +278,9 @@
     </div>
   </div>
 </section>
+
+
+
+
+
+

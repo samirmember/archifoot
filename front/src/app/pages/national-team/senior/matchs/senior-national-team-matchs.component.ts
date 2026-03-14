@@ -42,11 +42,14 @@ export class SeniorNationalTeamMatchsComponent {
   private readonly filters$ = new BehaviorSubject<ResultFilters>({});
   private readonly currentPage = signal(1);
 
+  readonly summaryPanelId = 'match-summary-panel';
   readonly results = signal<MatchResult[]>([]);
   readonly isLoading = signal(false);
   readonly hasMoreResults = signal(true);
   readonly summary = signal<MatchResultsSummary>(this.emptySummary());
   readonly isSummaryLoading = signal(false);
+  readonly isSummaryExpanded = signal(false);
+  readonly hasUserToggledSummary = signal(false);
 
   years = this.numberService.generateAllYears();
   competitions = toSignal(
@@ -119,34 +122,42 @@ export class SeniorNationalTeamMatchsComponent {
   getActiveFilterLabels(): string[] {
     const labels: string[] = [];
 
-    if (this.selectedCountry?.name?.trim()) {
-      labels.push(this.selectedCountry.name.trim());
+    const competitionName = this.getSelectedCompetitionName();
+    if (competitionName) {
+      labels.push(competitionName);
     }
 
     if (this.selectedYear !== null) {
       labels.push(String(this.selectedYear));
     }
 
-    const competitionName = this.getSelectedCompetitionName();
-    if (competitionName) {
-      labels.push(competitionName);
+    if (this.selectedCountry?.name?.trim()) {
+      labels.push(this.selectedCountry.name.trim());
     }
 
     return labels;
+  }
+
+  getSearchContextLabel(): string {
+    const labels = this.getActiveFilterLabels();
+    return labels.length > 0 ? labels.join(' • ') : 'Toutes les rencontres';
   }
 
   getSignedValue(value: number): string {
     return value > 0 ? `+${value}` : `${value}`;
   }
 
-  getSummaryDescription(): string {
-    const totalMatches = this.summary().totalMatches;
-    if (totalMatches === 0) {
+  getOfficialContextNote(): string {
+    if (this.summary().totalMatches === 0) {
       return 'Aucune rencontre ne correspond aux filtres actuels.';
     }
 
-    const suffix = totalMatches > 1 ? 's' : '';
-    return `${totalMatches} rencontre${suffix} prises en compte pour ce bilan.`;
+    return "Part des matchs officiels dans l'echantillon actuellement affiche.";
+  }
+
+  toggleSummaryAccordion(): void {
+    this.hasUserToggledSummary.set(true);
+    this.isSummaryExpanded.update((isExpanded) => !isExpanded);
   }
 
   private refreshResults(): void {
@@ -202,3 +213,7 @@ export class SeniorNationalTeamMatchsComponent {
     };
   }
 }
+
+
+
+
