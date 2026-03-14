@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
 import { ApiClientService } from '../core/http/api-client.service';
 import { environment } from '../../environments/environment';
+import { MatchResult } from './result.service';
 
 export interface SeniorCoachListItem {
   id: number;
@@ -80,12 +81,32 @@ export interface SeniorCoach {
   preferredSystem?: string;
   badges: string[];
   highlights: SeniorCoachHighlights;
+  appearanceOptions: {
+    years: number[];
+    competitions: Array<{
+      id: number;
+      name: string;
+    }>;
+  };
+  appearancesMeta: {
+    total: number;
+  };
   biography: string;
   careerPath: SeniorCoachTeamPeriod[];
   competitionStats: SeniorCoachCompetitionStat[];
   milestones: SeniorCoachMilestone[];
   staff: string[];
   futureDataPlaceholders: SeniorCoachFutureDataBlock[];
+}
+
+export interface SeniorCoachAppearancesResponse {
+  items: MatchResult[];
+  meta: {
+    page: number;
+    itemsPerPage: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 @Injectable({ providedIn: 'root' })
@@ -127,6 +148,22 @@ export class CoachService {
         })),
         catchError(() => of(null)),
       );
+  }
+
+  getSeniorNationalTeamCoachAppearances(
+    slug: string,
+    filters: {
+      page?: number;
+      itemsPerPage?: number;
+      seasonName?: string;
+      teamIso3?: string;
+      competitionId?: number;
+    } = {},
+  ): Observable<SeniorCoachAppearancesResponse> {
+    return this.apiClient.get<SeniorCoachAppearancesResponse>(
+      `senior-national-team/coaches/${encodeURIComponent(slug)}/appearances`,
+      filters,
+    );
   }
 
   private toCoachPhotoUrl(photoUrl: string | null | undefined): string | null {

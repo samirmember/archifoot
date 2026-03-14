@@ -178,95 +178,34 @@
 
       <section class="card-like section-block">
         <h2>Rencontres disputées</h2>
-        @if (areAppearancesLoading() && appearances().length === 0) {
-          <app-results-skeleton [count]="3" />
-        } @else if (totalAppearances() === 0) {
-          <p class="muted">Aucune rencontre trouvée pour ce joueur.</p>
-        } @else {
-          @if (shouldShowAppearanceFilters()) {
-            <form class="filter-form">
-              <div class="row">
-                <div class="col-md-4 mb-3">
-                  <div class="form-select-wrapper">
-                    <label for="player-appearance-country" class="form-label">Pays adversaire</label>
-                    <app-country-input
-                      id="player-appearance-country"
-                      name="playerAppearanceCountry"
-                      (selectedCountryChange)="onCountryChange($event)"
-                    />
-                  </div>
-                </div>
-
-                <div class="col-md-4 mb-3">
-                  <div class="form-select-wrapper">
-                    <label for="player-appearance-year" class="form-label">Année</label>
-                    <select
-                      class="form-select"
-                      id="player-appearance-year"
-                      [ngModel]="selectedYear()"
-                      (ngModelChange)="onYearChange($event)"
-                      name="playerAppearanceYear"
-                    >
-                      <option [ngValue]="null">Toutes les années</option>
-                      @for (year of years(); track year) {
-                        <option [ngValue]="year">{{ year }}</option>
-                      }
-                    </select>
-                  </div>
-                </div>
-
-                <div class="col-md-4 mb-3">
-                  <div class="form-select-wrapper">
-                    <label for="player-appearance-competition" class="form-label">Type du match</label>
-                    <select
-                      class="form-select"
-                      id="player-appearance-competition"
-                      [ngModel]="selectedCompetitionId()"
-                      (ngModelChange)="onCompetitionChange($event)"
-                      name="playerAppearanceCompetition"
-                    >
-                      <option [ngValue]="null">Toutes les compétitions</option>
-                      @for (competition of competitions(); track competition.id) {
-                        <option [ngValue]="competition.id">{{ competition.name }}</option>
-                      }
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </form>
-          }
-
-          @if (!appearances().length) {
-            @if (hasActiveAppearanceFilters()) {
-              <p class="muted">Aucune rencontre ne correspond aux filtres sélectionnés.</p>
-            } @else {
-              <p class="muted">Aucune rencontre trouvée pour ce joueur.</p>
-            }
-          } @else {
-            <div class="results-list">
-              @for (appearance of appearances(); track appearance.fixtureId ?? $index) {
-                <app-result [result]="appearance" />
-              }
-            </div>
-
-            <div class="text-center">
-              <button
-                type="button"
-                class="btn btn-primary"
-                [disabled]="areAppearancesLoading() || !hasMoreResults()"
-                (click)="loadMore()"
-              >
-                @if (areAppearancesLoading()) {
-                  Chargement...
-                } @else if (hasMoreResults()) {
-                  Charger des résultats supplémentaires
-                } @else {
-                  Plus aucun résultat
-                }
-              </button>
-            </div>
-          }
+        @if (shouldShowAppearanceFilters()) {
+          <app-match-filters
+            countryInputId="player-appearance-country"
+            countryInputName="playerAppearanceCountry"
+            yearSelectId="player-appearance-year"
+            yearSelectName="playerAppearanceYear"
+            competitionSelectId="player-appearance-competition"
+            competitionSelectName="playerAppearanceCompetition"
+            [selectedCountry]="selectedCountry()"
+            [selectedYear]="selectedYear()"
+            [selectedCompetitionId]="selectedCompetitionId()"
+            [years]="years()"
+            [competitions]="competitions()"
+            (countryChange)="onCountryChange($event)"
+            (yearChange)="onYearChange($event)"
+            (competitionChange)="onCompetitionChange($event)"
+          />
         }
+
+        <app-match-results-section
+          [results]="appearances()"
+          [isLoading]="areAppearancesLoading()"
+          [hasActiveFilters]="hasActiveAppearanceFilters()"
+          emptyMessage="Aucune rencontre trouvée pour ce joueur."
+          emptyFilteredMessage="Aucune rencontre ne correspond aux filtres sélectionnés."
+          [showLoadMore]="shouldShowLoadMoreAppearances()"
+          (loadMore)="loadMore()"
+        />
       </section>
     }
   </div>

@@ -1,0 +1,29 @@
+@if (title()) {
+  <h3 class="results-title mb-4">{{ title() }}</h3>
+}
+
+@if (isLoading() && results().length === 0) {
+  <app-results-skeleton [count]="3" />
+} @else if (!results().length) {
+  <p class="muted">
+    {{ hasActiveFilters() ? emptyFilteredMessage() : emptyMessage() }}
+  </p>
+} @else {
+  <div class="results-list">
+    @for (result of results(); track result.fixtureId ?? $index) {
+      <app-result [result]="result" />
+    }
+  </div>
+}
+
+@if (showLoadMore()) {
+  <div class="text-center load-more">
+    <button type="button" class="btn btn-primary" [disabled]="isLoading()" (click)="onLoadMore()">
+      @if (isLoading()) {
+        Chargement...
+      } @else {
+        {{ loadMoreLabel() }}
+      }
+    </button>
+  </div>
+}

@@ -1,4 +1,4 @@
-import { Component, inject, input, output, viewChild } from '@angular/core';
+import { Component, effect, inject, input, output, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AutoComplete, AutoCompleteModule } from 'primeng/autocomplete';
@@ -17,12 +17,19 @@ export class CountryInputComponent {
   id = input.required<string>();
   name = input.required<string>();
   placeholder = input<string>('Tous les pays');
+  value = input<Country | null>(null);
   countryService = inject(CountryService);
   autoComplete = viewChild<AutoComplete>(AutoComplete);
   selectedCountry: Country | null = null;
   selectedCountryChange = output<Country | null>();
   suggestions: Country[] = [];
   loading = false;
+
+  constructor() {
+    effect(() => {
+      this.selectedCountry = this.value();
+    });
+  }
 
   onSelectedCountryChange(country: Country | null): void {
     this.selectedCountry = country;

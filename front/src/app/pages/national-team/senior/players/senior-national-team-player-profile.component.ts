@@ -1,11 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { ResultComponent } from 'src/app/components/result/result.component';
-import { ResultsSkeletonComponent } from 'src/app/components/results-skeleton/results-skeleton.component';
-import { CountryInputComponent } from 'src/app/layouts/input/country-input.component';
+import { MatchFiltersComponent } from 'src/app/components/match-filters/match-filters.component';
+import { MatchResultsSectionComponent } from 'src/app/components/match-results-section/match-results-section.component';
 import { Country } from 'src/app/models/country.model';
 import { catchError, of } from 'rxjs';
 import GLightbox from 'glightbox';
@@ -27,11 +25,9 @@ interface SelectionPeriodStat {
   selector: 'app-senior-national-team-player-profile',
   imports: [
     CommonModule,
-    FormsModule,
     RouterLink,
-    ResultComponent,
-    ResultsSkeletonComponent,
-    CountryInputComponent,
+    MatchFiltersComponent,
+    MatchResultsSectionComponent,
   ],
   templateUrl: './senior-national-team-player-profile.component.html',
   styleUrl: './senior-national-team-player-profile.component.scss',
@@ -104,6 +100,7 @@ export class SeniorNationalTeamPlayerProfileComponent implements OnDestroy {
       },
     ];
   });
+  readonly shouldShowLoadMoreAppearances = computed(() => this.hasMoreResults());
 
   constructor() {
     effect((onCleanup) => {

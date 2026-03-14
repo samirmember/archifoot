@@ -9,56 +9,23 @@
 
     <div class="row">
       <div class="col-xl-10 mx-auto">
-        <form class="filter-form mb-10">
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <div class="form-select-wrapper">
-                <label for="opposing-country" class="form-label">Pays adversaire</label>
-                <app-country-input
-                  id="country"
-                  name="country"
-                  (selectedCountryChange)="onCountryChange($event)"
-                />
-              </div>
-            </div>
-
-            <div class="col-md-4 mb-3">
-              <div class="form-select-wrapper">
-                <label for="year" class="form-label">Année</label>
-                <select
-                  class="form-select"
-                  id="year"
-                  [(ngModel)]="selectedYear"
-                  (ngModelChange)="onYearChange($event)"
-                  name="year"
-                >
-                  <option [ngValue]="null">Toutes les années</option>
-                  @for (year of years; track $index) {
-                    <option [ngValue]="year">{{ year }}</option>
-                  }
-                </select>
-              </div>
-            </div>
-
-            <div class="col-md-4 mb-3">
-              <div class="form-select-wrapper">
-                <label for="match-type" class="form-label">Type du match</label>
-                <select
-                  class="form-select"
-                  id="match-type"
-                  [(ngModel)]="selectedCompetitionId"
-                  (ngModelChange)="onCompetitionChange($event)"
-                  name="competition"
-                >
-                  <option [ngValue]="null">Toutes les compétitions</option>
-                  @for (competition of competitions(); track competition.id) {
-                    <option [ngValue]="competition.id">{{ competition.name }}</option>
-                  }
-                </select>
-              </div>
-            </div>
-          </div>
-        </form>
+        <app-match-filters
+          countryInputId="country"
+          countryInputName="country"
+          yearSelectId="year"
+          yearSelectName="year"
+          competitionSelectId="match-type"
+          competitionSelectName="competition"
+          [selectedCountry]="selectedCountry"
+          [selectedYear]="selectedYear"
+          [selectedCompetitionId]="selectedCompetitionId"
+          [years]="years"
+          [competitions]="competitions()"
+          variant="card"
+          (countryChange)="onCountryChange($event)"
+          (yearChange)="onYearChange($event)"
+          (competitionChange)="onCompetitionChange($event)"
+        />
 
         @let activeFilterLabels = getActiveFilterLabels();
         <section class="match-insights" [class.is-loading]="isSummaryLoading()">
@@ -250,35 +217,20 @@
           </article>
         </section>
 
-        @if (isLoading() && results().length === 0) {
-          <app-results-skeleton [count]="3" />
-        } @else {
-          <app-results-list [list]="results()" />
-        }
-
-        @if (results().length > 0) {
-          <div class="text-center">
-            <button
-              type="button"
-              class="btn btn-primary"
-              [disabled]="isLoading() || !hasMoreResults()"
-              (click)="loadMore()"
-            >
-              @if (isLoading()) {
-                Chargement...
-              } @else if (hasMoreResults()) {
-                Charger des résultats supplémentaires
-              } @else {
-                Plus aucun résultat
-              }
-            </button>
-          </div>
-        }
+        <app-match-results-section
+          title="Résultats"
+          [results]="results()"
+          [isLoading]="isLoading()"
+          [hasActiveFilters]="activeFilterLabels.length > 0"
+          emptyMessage="Aucun résultat disponible."
+          emptyFilteredMessage="Aucun résultat trouvé avec les filtres sélectionnés."
+          [showLoadMore]="hasMoreResults()"
+          (loadMore)="loadMore()"
+        />
       </div>
     </div>
   </div>
 </section>
-
 
 
 

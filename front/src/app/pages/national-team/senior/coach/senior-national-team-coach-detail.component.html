@@ -145,6 +145,39 @@
           </div>
         </article>
       </div>
+
+      <article class="panel panel--full-width">
+        <h2>Rencontres dirigées</h2>
+
+        @if (shouldShowAppearanceFilters()) {
+          <app-match-filters
+            countryInputId="coach-appearance-country"
+            countryInputName="coachAppearanceCountry"
+            yearSelectId="coach-appearance-year"
+            yearSelectName="coachAppearanceYear"
+            competitionSelectId="coach-appearance-competition"
+            competitionSelectName="coachAppearanceCompetition"
+            [selectedCountry]="selectedCountry()"
+            [selectedYear]="selectedYear()"
+            [selectedCompetitionId]="selectedCompetitionId()"
+            [years]="years()"
+            [competitions]="competitions()"
+            (countryChange)="onCountryChange($event)"
+            (yearChange)="onYearChange($event)"
+            (competitionChange)="onCompetitionChange($event)"
+          />
+        }
+
+        <app-match-results-section
+          [results]="appearances()"
+          [isLoading]="areAppearancesLoading()"
+          [hasActiveFilters]="hasActiveAppearanceFilters()"
+          emptyMessage="Aucune rencontre trouvée pour cet entraîneur."
+          emptyFilteredMessage="Aucune rencontre ne correspond aux filtres sélectionnés."
+          [showLoadMore]="hasMoreResults()"
+          (loadMore)="loadMore()"
+        />
+      </article>
     }
   </div>
 </section>

@@ -1,0 +1,51 @@
+<form class="filter-form" [class.filter-form--card]="variant() === 'card'">
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <div class="form-select-wrapper">
+        <label [for]="countryInputId()" class="form-label">Pays adversaire</label>
+        <app-country-input
+          [id]="countryInputId()"
+          [name]="countryInputName()"
+          [value]="selectedCountry()"
+          (selectedCountryChange)="onCountryChange($event)"
+        />
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+      <div class="form-select-wrapper">
+        <label [for]="yearSelectId()" class="form-label">Année</label>
+        <select
+          class="form-select"
+          [id]="yearSelectId()"
+          [ngModel]="selectedYear()"
+          (ngModelChange)="onYearChange($event)"
+          [name]="yearSelectName()"
+        >
+          <option [ngValue]="null">Toutes les années</option>
+          @for (year of years(); track year) {
+            <option [ngValue]="year">{{ year }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+      <div class="form-select-wrapper">
+        <label [for]="competitionSelectId()" class="form-label">Type du match</label>
+        <select
+          class="form-select"
+          [id]="competitionSelectId()"
+          [ngModel]="selectedCompetitionId()"
+          (ngModelChange)="onCompetitionChange($event)"
+          [name]="competitionSelectName()"
+        >
+          <option [ngValue]="null">Toutes les compétitions</option>
+          @for (competition of competitions(); track competition.id) {
+            <option [ngValue]="competition.id">{{ competition.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+</form>

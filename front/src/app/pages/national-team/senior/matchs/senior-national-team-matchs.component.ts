@@ -1,11 +1,10 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
-import { AutoCompleteModule } from 'primeng/autocomplete';
 import { BehaviorSubject, catchError, of } from 'rxjs';
 import { Country } from '../../../../models/country.model';
 import { NumberService } from '../../../../../shared/number.service';
-import { CountryInputComponent } from 'src/app/layouts/input/country-input.component';
+import { MatchFiltersComponent } from 'src/app/components/match-filters/match-filters.component';
+import { MatchResultsSectionComponent } from 'src/app/components/match-results-section/match-results-section.component';
 import { CompetitionService } from 'src/app/services/competition.service';
 import {
   MatchResult,
@@ -13,17 +12,12 @@ import {
   ResultFilters,
   ResultService,
 } from 'src/app/services/result.service';
-import { ResultsListComponent } from 'src/app/components/results-list/results-list.component';
-import { ResultsSkeletonComponent } from 'src/app/components/results-skeleton/results-skeleton.component';
 
 @Component({
   selector: 'app-senior-national-team-matchs',
   imports: [
-    AutoCompleteModule,
-    FormsModule,
-    CountryInputComponent,
-    ResultsListComponent,
-    ResultsSkeletonComponent,
+    MatchFiltersComponent,
+    MatchResultsSectionComponent,
   ],
   templateUrl: './senior-national-team-matchs.component.html',
   styleUrl: './senior-national-team-matchs.component.scss',
@@ -213,7 +207,5 @@ export class SeniorNationalTeamMatchsComponent {
     };
   }
 }
-
-
 
 
