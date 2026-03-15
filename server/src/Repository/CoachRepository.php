@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Coach;
 use App\Entity\Role;
+use App\Service\FixtureOutcomeEnum;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -236,6 +237,7 @@ class CoachRepository extends ServiceEntityRepository
             "SELECT
                 f.id AS fixtureId,
                 f.match_date AS match_date,
+                algeriaParticipant.outcome AS outcome_algeria,
                 COALESCE(
                     CASE
                         WHEN scoreA.team_id = ssf.team_id THEN scoreA.score
@@ -273,12 +275,19 @@ class CoachRepository extends ServiceEntityRepository
         foreach ($rows as $index => $row) {
             $for = (int) $row['score_algeria'];
             $against = (int) $row['score_opponent'];
+            $outcome = isset($row['outcome_algeria']) ? FixtureOutcomeEnum::tryFrom((int) $row['outcome_algeria']) : null;
 
             $stats['matchCount']++;
             $stats['goalsFor'] += $for;
             $stats['goalsAgainst'] += $against;
 
-            if ($for > $against) {
+            if ($outcome !== null) {
+                match ($outcome) {
+                    FixtureOutcomeEnum::WINNER => $stats['wins']++,
+                    FixtureOutcomeEnum::DRAW => $stats['draws']++,
+                    FixtureOutcomeEnum::LOSER => $stats['losses']++,
+                };
+            } elseif ($for > $against) {
                 $stats['wins']++;
             } elseif ($for === $against) {
                 $stats['draws']++;
