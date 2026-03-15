@@ -56,6 +56,16 @@
                 <span>{{ asBadgeLabel(profile()!.profile.deathDate, 'Date de naissance inconnue') }}</span>
               </article>
             }
+            @if (profile()!.mainClubs?.length) {
+              <article class="identity-card--fill-right">
+                <label>Clubs principaux</label>
+                <div class="identity-badges">
+                  @for (club of profile()!.mainClubs!; track club) {
+                    <span class="identity-badge">{{ club }}</span>
+                  }
+                </div>
+              </article>
+            }
           </div>
         </div>
       </article>

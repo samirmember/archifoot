@@ -75,6 +75,7 @@ class PlayerRepository extends ServiceEntityRepository
             'fullName' => $matchedPlayer['fullName'],
             'photoUrl' => $matchedPlayer['photoUrl'],
             'featurePhotoUrl' => $matchedPlayer['featurePhotoUrl'],
+            'mainClubs' => $this->normalizeMainClubs($matchedPlayer['mainClubs'] ?? null),
             'galleryPhotos' => $galleryPhotos,
             'profile' => [
                 'birthDate' => $this->dateFormatter->short($matchedPlayer['birthDate']),
@@ -270,6 +271,7 @@ class PlayerRepository extends ServiceEntityRepository
                 'person.fullName AS fullName',
                 'person.photoUrl AS photoUrl',
                 'person.featurePhotoUrl AS featurePhotoUrl',
+                'p.mainClubs AS mainClubs',
                 'person.birthDate AS birthDate',
                 'person.deathDate AS deathDate',
                 'birthCity.name AS birthCityName',
@@ -561,6 +563,46 @@ class PlayerRepository extends ServiceEntityRepository
         );
 
         return (int) ($result['duelsWon'] ?? 0);
+    }
+
+    /** @return array<int, string>|null */
+    private function normalizeMainClubs(mixed $value): ?array
+    {
+        if (is_string($value)) {
+            try {
+                $value = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+            } catch (\JsonException) {
+                return null;
+            }
+        }
+
+        if (!is_array($value)) {
+            return null;
+        }
+
+        $clubs = [];
+        $seen = [];
+
+        foreach ($value as $club) {
+            if (!is_string($club) && !is_numeric($club)) {
+                continue;
+            }
+
+            $trimmedClub = trim((string) $club);
+            if ($trimmedClub == '') {
+                continue;
+            }
+
+            $normalizedClub = mb_strtolower($trimmedClub);
+            if (isset($seen[$normalizedClub])) {
+                continue;
+            }
+
+            $seen[$normalizedClub] = true;
+            $clubs[] = $trimmedClub;
+        }
+
+        return $clubs === [] ? null : $clubs;
     }
 
     private function slugify(string $value): string

@@ -16,6 +16,7 @@ export interface SeniorPlayerDetail {
   fullName: string;
   photoUrl: string | null;
   featurePhotoUrl: string | null;
+  mainClubs: string[] | null;
   galleryPhotos: Array<{
     id: number;
     imageUrl: string;
@@ -195,6 +196,7 @@ export class PlayerService {
           ...profile,
           photoUrl: this.toPlayerPhotoUrl(profile.photoUrl),
           featurePhotoUrl: this.toPlayerPhotoUrl(profile.featurePhotoUrl, 'feature'),
+          mainClubs: this.normalizeStringList(profile.mainClubs),
           galleryPhotos: (profile.galleryPhotos ?? []).map((photo) => ({
             ...photo,
             imageUrl: this.toPlayerPhotoUrl(photo.imageUrl, 'gallery') ?? photo.imageUrl,
@@ -221,6 +223,33 @@ export class PlayerService {
       `senior-national-team/players/${encodeURIComponent(slug)}/appearances`,
       filters,
     );
+  }
+
+  private normalizeStringList(values: unknown): string[] | null {
+    if (!Array.isArray(values)) {
+      return null;
+    }
+
+    const uniqueValues: string[] = [];
+    const seen = new Set<string>();
+
+    for (const value of values) {
+      const trimmedValue =
+        typeof value === 'string' || typeof value === 'number' ? String(value).trim() : '';
+      if (!trimmedValue) {
+        continue;
+      }
+
+      const normalizedValue = trimmedValue.toLocaleLowerCase();
+      if (seen.has(normalizedValue)) {
+        continue;
+      }
+
+      seen.add(normalizedValue);
+      uniqueValues.push(trimmedValue);
+    }
+
+    return uniqueValues.length > 0 ? uniqueValues : null;
   }
 
   private extractDuelsWon(placeholders: StatPlaceholder[] | undefined): number | null {

@@ -62,11 +62,12 @@
   }
 
   .identity-grid {
-    display: grid;
+    display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 
     article {
+      flex: 1 1 180px;
       padding: 0.65rem 0.75rem;
       border-radius: 10px;
       background: #f4f7fb;
@@ -88,6 +89,30 @@
       font-weight: 500;
       font-size: 0.92rem;
       line-height: 1.25;
+    }
+
+    .identity-card--fill-right {
+      flex: 999 1 260px;
+    }
+
+    .identity-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .identity-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.9rem;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid #d8e3f4;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #2b426f;
+      font-size: 0.82rem;
+      font-weight: 600;
+      line-height: 1.2;
     }
   }
 
