@@ -3,13 +3,14 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatchScoresheetDetailsResponse, MatchLineupItem, MatchScoresheetParticipant } from 'src/app/models/match-scoresheet.model';
 import { buildCompetitionLabels, MatchResult } from 'src/app/services/result.service';
 import { MatchScoresheetService } from 'src/app/services/match-scoresheet.service';
-import { FlagComponent } from 'src/app/layouts/flag/flag.component';
 import { StaffCardComponent } from 'src/app/components/staff-card/staff-card.component';
 import { DatePipe } from '@angular/common';
 
+type MatchDetailsTab = 'lineups' | 'changes';
+
 @Component({
   selector: 'app-senior-national-team-match-detail',
-  imports: [RouterLink, DatePipe, FlagComponent, StaffCardComponent],
+  imports: [RouterLink, DatePipe, StaffCardComponent],
   templateUrl: './senior-national-team-match-detail.component.html',
   styleUrl: './senior-national-team-match-detail.component.scss',
 })
@@ -20,6 +21,7 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
   readonly isLoading = signal(true);
   readonly error = signal<string | null>(null);
   readonly details = signal<MatchScoresheetDetailsResponse | null>(null);
+  readonly activeTab = signal<MatchDetailsTab>('lineups');
 
   readonly headerResult = computed<MatchResult>(() => {
     const fixture = this.details()?.fixture;
@@ -57,6 +59,8 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
   });
 
   readonly competitionLabel = computed(() => this.headerResult().competitionLabel?.trim() ?? '');
+  readonly headerTopLeft = computed(() => this.competitionLabel());
+  readonly headerDate = computed(() => this.headerResult().date);
   readonly locationLabel = computed(() =>
     [this.headerResult().stadium, this.headerResult().city, this.headerResult().countryStadiumName]
       .filter(this.isNonEmptyString)
@@ -65,6 +69,40 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
 
   readonly iso2A = computed(() => (this.headerResult().countryCodeA ?? '').toLowerCase());
   readonly iso2B = computed(() => (this.headerResult().countryCodeB ?? '').toLowerCase());
+  readonly winner = computed<'A' | 'B' | null>(() => {
+    const result = this.headerResult();
+
+    if (!result.played || result.scoreA === null || result.scoreB === null || result.scoreA === result.scoreB) {
+      return null;
+    }
+
+    return result.scoreA > result.scoreB ? 'A' : 'B';
+  });
+
+  readonly headerTeams = computed(() => [
+    {
+      key: 'A' as const,
+      name: this.headerResult().countryA,
+      iso2: this.iso2A(),
+      score: this.headerResult().scoreA,
+      isWinner: this.winner() === 'A',
+    },
+    {
+      key: 'B' as const,
+      name: this.headerResult().countryB,
+      iso2: this.iso2B(),
+      score: this.headerResult().scoreB,
+      isWinner: this.winner() === 'B',
+    },
+  ]);
+
+  readonly scoreLabel = computed(() => {
+    if (this.headerResult().scoreA !== null && this.headerResult().scoreB !== null) {
+      return this.headerResult().played ? 'Score final' : 'Score';
+    }
+
+    return this.headerResult().played ? 'Match joué' : 'À venir';
+  });
 
   readonly matchMeta = computed(() => {
     const fixture = this.details()?.fixture;
@@ -96,6 +134,7 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
 
   readonly lineupAlgeria = computed(() => this.buildLineupForTeam(this.details()?.fixture?.teamA?.teamName));
   readonly lineupOpponent = computed(() => this.buildLineupForTeam(this.details()?.fixture?.teamB?.teamName));
+  readonly lineupTeams = computed(() => [this.lineupAlgeria(), this.lineupOpponent()]);
 
   readonly isTeamAAlgeria = computed(() => {
     const teamA = this.details()?.fixture?.teamA;
@@ -130,6 +169,22 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
 
   readonly teamAChangesTitle = computed(() => this.isTeamAAlgeria() ? 'Les changements (Algérie)' : "Changements de l'équipe adverse");
   readonly teamBChangesTitle = computed(() => this.isTeamAAlgeria() ? "Changements de l'équipe adverse" : 'Les changements (Algérie)');
+  readonly changeTeams = computed(() => [
+    {
+      key: 'A' as const,
+      title: this.teamAChangesTitle(),
+      name: this.headerResult().countryA,
+      iso2: this.iso2A(),
+      changes: this.teamAChanges(),
+    },
+    {
+      key: 'B' as const,
+      title: this.teamBChangesTitle(),
+      name: this.headerResult().countryB,
+      iso2: this.iso2B(),
+      changes: this.teamBChanges(),
+    },
+  ]);
 
   readonly timelineEvents = computed(() => {
     const goals = this.details()?.goals ?? [];
@@ -247,6 +302,10 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
     });
   }
 
+  setActiveTab(tab: MatchDetailsTab): void {
+    this.activeTab.set(tab);
+  }
+
   private buildLineupForTeam(teamName: string | null | undefined): { title: string; iso2: string; players: Array<{ role: string; name: string; number: string; captain?: boolean | null }> } {
     const fixture = this.details()?.fixture;
     const normalizedTeamName = (teamName ?? '').toLowerCase();
@@ -279,6 +338,20 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
     if (v.includes('mid')) return 'MF';
     if (v.includes('for') || v.includes('att')) return 'FW';
     return 'PL';
+  }
+
+  flagUrl(iso2: string | null | undefined): string | null {
+    const normalizedIso2 = (iso2 ?? '').toLowerCase();
+
+    if (!normalizedIso2) {
+      return null;
+    }
+
+    if (normalizedIso2 === 'su') {
+      return 'assets/img/urss-flag.png';
+    }
+
+    return `https://flagcdn.com/w160/${normalizedIso2}.png`;
   }
 
   private findCaptain(teamName: string | null | undefined): string | null {

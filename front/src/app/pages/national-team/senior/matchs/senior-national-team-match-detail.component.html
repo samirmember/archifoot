@@ -11,48 +11,85 @@
   }
 
   <article class="summary-card card shadow-sm mb-4">
-    <div class="card-body p-6 p-lg-5">
-      <div class="summary-head text-center">
-        <p class="date" [title]="'Match n°' + headerResult().externalMatchNo">{{ headerResult().date | date: 'd MMM y' }}</p>
-
-        <div class="summary-versus">
-          <div class="team-side team-side-a">
-            <app-flag
-              [position]="'A'"
-              [countryName]="headerResult().countryA"
-              [iso2]="iso2A()"
-              [category]="headerResult().categoryA"
-            />
-          </div>
-
-          <div class="score-pill">{{ headerResult().scoreA ?? 0 }} - {{ headerResult().scoreB ?? 0 }}</div>
-
-          <div class="team-side team-side-b">
-            <app-flag
-              [position]="'B'"
-              [countryName]="headerResult().countryB"
-              [iso2]="iso2B()"
-              [category]="headerResult().categoryB"
-            />
-          </div>
-        </div>
-
-        @if (competitionLabel()) {
-          <p class="competition mb-1">{{ competitionLabel() }}</p>
+    <div class="summary-card-top">
+      <div class="summary-meta">
+        @if (headerTopLeft()) {
+          <p class="summary-meta-label mb-0">{{ headerTopLeft() }}</p>
+        } @else {
+          <span></span>
         }
-        @if (locationLabel()) {
-          <p class="location mb-0"><i class="uil uil-map-marker"></i> {{ locationLabel() }}.</p>
+
+        @if (headerDate()) {
+          <p class="summary-date mb-0" [title]="'Match n°' + headerResult().externalMatchNo">{{ headerDate() | date: 'd MMMM y' }}</p>
         }
       </div>
 
-      @if (headerResult().notes) {
-        <div class="notes-banner mt-3">
-          <h6 class="mb-1">Notes</h6>
-          <p class="mb-0">{{ headerResult().notes }}</p>
+      <div class="summary-teams">
+        <div class="summary-team" [class.is-winner]="headerTeams()[0].isWinner">
+          <div class="summary-flag-shell" [class.is-winner]="headerTeams()[0].isWinner">
+            @if (flagUrl(headerTeams()[0].iso2); as flagSrc) {
+              <img
+                class="summary-flag"
+                [src]="flagSrc"
+                [alt]="'Drapeau ' + headerTeams()[0].name"
+                width="96"
+                height="64"
+              />
+            }
+            @if (headerTeams()[0].isWinner) {
+              <span class="winner-badge">GAGNANT</span>
+            }
+          </div>
+          <h2 class="summary-team-name mb-0">{{ headerTeams()[0].name }}</h2>
         </div>
-      }
+
+        <div class="summary-score-block">
+          <div class="summary-score">
+            <span>{{ headerTeams()[0].score ?? 0 }}</span>
+            <span class="summary-score-separator">-</span>
+            <span>{{ headerTeams()[1].score ?? 0 }}</span>
+          </div>
+          <span class="summary-score-label">{{ scoreLabel() }}</span>
+        </div>
+
+        <div class="summary-team" [class.is-winner]="headerTeams()[1].isWinner">
+          <div class="summary-flag-shell" [class.is-winner]="headerTeams()[1].isWinner">
+            @if (flagUrl(headerTeams()[1].iso2); as flagSrc) {
+              <img
+                class="summary-flag"
+                [src]="flagSrc"
+                [alt]="'Drapeau ' + headerTeams()[1].name"
+                width="96"
+                height="64"
+              />
+            }
+            @if (headerTeams()[1].isWinner) {
+              <span class="winner-badge">GAGNANT</span>
+            }
+          </div>
+          <h2 class="summary-team-name mb-0">{{ headerTeams()[1].name }}</h2>
+        </div>
+      </div>
+    </div>
+
+    @if (locationLabel()) {
+      <div class="summary-footer">
+        <i class="uil uil-map-marker"></i>
+        <span>{{ locationLabel() }}</span>
+      </div>
+    }
+  </article>
+      @if (headerResult().notes) {
+  <article class="card shadow-sm mb-4">
+    <div class="card-body p-6">
+      <h3 class="section-title mb-3">Notes</h3>
+      <p class="notes-banner mb-0">{{ headerResult().notes }}</p>
+
+              
     </div>
   </article>
+
+    }
 
   @if (officials().length > 0) {
   <article class="card shadow-sm mb-4">
@@ -153,111 +190,128 @@
     </div>
   </div>
 
-  <article class="card shadow-sm mb-4">
-    <div class="card-body p-6">
-      <h3 class="section-title mb-4"><i class="uil uil-layer-group"></i> Compositions de départ</h3>
-      <div class="row g-4">
-        <div class="col-lg-6">
-          <div class="lineup-card">
-            <header>
-              <span>{{ lineupAlgeria().title }}</span>
-              @if (lineupAlgeria().iso2) {
-                <img
-                  class="team-flag"
-                  [src]="'https://flagcdn.com/w40/' + lineupAlgeria().iso2 + '.png'"
-                  [alt]="lineupAlgeria().title"
-                  width="24"
-                  height="16"
-                />
-              }
-            </header>
-            <ul>
-              @for (player of lineupAlgeria().players.slice(0, 11); track player.name) {
-                <li [class.captain-row]="player.captain">
-                  <span class="role" [class.captain]="player.captain"></span>
-                  <strong>
-                    {{ player.name }}
-                    @if (player.captain) {
-                      <span class="captain-mark"><i class="uil uil-crown"></i> CAP</span>
-                    }
-                  </strong>
-                  <!-- <span class="number">{{ player.number }}</span> -->
-                </li>
-              }
-            </ul>
-          </div>
-        </div>
+  <article class="card shadow-sm mb-4 details-tabs-card">
+    <div class="details-tabs-header" role="tablist" aria-label="Détails de la feuille de match">
+      <button
+        type="button"
+        class="details-tab-trigger"
+        [class.is-active]="activeTab() === 'lineups'"
+        [attr.aria-selected]="activeTab() === 'lineups'"
+        aria-controls="match-detail-lineups"
+        id="match-detail-lineups-tab"
+        role="tab"
+        (click)="setActiveTab('lineups')"
+      >
+        Compositions de départ
+      </button>
+      <button
+        type="button"
+        class="details-tab-trigger"
+        [class.is-active]="activeTab() === 'changes'"
+        [attr.aria-selected]="activeTab() === 'changes'"
+        aria-controls="match-detail-changes"
+        id="match-detail-changes-tab"
+        role="tab"
+        (click)="setActiveTab('changes')"
+      >
+        Changements
+      </button>
+    </div>
 
-        <div class="col-lg-6">
-          <div class="lineup-card">
-            <header>
-              <span>{{ lineupOpponent().title }}</span>
-              @if (lineupOpponent().iso2) {
-                <img
-                  class="team-flag"
-                  [src]="'https://flagcdn.com/w40/' + lineupOpponent().iso2 + '.png'"
-                  [alt]="lineupOpponent().title"
-                  width="24"
-                  height="16"
-                />
-              }
-            </header>
-            <ul>
-              @for (player of lineupOpponent().players.slice(0, 11); track player.name) {
-                <li [class.captain-row]="player.captain">
-                  <span class="role" [class.captain]="player.captain"></span>
-                  <strong>
-                    {{ player.name }}
-                    @if (player.captain) {
-                      <span class="captain-mark"><i class="uil uil-crown"></i> CAP</span>
+    <div class="card-body p-0">
+      @if (activeTab() === 'lineups') {
+        <div
+          class="details-tab-panel"
+          id="match-detail-lineups"
+          role="tabpanel"
+          aria-labelledby="match-detail-lineups-tab"
+        >
+          <div class="row g-4 p-6">
+            @for (lineup of lineupTeams(); track lineup.title) {
+              <div class="col-lg-6">
+                <div class="lineup-card">
+                  <header>
+                    <div class="lineup-team-head">
+                      @if (flagUrl(lineup.iso2); as flagSrc) {
+                        <img
+                          class="team-flag"
+                          [src]="flagSrc"
+                          [alt]="lineup.title"
+                          width="24"
+                          height="16"
+                        />
+                      }
+                      <span>{{ lineup.title }}</span>
+                    </div>
+                  </header>
+                  <ul>
+                    @for (player of lineup.players.slice(0, 11); track player.name + player.number) {
+                      <li [class.captain-row]="player.captain">
+                        <span class="role" [class.captain]="player.captain"></span>
+                        <strong>
+                          {{ player.name }}
+                          @if (player.captain) {
+                            <span class="captain-mark"><i class="uil uil-crown"></i> CAP</span>
+                          }
+                        </strong>
+                        
+                      </li>
                     }
-                  </strong>
-                  <!-- <span class="number">{{ player.number }}</span> -->
-                </li>
-              }
-            </ul>
+                  </ul>
+                </div>
+              </div>
+            }
           </div>
         </div>
-      </div>
+      } @else {
+        <div
+          class="details-tab-panel"
+          id="match-detail-changes"
+          role="tabpanel"
+          aria-labelledby="match-detail-changes-tab"
+        >
+          <div class="row g-4 p-6">
+            @for (team of changeTeams(); track team.key) {
+              <div class="col-lg-6">
+                <article class="changes-card h-100">
+                  <header class="changes-card-header">
+                    <div class="lineup-team-head">
+                      @if (flagUrl(team.iso2); as flagSrc) {
+                        <img
+                          class="team-flag"
+                          [src]="flagSrc"
+                          [alt]="team.name"
+                          width="24"
+                          height="16"
+                        />
+                      }
+                      <div>
+                        <h3 class="changes-team-name mb-0">{{ team.name }}</h3>
+                      </div>
+                    </div>
+                  </header>
+
+                  @if (team.changes.length > 0) {
+                    <ul class="simple-list">
+                      @for (change of team.changes; track change.minute + change.playerOut + change.playerIn) {
+                        <li>
+                          <!-- @if (change.minute) {
+                            <span class="minute">{{ change.minute }}</span>
+                          } -->
+                          <span class="change-chip out"><i class="uil uil-arrow-circle-left"></i> {{ change.playerOut }}</span>
+                          <span class="change-chip in"><i class="uil uil-arrow-circle-right"></i> {{ change.playerIn }}</span>
+                        </li>
+                      }
+                    </ul>
+                  } @else {
+                    <div class="empty-state">Aucun changement enregistré.</div>
+                  }
+                </article>
+              </div>
+            }
+          </div>
+        </div>
+      }
     </div>
   </article>
-
-  <div class="row g-4 mb-4">
-    @if (teamAChanges().length > 0) {
-    <div [class.col-lg-6]="teamBChanges().length > 0" [class.col-lg-12]="teamBChanges().length === 0">
-      <article class="card shadow-sm h-100">
-        <div class="card-body" [class.p-6]="teamBChanges().length > 0" [class.p-12]="teamBChanges().length === 0">
-          <h3 class="section-title mb-3">{{ teamAChangesTitle() }}</h3>
-          <ul class="simple-list">
-            @for (change of teamAChanges(); track change) {
-              <li>
-                <!-- <span class="minute">{{ change.minute }}</span> -->
-                <span class="change-chip out"><i class="uil uil-arrow-circle-left"></i> {{ change.playerOut }}</span>
-                <span class="change-chip in"><i class="uil uil-arrow-circle-right"></i> {{ change.playerIn }}</span>
-              </li>
-            }
-          </ul>
-        </div>
-      </article>
-    </div>
-    }
-    @if (teamBChanges().length > 0) {
-    <div [class.col-lg-6]="teamAChanges().length > 0" [class.col-lg-12]="teamAChanges().length === 0">
-      <article class="card shadow-sm h-100">
-        <div class="card-body">
-          <h3 class="section-title mb-3">{{ teamBChangesTitle() }}</h3>
-          <ul class="simple-list">
-            @for (change of teamBChanges(); track change) {
-              <li>
-                <!-- <span class="minute">{{ change.minute }}</span> -->
-                <span class="change-chip out"><i class="uil uil-arrow-circle-left"></i> {{ change.playerOut }}</span>
-                <span class="change-chip in"><i class="uil uil-arrow-circle-right"></i> {{ change.playerIn }}</span>
-              </li>
-            }
-          </ul>
-        </div>
-      </article>
-    </div>
-    }
-  </div>
 </section>
