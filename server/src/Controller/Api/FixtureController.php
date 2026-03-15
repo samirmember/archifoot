@@ -63,6 +63,38 @@ class FixtureController extends AbstractController
             ['fixtureId' => $fixtureId]
         );
 
+        $competitions = $connection->fetchAllAssociative(
+            <<<'SQL'
+                SELECT
+                    c.id,
+                    c.name
+                FROM fixture_competition fc
+                INNER JOIN competition c ON c.id = fc.competition_id
+                WHERE fc.fixture_id = :fixtureId
+                ORDER BY c.name ASC, c.id ASC
+            SQL,
+            ['fixtureId' => $fixtureId]
+        );
+
+        $stages = $connection->fetchAllAssociative(
+            <<<'SQL'
+                SELECT
+                    s.id AS stage_id,
+                    s.name AS stage_name,
+                    e.id AS edition_id,
+                    e.name AS edition_name,
+                    c.id AS competition_id,
+                    c.name AS competition_name
+                FROM fixture_stage fs
+                INNER JOIN stage s ON s.id = fs.stage_id
+                LEFT JOIN edition e ON e.id = s.edition_id
+                LEFT JOIN competition c ON c.id = e.competition_id
+                WHERE fs.fixture_id = :fixtureId
+                ORDER BY s.sort_order ASC, s.name ASC, s.id ASC
+            SQL,
+            ['fixtureId' => $fixtureId]
+        );
+
         $participantA = null;
         $participantB = null;
 
@@ -74,6 +106,34 @@ class FixtureController extends AbstractController
                 $participantB = $participant;
             }
         }
+
+        $competitions = array_map(
+            static fn (array $competition): array => [
+                'id' => isset($competition['id']) ? (int) $competition['id'] : null,
+                'name' => $competition['name'] ?? null,
+            ],
+            $competitions
+        );
+
+        $stages = array_map(
+            static fn (array $stage): array => [
+                'id' => isset($stage['stage_id']) ? (int) $stage['stage_id'] : null,
+                'name' => $stage['stage_name'] ?? null,
+                'edition' => $stage['edition_id'] === null && $stage['edition_name'] === null
+                    ? null
+                    : [
+                        'id' => isset($stage['edition_id']) ? (int) $stage['edition_id'] : null,
+                        'name' => $stage['edition_name'] ?? null,
+                        'competition' => $stage['competition_id'] === null && $stage['competition_name'] === null
+                            ? null
+                            : [
+                                'id' => isset($stage['competition_id']) ? (int) $stage['competition_id'] : null,
+                                'name' => $stage['competition_name'] ?? null,
+                            ],
+                    ],
+            ],
+            $stages
+        );
 
         $scoresheet = $connection->fetchAssociative(
             <<<'SQL'
@@ -224,6 +284,8 @@ class FixtureController extends AbstractController
         return $this->json([
             'fixture' => [
                 ...$fixture,
+                'competitions' => $competitions,
+                'stages' => $stages,
                 'teamA' => $participantA,
                 'teamB' => $participantB,
             ],
