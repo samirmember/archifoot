@@ -11,3 +11,5 @@
 /public/uploads/**/*
 !/public/uploads/**/
 !/public/uploads/**/*.webp
+!/public/uploads/**/*.jpg
+!/public/uploads/**/*.avif
