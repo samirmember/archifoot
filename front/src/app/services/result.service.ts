@@ -61,6 +61,37 @@ export interface MatchResultsSummary {
   officialRate: number;
 }
 
+type CompetitionContextFixture = Pick<ApiFixture, 'competitions' | 'stages' | 'externalMatchNo'>;
+
+export function buildCompetitionLabels(fixture: CompetitionContextFixture): string[] {
+  const competitions = fixture.competitions ?? [];
+  const stages = fixture.stages ?? [];
+
+  if (competitions.length === 0) return [];
+
+  if (stages.length > 0 && stages.length !== competitions.length) {
+    console.warn(
+      `[getCompetitionContextLabels] Incohérence: competitions=${competitions.length}, stages=${stages.length} (externalMatchNo=${fixture.externalMatchNo ?? 'n/a'})`,
+    );
+  }
+
+  return competitions
+    .map((comp, i) => {
+      const compName = (comp?.name ?? '').trim();
+      const stage = stages[i];
+
+      const stageName = (stage?.name ?? '').trim();
+      const editionName = (stage?.edition?.name ?? '').trim();
+
+      if (!stageName && !editionName) return compName;
+
+      return [stageName.charAt(0).toUpperCase() + stageName.slice(1), compName, editionName]
+        .filter(Boolean)
+        .join(' ');
+    })
+    .filter(Boolean);
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -103,52 +134,10 @@ export class ResultService {
       stadium: fixture.stadiumName ?? null,
       countryStadiumName: fixture.countryStadiumName,
       notes: fixture.notes ?? null,
-      competitionLabel: this.getCompetitionLabels(fixture).join(' | '),
+      competitionLabel: buildCompetitionLabels(fixture).join(' | '),
       categoryA: fixture.categories[0].name ?? '',
       categoryB: fixture.categories[1].name ?? '',
     };
-  }
-
-  /**
-   * Construit les libellés "Stage Compétition Édition" par compétition.
-   * - Si stages/editions absents -> ["Nom compétition", ...]
-   * - Sinon -> ["Stage Nom compétition Édition", ...]
-   */
-  private getCompetitionLabels(fixture: ApiFixture): string[] {
-    const competitions = fixture.competitions ?? [];
-    const stages = fixture.stages ?? [];
-
-    // Si pas de compétition => rien à construire
-    if (competitions.length === 0) return [];
-
-    // Contrôle de cohérence (si stages fournis)
-    if (stages.length > 0 && stages.length !== competitions.length) {
-      console.warn(
-        `[getCompetitionContextLabels] Incohérence: competitions=${competitions.length}, stages=${stages.length} (externalMatchNo=${fixture.externalMatchNo ?? 'n/a'})`,
-      );
-    }
-
-    return competitions
-      .map((comp, i) => {
-        const compName = (comp?.name ?? '').trim();
-        const stage = stages[i];
-
-        const stageName = (stage?.name ?? '').trim();
-        const editionName = (stage?.edition?.name ?? '').trim();
-
-        // Si on veut être strict sur "édition doit correspondre à la compétition",
-        // on peut vérifier stage.edition?.competition?.id === comp.id (si ids présents).
-        // Ici, on reste best-effort.
-
-        // Cas "match amical" : pas de stage + pas d'édition => juste le nom compétition
-        if (!stageName && !editionName) return compName;
-
-        // Concat propre (sans doubles espaces)
-        return [stageName.charAt(0).toUpperCase() + stageName.slice(1), compName, editionName]
-          .filter(Boolean)
-          .join(' ');
-      })
-      .filter(Boolean); // au cas où compName est vide/null
   }
 
   private buildFixtureFilters(filters?: ResultFilters): Record<string, string> {

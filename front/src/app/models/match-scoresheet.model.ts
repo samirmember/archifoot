@@ -1,3 +1,5 @@
+import { ApiFixtureStage, ApiFixtureStageCompetition } from './api-fixture.model';
+
 export interface MatchScoresheetParticipant {
   role: string | null;
   score: number;
@@ -18,6 +20,8 @@ export interface MatchScoresheetFixture {
   cityName: string | null;
   stadiumName: string | null;
   countryStadiumName: string | null;
+  stages: ApiFixtureStage[];
+  competitions: ApiFixtureStageCompetition[];
   teamA: MatchScoresheetParticipant;
   teamB: MatchScoresheetParticipant;
 }

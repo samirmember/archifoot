@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatchScoresheetDetailsResponse, MatchLineupItem, MatchScoresheetParticipant } from 'src/app/models/match-scoresheet.model';
-import { MatchResult } from 'src/app/services/result.service';
+import { buildCompetitionLabels, MatchResult } from 'src/app/services/result.service';
 import { MatchScoresheetService } from 'src/app/services/match-scoresheet.service';
 import { FlagComponent } from 'src/app/layouts/flag/flag.component';
 import { StaffCardComponent } from 'src/app/components/staff-card/staff-card.component';
@@ -21,45 +21,47 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly details = signal<MatchScoresheetDetailsResponse | null>(null);
 
-  // Fallbacks statiques pour les champs absents de l'API scoresheet actuelle
-  readonly fallbackCompetition = 'CAN';
-  readonly fallbackEdition = 'CAN 2025 au Maroc';
-  readonly fallbackStage = '1/4 de finale';
-  readonly fallbackNotes = [
-    'Weather: 24°C, ciel clair, faible humidité (40%).',
-    'Observations tactiques: l’adversaire a dominé la possession (62%).',
-    'Indice qualité match: 8.8/10 · Intensité élevée.',
-  ];
-
   readonly headerResult = computed<MatchResult>(() => {
-    const data = this.details();
-    const fixture = data?.fixture;
+    const fixture = this.details()?.fixture;
+
     return {
-      fixtureId: fixture?.id ?? 678,
-      externalMatchNo: fixture?.externalMatchNo ?? 678,
-      countryA: fixture?.teamA?.teamName ?? 'Algérie',
-      countryB: fixture?.teamB?.teamName ?? 'Nigeria',
-      countryCodeA: fixture?.teamA?.teamIso2 ?? 'dz',
-      countryCodeB: fixture?.teamB?.teamIso2 ?? 'ng',
-      editions: [this.fallbackEdition],
-      stages: [this.fallbackStage],
-      competitions: [],
-      scoreA: fixture?.teamA?.score ?? 0,
-      scoreB: fixture?.teamB?.score ?? 2,
-      categoryA: fixture?.teamA?.categoryName ?? 'Senior',
-      categoryB: fixture?.teamB?.categoryName ?? 'Senior',
-      date: fixture?.matchDate ?? '2026-01-10T20:00:00Z',
-      season: fixture?.seasonName ?? '2025/2026',
-      isOfficial: fixture?.isOfficial ?? true,
-      played: fixture?.played ?? true,
-      city: fixture?.cityName ?? 'Marrakech',
-      stadium: fixture?.stadiumName ?? 'Grand Stade',
-      countryStadiumName: fixture?.countryStadiumName ?? 'Maroc',
+      fixtureId: fixture?.id ?? null,
+      externalMatchNo: fixture?.externalMatchNo ?? null,
+      countryA: fixture?.teamA?.teamName ?? '',
+      countryB: fixture?.teamB?.teamName ?? '',
+      countryCodeA: fixture?.teamA?.teamIso2 ?? '',
+      countryCodeB: fixture?.teamB?.teamIso2 ?? '',
+      editions: fixture?.stages?.map((stage) => stage.edition?.name).filter(this.isNonEmptyString) ?? null,
+      stages: fixture?.stages?.map((stage) => stage.name).filter(this.isNonEmptyString) ?? null,
+      competitions: fixture?.competitions ?? [],
+      scoreA: fixture?.teamA?.score ?? null,
+      scoreB: fixture?.teamB?.score ?? null,
+      categoryA: fixture?.teamA?.categoryName ?? '',
+      categoryB: fixture?.teamB?.categoryName ?? '',
+      date: fixture?.matchDate ?? null,
+      season: fixture?.seasonName ?? null,
+      isOfficial: fixture?.isOfficial ?? null,
+      played: fixture?.played ?? null,
+      city: fixture?.cityName ?? null,
+      stadium: fixture?.stadiumName ?? null,
+      countryStadiumName: fixture?.countryStadiumName ?? null,
       notes: fixture?.notes ?? null,
-      competitionLabel: `${this.fallbackStage} ${this.fallbackCompetition} ${this.fallbackEdition}`,
+      competitionLabel: fixture
+        ? buildCompetitionLabels({
+            competitions: fixture.competitions,
+            stages: fixture.stages,
+            externalMatchNo: fixture.externalMatchNo,
+          }).join(' | ')
+        : '',
     };
   });
 
+  readonly competitionLabel = computed(() => this.headerResult().competitionLabel?.trim() ?? '');
+  readonly locationLabel = computed(() =>
+    [this.headerResult().stadium, this.headerResult().city, this.headerResult().countryStadiumName]
+      .filter(this.isNonEmptyString)
+      .join(', '),
+  );
 
   readonly iso2A = computed(() => (this.headerResult().countryCodeA ?? '').toLowerCase());
   readonly iso2B = computed(() => (this.headerResult().countryCodeB ?? '').toLowerCase());
@@ -67,11 +69,11 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
   readonly matchMeta = computed(() => {
     const fixture = this.details()?.fixture;
     return [
-      { label: 'N° du match', value: String(fixture?.externalMatchNo ?? 678) },
-      { label: 'Compétition', value: this.fallbackCompetition },
-      { label: 'Édition', value: this.fallbackEdition },
+      { label: 'N° du match', value: fixture?.externalMatchNo ? String(fixture.externalMatchNo) : null },
+      { label: 'Compétition', value: fixture?.competitions?.map((competition) => competition.name).filter(this.isNonEmptyString).join(' | ') || null },
+      { label: 'Édition', value: fixture?.stages?.map((stage) => stage.edition?.name).filter(this.isNonEmptyString).join(' | ') || null },
       { label: 'Saison', value: fixture?.seasonName ?? null },
-      { label: 'Stage', value: this.fallbackStage },
+      { label: 'Stage', value: fixture?.stages?.map((stage) => stage.name).filter(this.isNonEmptyString).join(' | ') || null },
       { label: 'Stade', value: fixture?.stadiumName ?? null },
       { label: 'Ville - Stade', value: fixture?.cityName ?? null },
       { label: 'Pays - Stade', value: fixture?.countryStadiumName ?? null },
@@ -81,10 +83,15 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
       },
       { label: 'Catégorie A', value: fixture?.teamA?.categoryName ?? null },
       { label: 'Pays A', value: fixture?.teamA?.teamName ?? null },
-      { label: 'Score', value: `${fixture?.teamA?.score ?? null} - ${fixture?.teamB?.score ?? null}` },
+      {
+        label: 'Score',
+        value: fixture?.teamA?.score !== undefined && fixture?.teamA?.score !== null && fixture?.teamB?.score !== undefined && fixture?.teamB?.score !== null
+          ? `${fixture.teamA.score} - ${fixture.teamB.score}`
+          : null,
+      },
       { label: 'Pays B', value: fixture?.teamB?.teamName ?? null },
       { label: 'Catégorie B', value: fixture?.teamB?.categoryName ?? null },
-    ];
+    ].filter((item) => this.isNonEmptyString(item.value));
   });
 
   readonly lineupAlgeria = computed(() => this.buildLineupForTeam(this.details()?.fixture?.teamA?.teamName));
@@ -209,29 +216,13 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
   });
 
   readonly officials = computed(() => {
-    const fromApi = this.details()?.officials ?? [];
-    if (fromApi.length > 0) {
-      return fromApi.map((o) => ({
+    return (this.details()?.officials ?? [])
+      .map((o) => ({
         role: o.role || 'Officiel',
-        name: o.personName || o.nameText || 'N/A',
-        nationality: o.nationality || 'N/A',
-      }));
-    }
-
-    return [
-      { role: 'arbitre_principal', name: 'Victor Gomes', nationality: 'Afrique du Sud' },
-      { role: 'Arbitre assistant 1', name: 'Nomer Roran', nationality: 'France' },
-      { role: 'Arbitre assistant 2', name: 'Goono Soime', nationality: 'France' },
-      { role: '4ème Arbitre', name: 'John Vollan', nationality: 'Nigeria' },
-    ];
-  });
-
-  readonly notes = computed(() => {
-    const report = this.details()?.scoresheet?.report;
-    const reservations = this.details()?.scoresheet?.reservations;
-    const notes = this.details()?.fixture?.notes;
-    const dynamic = [notes, report, reservations].filter((v): v is string => Boolean(v && v.trim()));
-    return dynamic.length > 0 ? dynamic : this.fallbackNotes;
+        name: o.personName || o.nameText || null,
+        nationality: o.nationality || null,
+      }))
+      .filter((official) => this.isNonEmptyString(official.name));
   });
 
   ngOnInit(): void {
@@ -250,7 +241,7 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
         this.isLoading.set(false);
       },
       error: () => {
-        this.error.set('Impossible de charger la fiche technique. Affichage des données de démonstration.');
+        this.error.set('Impossible de charger la fiche technique.');
         this.isLoading.set(false);
       },
     });
@@ -299,5 +290,9 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
     const iso2 = (teamIso2 ?? '').toLowerCase();
     const name = (teamName ?? '').toLowerCase();
     return iso2 === 'dz' || name.includes('algérie') || name.includes('algerie');
+  }
+
+  private isNonEmptyString(value: string | null | undefined): value is string {
+    return typeof value === 'string' && value.trim().length > 0;
   }
 }
