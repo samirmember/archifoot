@@ -5,7 +5,7 @@
 .filter-form {
   margin-bottom: 1rem;
   padding: 1rem;
-  border-radius: 12px;
+  border-radius: var(--p-menubar-border-radius);
   background: #f8fafc;
   border: 1px solid #e8edf3;
 }
