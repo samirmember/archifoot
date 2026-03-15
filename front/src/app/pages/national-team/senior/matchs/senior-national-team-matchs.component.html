@@ -206,9 +206,15 @@
 
                     <p class="context-card__note">{{ getOfficialContextNote() }}</p>
 
-                    <button type="button" class="context-card__button" disabled aria-disabled="true">
+                    <button
+                      type="button"
+                      class="context-card__button"
+                      (click)="exportPdf()"
+                      [disabled]="isSummaryLoading() || isExportingPdf()"
+                      [attr.aria-busy]="isExportingPdf()"
+                    >
                       <i class="uil uil-file-download-alt"></i>
-                      Rapport complet (PDF)
+                      {{ isExportingPdf() ? 'Préparation du PDF...' : 'Exporter l\'analyse (PDF)' }}
                     </button>
                   </aside>
                 </div>
@@ -231,7 +237,6 @@
     </div>
   </div>
 </section>
-
 
 
 

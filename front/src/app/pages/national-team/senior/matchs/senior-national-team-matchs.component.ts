@@ -7,6 +7,11 @@ import { MatchFiltersComponent } from 'src/app/components/match-filters/match-fi
 import { MatchResultsSectionComponent } from 'src/app/components/match-results-section/match-results-section.component';
 import { CompetitionService } from 'src/app/services/competition.service';
 import {
+  buildMatchInsightsReportPayload,
+  getMatchInsightsOfficialNote,
+  MatchInsightsPdfService,
+} from 'src/app/services/match-insights-pdf.service';
+import {
   MatchResult,
   MatchResultsSummary,
   ResultFilters,
@@ -28,6 +33,7 @@ export class SeniorNationalTeamMatchsComponent {
 
   private readonly numberService = inject(NumberService);
   private readonly competitionService = inject(CompetitionService);
+  private readonly matchInsightsPdfService = inject(MatchInsightsPdfService);
   private readonly resultService = inject(ResultService);
 
   selectedCountry: Country | null = null;
@@ -45,6 +51,7 @@ export class SeniorNationalTeamMatchsComponent {
   readonly hasMoreResults = signal(true);
   readonly summary = signal<MatchResultsSummary>(this.emptySummary());
   readonly isSummaryLoading = signal(false);
+  readonly isExportingPdf = signal(false);
   readonly isSummaryExpanded = signal(false);
   readonly hasUserToggledSummary = signal(false);
 
@@ -136,16 +143,38 @@ export class SeniorNationalTeamMatchsComponent {
   }
 
   getOfficialContextNote(): string {
-    if (this.summary().totalMatches === 0) {
-      return 'Aucune rencontre ne correspond aux filtres actuels.';
-    }
-
-    return "Part des matchs officiels dans l'echantillon actuellement affiché.";
+    return getMatchInsightsOfficialNote(this.summary().totalMatches);
   }
 
   toggleSummaryAccordion(): void {
     this.hasUserToggledSummary.set(true);
     this.isSummaryExpanded.update((isExpanded) => !isExpanded);
+  }
+
+  async exportPdf(): Promise<void> {
+    if (this.isSummaryLoading() || this.isExportingPdf()) {
+      return;
+    }
+
+    this.isExportingPdf.set(true);
+
+    try {
+      await this.matchInsightsPdfService.export(
+        buildMatchInsightsReportPayload({
+          countryName: this.selectedCountry?.name ?? null,
+          year: this.selectedYear,
+          competitionName: this.getSelectedCompetitionName(),
+          generatedAt: new Date(),
+          scopeLabel: this.getSearchContextLabel(),
+          officialNote: this.getOfficialContextNote(),
+          summary: this.summary(),
+        }),
+      );
+    } catch (error) {
+      console.error('Failed to export match insights PDF.', error);
+    } finally {
+      this.isExportingPdf.set(false);
+    }
   }
 
   private refreshResults(): void {
@@ -213,4 +242,3 @@ export class SeniorNationalTeamMatchsComponent {
     };
   }
 }
-
