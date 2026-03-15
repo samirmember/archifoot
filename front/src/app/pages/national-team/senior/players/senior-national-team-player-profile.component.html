@@ -69,7 +69,27 @@
           </div>
         </div>
       </article>
-
+        @if (profile()!.featurePhotoUrl) {
+          <article class="card-like feature-photo-card">
+            <figure class="hover-scale rounded cursor-dark">
+              <a
+                [href]="profile()!.featurePhotoUrl!"
+                data-glightbox
+                data-gallery="cover-photo"
+                class="feature-photo-link"
+                [attr.data-gallery]="'player-' + profile()!.id"
+                [attr.data-glightbox]="'title: Photo de couverture - ' + profile()!.fullName"
+              >
+                <img
+                  [src]="profile()!.featurePhotoUrl!"
+                  [srcset]="profile()!.featurePhotoUrl! + ' 2x'"
+                  [alt]="'Photo de couverture ' + profile()!.fullName"
+                  loading="lazy"
+                />
+              </a>
+            </figure>
+          </article>
+        }
       <section class="stats-grid" [class.has-feature-photo]="!!profile()!.featurePhotoUrl">
         <article class="card-like stat-card">
           <h2>Statistiques</h2>
@@ -91,71 +111,26 @@
               <span>Duels gagnés</span>
             </div>
           </div>
-
-          @if (profile()!.featurePhotoUrl) {
-            <article class="leadership-under-stats">
-              <h2>Leadership</h2>
-              <div class="big-stats compact">
-                <div>
-                  <strong>{{ profile()!.stats.goals }}</strong>
-                  <span>Buts</span>
-                </div>
-                <div>
-                  <strong>{{ profile()!.stats.captaincies }}</strong>
-                  <span>Matchs capitaine</span>
-                </div>
-                @for (selectionStat of selectionPeriodStats(); track selectionStat.label) {
-                  <div>
-                    <strong>{{ selectionStat.value }}</strong>
-                    <span>{{ selectionStat.label }}</span>
-                  </div>
-                }
-              </div>
-            </article>
-          }
         </article>
-
-        @if (profile()!.featurePhotoUrl) {
-          <article class="card-like feature-photo-card">
-            <figure class="hover-scale rounded cursor-dark">
-              <a
-                [href]="profile()!.featurePhotoUrl!"
-                data-glightbox
-                data-gallery="cover-photo"
-                class="feature-photo-link"
-                [attr.data-gallery]="'player-' + profile()!.id"
-                [attr.data-glightbox]="'title: Photo de couverture - ' + profile()!.fullName"
-              >
-                <img
-                  [src]="profile()!.featurePhotoUrl!"
-                  [srcset]="profile()!.featurePhotoUrl! + ' 2x'"
-                  [alt]="'Photo de couverture ' + profile()!.fullName"
-                  loading="lazy"
-                />
-              </a>
-            </figure>
-          </article>
-        } @else {
-          <article class="card-like stat-card">
-            <h2>Leadership</h2>
-            <div class="big-stats compact">
-              <div>
-                <strong>{{ profile()!.stats.goals }}</strong>
-                <span>Buts</span>
-              </div>
-              <div>
-                <strong>{{ profile()!.stats.captaincies }}</strong>
-                <span>Matchs capitaine</span>
-              </div>
-              @for (selectionStat of selectionPeriodStats(); track selectionStat.label) {
-                <div>
-                  <strong>{{ selectionStat.value }}</strong>
-                  <span>{{ selectionStat.label }}</span>
-                </div>
-              }
+        <article class="card-like stat-card">
+          <h2>Leadership</h2>
+          <div class="big-stats compact">
+            <div>
+              <strong>{{ profile()!.stats.goals }}</strong>
+              <span>Buts</span>
             </div>
-          </article>
-        }
+            <div>
+              <strong>{{ profile()!.stats.captaincies }}</strong>
+              <span>Matchs capitaine</span>
+            </div>
+            @for (selectionStat of selectionPeriodStats(); track selectionStat.label) {
+              <div>
+                <strong>{{ selectionStat.value }}</strong>
+                <span>{{ selectionStat.label }}</span>
+              </div>
+            }
+          </div>
+        </article>
       </section>
 
       @if (hasGalleryPhotos()) {
@@ -182,9 +157,6 @@
                   [alt]="photo.caption || ('Photo de ' + profile()!.fullName)"
                   loading="lazy"
                 />
-                @if (photo.caption) {
-                  <span class="photo-legend">{{ photo.caption }}</span>
-                }
               </a>
             </figure>
             }

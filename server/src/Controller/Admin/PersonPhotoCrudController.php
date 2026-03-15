@@ -2,8 +2,11 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Person;
 use App\Entity\PersonPhoto;
+use App\Entity\Player;
 use App\Service\ImageUploadOptimizer;
+use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
@@ -38,6 +41,16 @@ class PersonPhotoCrudController extends AbstractCrudController
             ->setUploadDir('public/uploads/person/gallery')
             ->setUploadedFileNamePattern('[uuid].[extension]')
             ->setRequired(true);
+        $personField = AssociationField::new('person', 'Personne')
+            ->autocomplete(callback: static fn (Person $person): string => $person->getFullName() ?? sprintf('Person #%s', $person->getId() ?? '?'))
+            ->setQueryBuilder(static function (QueryBuilder $queryBuilder): QueryBuilder {
+                return $queryBuilder
+                    ->distinct()
+                    ->innerJoin(Player::class, 'player', 'WITH', 'player.person = entity')
+                    ->andWhere('entity.fullName IS NOT NULL')
+                    ->orderBy('entity.fullName', 'ASC')
+                    ->addOrderBy('entity.id', 'ASC');
+            });
 
         if ($pageName === Crud::PAGE_INDEX) {
             return [
@@ -49,7 +62,7 @@ class PersonPhotoCrudController extends AbstractCrudController
         }
 
         return [
-            AssociationField::new('person', 'Personne')->autocomplete(),
+            $personField,
             $imageField,
             TextField::new('caption', 'Légende')->setRequired(false),
             IntegerField::new('sortOrder', 'Ordre'),
@@ -74,4 +87,3 @@ class PersonPhotoCrudController extends AbstractCrudController
         parent::updateEntity($entityManager, $entityInstance);
     }
 }
-
