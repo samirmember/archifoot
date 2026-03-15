@@ -1,10 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { DOCUMENT, DatePipe } from '@angular/common';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatchScoresheetDetailsResponse, MatchLineupItem, MatchScoresheetParticipant } from 'src/app/models/match-scoresheet.model';
 import { buildCompetitionLabels, MatchResult } from 'src/app/services/result.service';
 import { MatchScoresheetService } from 'src/app/services/match-scoresheet.service';
 import { StaffCardComponent } from 'src/app/components/staff-card/staff-card.component';
-import { DatePipe } from '@angular/common';
 
 type MatchDetailsTab = 'lineups' | 'changes';
 
@@ -14,9 +15,13 @@ type MatchDetailsTab = 'lineups' | 'changes';
   templateUrl: './senior-national-team-match-detail.component.html',
   styleUrl: './senior-national-team-match-detail.component.scss',
 })
-export class SeniorNationalTeamMatchDetailComponent implements OnInit {
+export class SeniorNationalTeamMatchDetailComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly document = inject(DOCUMENT);
   private readonly service = inject(MatchScoresheetService);
+  private readonly externalMatchNoParam = toSignal(this.route.paramMap, {
+    initialValue: this.route.snapshot.paramMap,
+  });
 
   readonly isLoading = signal(true);
   readonly error = signal<string | null>(null);
@@ -290,30 +295,62 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
       .filter((official) => this.isNonEmptyString(official.name));
   });
 
-  ngOnInit(): void {
-    const externalMatchNoParam = this.route.snapshot.paramMap.get('externalMatchNo');
-    const externalMatchNo = externalMatchNoParam ? Number(externalMatchNoParam) : NaN;
+  constructor() {
+    effect((onCleanup) => {
+      const externalMatchNoParam = this.externalMatchNoParam().get('externalMatchNo');
+      const externalMatchNo = externalMatchNoParam ? Number(externalMatchNoParam) : NaN;
 
-    if (Number.isNaN(externalMatchNo) || externalMatchNo <= 0) {
-      this.error.set('Identifiant de match invalide.');
-      this.isLoading.set(false);
-      return;
-    }
+      this.scrollToSubmenu();
+      this.activeTab.set('lineups');
+      this.details.set(null);
+      this.error.set(null);
 
-    this.service.getMatchScoresheetDetails(externalMatchNo).subscribe({
-      next: (response) => {
-        this.details.set(response);
+      if (Number.isNaN(externalMatchNo) || externalMatchNo <= 0) {
+        this.error.set('Identifiant de match invalide.');
         this.isLoading.set(false);
-      },
-      error: () => {
-        this.error.set('Impossible de charger la fiche technique.');
-        this.isLoading.set(false);
-      },
+        return;
+      }
+
+      this.isLoading.set(true);
+
+      const subscription = this.service.getMatchScoresheetDetails(externalMatchNo).subscribe({
+        next: (response) => {
+          this.details.set(response);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.error.set('Impossible de charger la fiche technique.');
+          this.isLoading.set(false);
+        },
+      });
+
+      onCleanup(() => subscription.unsubscribe());
     });
   }
 
   setActiveTab(tab: MatchDetailsTab): void {
     this.activeTab.set(tab);
+  }
+
+  private scrollToSubmenu(): void {
+    const view = this.document.defaultView;
+    if (!view) {
+      return;
+    }
+
+    view.requestAnimationFrame(() => {
+      view.requestAnimationFrame(() => {
+        const submenu = this.document.querySelector('app-submenu');
+
+        if (!submenu) {
+          view.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+          return;
+        }
+
+        const top = submenu.getBoundingClientRect().top + view.scrollY;
+        view.scrollTo({ top: Math.max(top, 0), left: 0, behavior: 'auto' });
+      });
+    });
   }
 
   private buildLineupForTeam(teamName: string | null | undefined): { title: string; iso2: string; players: Array<{ role: string; name: string; number: string; captain?: boolean | null }> } {
