@@ -55,6 +55,7 @@ COPY --from=builder /app/vendor /app/vendor
 ENV APP_ENV=prod
 ENV APP_DEBUG=0
 ENV PORT=8080
+ENV SYMFONY_TRUSTED_PROXIES=REMOTE_ADDR
 
 # Installer les assets (API Platform, etc.) dans /public
 RUN php bin/console assets:install --no-interaction --env=prod --no-debug
