@@ -2,7 +2,7 @@
   .card-like {
     background: #fff;
     border: 1px solid #dfe7f1;
-    border-radius: 22px;
+    border-radius: var(--p-menubar-border-radius);
     box-shadow: 0 18px 40px rgba(24, 45, 86, 0.08);
   }
 

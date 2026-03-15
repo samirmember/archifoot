@@ -1,7 +1,7 @@
 .players-page {
   .card-like {
     background: #fff;
-    border-radius: 16px;
+    border-radius: var(--p-menubar-border-radius);
     border: 1px solid #e8edf3;
     box-shadow: 0 10px 30px rgba(35, 45, 66, 0.06);
     padding: 1.25rem;

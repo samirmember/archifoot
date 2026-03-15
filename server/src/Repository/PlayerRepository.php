@@ -78,6 +78,7 @@ class PlayerRepository extends ServiceEntityRepository
             'galleryPhotos' => $galleryPhotos,
             'profile' => [
                 'birthDate' => $this->dateFormatter->short($matchedPlayer['birthDate']),
+                'deathDate' => $this->dateFormatter->short($matchedPlayer['deathDate']),
                 'birthCity' => $matchedPlayer['birthCityName'],
                 'birthRegion' => $matchedPlayer['birthRegionName'],
                 'birthCountry' => $matchedPlayer['birthCountryName'],
@@ -270,6 +271,7 @@ class PlayerRepository extends ServiceEntityRepository
                 'person.photoUrl AS photoUrl',
                 'person.featurePhotoUrl AS featurePhotoUrl',
                 'person.birthDate AS birthDate',
+                'person.deathDate AS deathDate',
                 'birthCity.name AS birthCityName',
                 'birthRegion.name AS birthRegionName',
                 'birthCountry.name AS birthCountryName',

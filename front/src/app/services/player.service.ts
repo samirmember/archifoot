@@ -24,6 +24,7 @@ export interface SeniorPlayerDetail {
   }>;
   profile: {
     birthDate: string | null;
+    deathDate: string | null;
     birthCity: string | null;
     birthRegion: string | null;
     birthCountry: string | null;

@@ -50,6 +50,12 @@
                 <span>{{ asBadgeLabel(profile()!.profile.nationalityCountry) }}</span>
               </article>
             }
+            @if (profile()!.profile.deathDate) {
+              <article>
+                <label>Date du décès</label>
+                <span>{{ asBadgeLabel(profile()!.profile.deathDate, 'Date de naissance inconnue') }}</span>
+              </article>
+            }
           </div>
         </div>
       </article>
