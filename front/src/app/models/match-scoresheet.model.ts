@@ -3,6 +3,7 @@ import { ApiFixtureStage, ApiFixtureStageCompetition } from './api-fixture.model
 export interface MatchScoresheetParticipant {
   role: string | null;
   score: number;
+  outcome?: number | null;
   teamId: number;
   teamName: string;
   teamIso2: string;

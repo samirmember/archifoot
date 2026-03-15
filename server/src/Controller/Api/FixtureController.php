@@ -67,6 +67,7 @@ class FixtureController extends AbstractController
                 SELECT
                     fp.role,
                     fp.score,
+                    fp.outcome,
                     t.id AS "teamId",
                     t.display_name AS "teamName",
                     co.iso2 AS "teamIso2",
@@ -124,6 +125,21 @@ class FixtureController extends AbstractController
                 $participantB = $participant;
             }
         }
+
+        $normalizeParticipant = static fn (?array $participant): ?array => $participant === null
+            ? null
+            : [
+                'role' => $participant['role'] ?? null,
+                'score' => isset($participant['score']) ? (int) $participant['score'] : null,
+                'outcome' => isset($participant['outcome']) ? (int) $participant['outcome'] : null,
+                'teamId' => isset($participant['teamId']) ? (int) $participant['teamId'] : null,
+                'teamName' => $participant['teamName'] ?? null,
+                'teamIso2' => $participant['teamIso2'] ?? null,
+                'categoryName' => $participant['categoryName'] ?? null,
+            ];
+
+        $participantA = $normalizeParticipant($participantA);
+        $participantB = $normalizeParticipant($participantB);
 
         $competitions = array_map(
             static fn (array $competition): array => [

@@ -70,13 +70,23 @@ export class SeniorNationalTeamMatchDetailComponent implements OnInit {
   readonly iso2A = computed(() => (this.headerResult().countryCodeA ?? '').toLowerCase());
   readonly iso2B = computed(() => (this.headerResult().countryCodeB ?? '').toLowerCase());
   readonly winner = computed<'A' | 'B' | null>(() => {
-    const result = this.headerResult();
+    const fixture = this.details()?.fixture;
+    const outcomeA = fixture?.teamA?.outcome ?? null;
+    const outcomeB = fixture?.teamB?.outcome ?? null;
 
-    if (!result.played || result.scoreA === null || result.scoreB === null || result.scoreA === result.scoreB) {
+    if (outcomeA === 1 && outcomeB === 0) {
+      return 'A';
+    }
+
+    if (outcomeA === 0 && outcomeB === 1) {
+      return 'B';
+    }
+
+    if (outcomeA === 2 && outcomeB === 2) {
       return null;
     }
 
-    return result.scoreA > result.scoreB ? 'A' : 'B';
+    return null;
   });
 
   readonly headerTeams = computed(() => [

@@ -104,20 +104,16 @@
   flex-direction: column;
   align-items: center;
   gap: 0.9rem;
+  color: #0b6d43;
 }
 
 .summary-score {
   display: inline-flex;
   align-items: center;
   gap: 0.9rem;
-  color: #0b6d43;
   font-size: 3rem;
   font-weight: 700;
   line-height: 1;
-}
-
-.summary-score-separator {
-  color: #9cadc3;
 }
 
 .summary-score-label {
