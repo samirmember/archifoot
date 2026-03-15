@@ -1,6 +1,6 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { BehaviorSubject, catchError, of } from 'rxjs';
+import { catchError, of } from 'rxjs';
 import { Country } from '../../../../models/country.model';
 import { NumberService } from '../../../../../shared/number.service';
 import { MatchFiltersComponent } from 'src/app/components/match-filters/match-filters.component';
@@ -11,6 +11,7 @@ import {
   MatchResultsSummary,
   ResultFilters,
   ResultService,
+  SeniorMatchesPageResponse,
 } from 'src/app/services/result.service';
 
 @Component({
@@ -33,8 +34,10 @@ export class SeniorNationalTeamMatchsComponent {
   selectedYear: number | null = null;
   selectedCompetitionId: number | null = null;
 
-  private readonly filters$ = new BehaviorSubject<ResultFilters>({});
-  private readonly currentPage = signal(1);
+  private readonly query = signal<{ filters: ResultFilters; page: number }>({
+    filters: {},
+    page: 1,
+  });
 
   readonly summaryPanelId = 'match-summary-panel';
   readonly results = signal<MatchResult[]>([]);
@@ -52,45 +55,36 @@ export class SeniorNationalTeamMatchsComponent {
       initialValue: [],
     },
   );
-  private readonly currentFilters = toSignal(this.filters$, { initialValue: {} });
 
   constructor() {
     effect((onCleanup) => {
-      const filters = this.currentFilters();
-      const page = this.currentPage();
+      const { filters, page } = this.query();
+      const includeSummary = page === 1;
 
       this.isLoading.set(true);
+      this.isSummaryLoading.set(includeSummary);
 
       const subscription = this.resultService
-        .getResults({
+        .getSeniorMatchesPage(
+          {
           ...filters,
           page,
           itemsPerPage: SeniorNationalTeamMatchsComponent.PAGE_SIZE,
-        })
-        .pipe(catchError(() => of([])))
-        .subscribe((nextResults) => {
+          },
+          includeSummary,
+        )
+        .pipe(catchError(() => of(this.emptyPageResponse())))
+        .subscribe((response) => {
           this.results.update((currentResults) =>
-            page === 1 ? nextResults : [...currentResults, ...nextResults],
+            page === 1 ? response.items : [...currentResults, ...response.items],
           );
-          this.hasMoreResults.set(
-            nextResults.length === SeniorNationalTeamMatchsComponent.PAGE_SIZE,
-          );
+          this.hasMoreResults.set(response.meta.page < response.meta.totalPages);
+
+          if (page === 1) {
+            this.summary.set(response.summary ?? this.emptySummary());
+          }
+
           this.isLoading.set(false);
-        });
-
-      onCleanup(() => subscription.unsubscribe());
-    });
-
-    effect((onCleanup) => {
-      const filters = this.currentFilters();
-
-      this.isSummaryLoading.set(true);
-
-      const subscription = this.resultService
-        .getResultsSummary(filters)
-        .pipe(catchError(() => of(this.emptySummary())))
-        .subscribe((summary) => {
-          this.summary.set(summary);
           this.isSummaryLoading.set(false);
         });
 
@@ -146,7 +140,7 @@ export class SeniorNationalTeamMatchsComponent {
       return 'Aucune rencontre ne correspond aux filtres actuels.';
     }
 
-    return "Part des matchs officiels dans l'echantillon actuellement affiche.";
+    return "Part des matchs officiels dans l'echantillon actuellement affiché.";
   }
 
   toggleSummaryAccordion(): void {
@@ -169,8 +163,7 @@ export class SeniorNationalTeamMatchsComponent {
       filters.competitionId = this.selectedCompetitionId;
     }
 
-    this.currentPage.set(1);
-    this.filters$.next(filters);
+    this.query.set({ filters, page: 1 });
   }
 
   loadMore(): void {
@@ -178,7 +171,7 @@ export class SeniorNationalTeamMatchsComponent {
       return;
     }
 
-    this.currentPage.update((page) => page + 1);
+    this.query.update((current) => ({ ...current, page: current.page + 1 }));
   }
 
   private getSelectedCompetitionName(): string | null {
@@ -206,6 +199,18 @@ export class SeniorNationalTeamMatchsComponent {
       officialRate: 0,
     };
   }
-}
 
+  private emptyPageResponse(): SeniorMatchesPageResponse {
+    return {
+      items: [],
+      meta: {
+        page: this.query().page,
+        itemsPerPage: SeniorNationalTeamMatchsComponent.PAGE_SIZE,
+        total: 0,
+        totalPages: 1,
+      },
+      summary: this.query().page === 1 ? this.emptySummary() : null,
+    };
+  }
+}
 

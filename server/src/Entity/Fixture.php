@@ -11,7 +11,6 @@ use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use App\Filter\FixtureParticipantCountryIso3OrFilter;
 use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 
@@ -22,7 +21,7 @@ use Symfony\Component\Serializer\Annotation\SerializedName;
 #[ApiResource(
     formats: ['json' => ['application/json']],
     normalizationContext: ['groups' => ['fixture:read']],
-    operations: [new Get(), new GetCollection()],
+    operations: [new Get()],
 )]
 #[ApiFilter(SearchFilter::class, properties: [
     'season.name' => 'exact',

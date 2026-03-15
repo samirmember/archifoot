@@ -2,14 +2,32 @@
 
 namespace App\Controller\Api;
 
+use App\Repository\FixtureCollectionRepository;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 class FixtureController extends AbstractController
 {
     private const ALGERIA_TEAM_ID = 1;
+
+    #[Route('/api/fixtures', name: 'api_fixtures_index', methods: ['GET'], priority: 100)]
+    public function index(Request $request, FixtureCollectionRepository $fixtureCollectionRepository): JsonResponse
+    {
+        $query = $request->query->all();
+        $view = is_string($query['view'] ?? null) ? trim((string) $query['view']) : null;
+        $includeSummary = filter_var($query['includeSummary'] ?? false, FILTER_VALIDATE_BOOL);
+
+        if ($view === 'seniorMatches') {
+            return $this->json(
+                $fixtureCollectionRepository->findSeniorMatchesPage($query, $includeSummary)
+            );
+        }
+
+        return $this->json($fixtureCollectionRepository->findLegacyCollection($query));
+    }
 
     #[Route('/api/senior-national-team/matchs/{externalMatchNo}/scoresheet', name: 'api_senior_match_scoresheet_show', methods: ['GET'])]
     public function scoresheet(int $externalMatchNo, Connection $connection): JsonResponse

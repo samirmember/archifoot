@@ -147,11 +147,13 @@ namespace {
     $dz = new Country();
     setId($dz, 25);
     $dz->setName('Algérie');
+    $dz->setIso2('DZ');
     $dz->setIso3('DZA');
 
     $fr = new Country();
     setId($fr, 12);
     $fr->setName('France');
+    $fr->setIso2('FR');
     $fr->setIso3('FRA');
 
     $ntA = new NationalTeam();
@@ -205,8 +207,8 @@ namespace {
     assertSame(6, $stages[1]['id'], 'stage 2 id');
     assertSame("Coupe d'Afrique des Nations (CAN)", $stages[1]['edition']['competition']['name'], 'competition 2 name');
 
-    assertSame(['id' => 25, 'name' => 'Algérie', 'iso2' => 'DZA'], $fixture->getTeamA(), 'teamA');
-    assertSame(['id' => 12, 'name' => 'France', 'iso2' => 'FRA'], $fixture->getTeamB(), 'teamB');
+    assertSame(['id' => 25, 'name' => 'Algérie', 'iso2' => 'DZ'], $fixture->getTeamA(), 'teamA');
+    assertSame(['id' => 12, 'name' => 'France', 'iso2' => 'FR'], $fixture->getTeamB(), 'teamB');
     assertSame(0, $fixture->getScoreA(), 'scoreA');
     assertSame(3, $fixture->getScoreB(), 'scoreB');
     assertSame('Algérie', $fixture->getCountryStadiumName(), 'countryStadiumName');
