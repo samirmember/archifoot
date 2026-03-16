@@ -33,6 +33,43 @@ class Coach
     #[ORM\Column(name: 'external_number', length: 50, nullable: true)]
     private ?string $externalNumber = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'death_city_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?City $deathCity = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'death_region_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?Region $deathRegion = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'death_country_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?Country $deathCountry = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?string $career = null;
+
+    /** @var array<int, string>|null */
+    #[ORM\Column(name: 'main_clubs', type: 'json', nullable: true)]
+    private ?array $mainClubs = null;
+
+    #[ORM\Column(name: 'algeria_player_caps', nullable: true)]
+    private ?int $algeriaPlayerCaps = null;
+
+    #[ORM\Column(name: 'foreign_player_caps', nullable: true)]
+    private ?int $foreignPlayerCaps = null;
+
+    #[ORM\Column(name: 'head_matches', nullable: true)]
+    private ?int $headMatches = null;
+
+    #[ORM\Column(name: 'assistant_matches', nullable: true)]
+    private ?int $assistantMatches = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $callups = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $bio = null;
+
 
     public function getId(): ?int
     {
@@ -72,6 +109,140 @@ class Coach
     public function setExternalNumber(?string $externalNumber): static
     {
         $this->externalNumber = $externalNumber;
+
+        return $this;
+    }
+
+    public function getDeathCity(): ?City
+    {
+        return $this->deathCity;
+    }
+
+    public function setDeathCity(?City $deathCity): static
+    {
+        $this->deathCity = $deathCity;
+
+        return $this;
+    }
+
+    public function getDeathRegion(): ?Region
+    {
+        return $this->deathRegion;
+    }
+
+    public function setDeathRegion(?Region $deathRegion): static
+    {
+        $this->deathRegion = $deathRegion;
+
+        return $this;
+    }
+
+    public function getDeathCountry(): ?Country
+    {
+        return $this->deathCountry;
+    }
+
+    public function setDeathCountry(?Country $deathCountry): static
+    {
+        $this->deathCountry = $deathCountry;
+
+        return $this;
+    }
+
+    public function getCareer(): ?string
+    {
+        return $this->career;
+    }
+
+    public function setCareer(?string $career): static
+    {
+        $this->career = $career;
+
+        return $this;
+    }
+
+    /** @return array<int, string>|null */
+    public function getMainClubs(): ?array
+    {
+        return $this->mainClubs;
+    }
+
+    /** @param array<int, string>|null $mainClubs */
+    public function setMainClubs(?array $mainClubs): static
+    {
+        $this->mainClubs = $mainClubs;
+
+        return $this;
+    }
+
+    public function getAlgeriaPlayerCaps(): ?int
+    {
+        return $this->algeriaPlayerCaps;
+    }
+
+    public function setAlgeriaPlayerCaps(?int $algeriaPlayerCaps): static
+    {
+        $this->algeriaPlayerCaps = $algeriaPlayerCaps;
+
+        return $this;
+    }
+
+    public function getForeignPlayerCaps(): ?int
+    {
+        return $this->foreignPlayerCaps;
+    }
+
+    public function setForeignPlayerCaps(?int $foreignPlayerCaps): static
+    {
+        $this->foreignPlayerCaps = $foreignPlayerCaps;
+
+        return $this;
+    }
+
+    public function getHeadMatches(): ?int
+    {
+        return $this->headMatches;
+    }
+
+    public function setHeadMatches(?int $headMatches): static
+    {
+        $this->headMatches = $headMatches;
+
+        return $this;
+    }
+
+    public function getAssistantMatches(): ?int
+    {
+        return $this->assistantMatches;
+    }
+
+    public function setAssistantMatches(?int $assistantMatches): static
+    {
+        $this->assistantMatches = $assistantMatches;
+
+        return $this;
+    }
+
+    public function getCallups(): ?int
+    {
+        return $this->callups;
+    }
+
+    public function setCallups(?int $callups): static
+    {
+        $this->callups = $callups;
+
+        return $this;
+    }
+
+    public function getBio(): ?string
+    {
+        return $this->bio;
+    }
+
+    public function setBio(?string $bio): static
+    {
+        $this->bio = $bio;
 
         return $this;
     }
