@@ -52,5 +52,6 @@ docker compose exec -ti server php bin/console app:fixture:update-outcomes-alger
 docker compose exec -ti server php bin/console app:fixture:set-officials-matchs
 docker compose exec -ti server php -d memory_limit=-1 bin/console app:import:external-numbers coach ext_num_coach.xlsx
 docker compose exec -ti server php -d memory_limit=-1 bin/console app:import:player-infos-update players.xlsx
+docker compose exec -ti server php -d memory_limit=-1 bin/console app:import:coach-infos-update coach-infos.xlsx
 docker compose exec -ti server bin/console cache:clear
 mysqldump -h 127.0.0.1 -P 3307 -u archifoot -parchifoot archifoot > bdd/init/02_dump.sql
