@@ -458,8 +458,24 @@ CREATE TABLE `coach` (
   `external_number` VARCHAR(50) DEFAULT NULL COMMENT 'External number',
   `person_id` INT NULL COMMENT 'FK person',
   `role` VARCHAR(50) NULL COMMENT 'Head/Assistant/Trainer',
+  `death_city_id` INT DEFAULT NULL,
+  `death_region_id` INT DEFAULT NULL,
+  `death_country_id` INT DEFAULT NULL,
+  `career` VARCHAR(255) DEFAULT NULL,
+  `main_clubs` JSON DEFAULT NULL, `algeria_player_caps` INT DEFAULT NULL,
+  `foreign_player_caps` INT DEFAULT NULL,
+  `head_matches` INT DEFAULT NULL,
+  `assistant_matches` INT DEFAULT NULL,
+  `callups` INT DEFAULT NULL,
+  `bio` LONGTEXT DEFAULT NULL,
+  INDEX IDX_4B6B9FE2A24D5E9B (death_city_id),
+  INDEX IDX_4B6B9FE2BE035435 (death_region_id),
+  INDEX IDX_4B6B9FE261F3FC4C (death_country_id),
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_coach_person_id` FOREIGN KEY (`person_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+  CONSTRAINT `fk_coach_person_id` FOREIGN KEY (`person_id`) REFERENCES `person`(`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT `FK_4B6B9FE2A24D5E9B` FOREIGN KEY (`death_city_id`) REFERENCES `city` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_4B6B9FE2BE035435` FOREIGN KEY (`death_region_id`) REFERENCES `region` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_4B6B9FE261F3FC4C` FOREIGN KEY (`death_country_id`) REFERENCES `country` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `referee`;
